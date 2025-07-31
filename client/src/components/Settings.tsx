@@ -1,0 +1,679 @@
+import React, { useState } from 'react';
+import { useFontSizeContext } from '../components/FontSizeProvider';
+import { BackupAndRestoreTab } from './BackupAndRestoreTab';
+import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download } from 'lucide-react';
+
+interface SettingsProps {
+  onClearAllExpenses?: () => void;
+  expenseCount?: number;
+  onLogout?: () => void;
+  onUpdateCredentials?: (credentials: { username?: string; password?: string; email?: string }) => void;
+  currentCredentials?: { username: string; password: string; email: string };
+}
+
+export const Settings: React.FC<SettingsProps> = ({ 
+  onClearAllExpenses,
+  expenseCount = 0,
+  onLogout,
+  onUpdateCredentials,
+  currentCredentials
+}) => {
+  const { getFontSizeClasses } = useFontSizeContext();
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+  const [showCredentialsForm, setShowCredentialsForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'data' | 'about'>('general');
+  const [credentialsForm, setCredentialsForm] = useState({
+    username: currentCredentials?.username || '',
+    password: currentCredentials?.password || '',
+    email: currentCredentials?.email || '',
+    confirmPassword: ''
+  });
+  const [credentialsError, setCredentialsError] = useState('');
+
+
+
+  const handleClearAllExpenses = () => {
+    if (onClearAllExpenses) {
+      onClearAllExpenses();
+      setShowClearConfirmation(false);
+    }
+  };
+
+  const handleCredentialsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCredentialsError('');
+
+    // Validation
+    if (!credentialsForm.username.trim()) {
+      setCredentialsError('Username is required');
+      return;
+    }
+
+    if (credentialsForm.username.trim().length < 3) {
+      setCredentialsError('Username must be at least 3 characters long');
+      return;
+    }
+
+    if (!credentialsForm.email.trim()) {
+      setCredentialsError('Email is required');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentialsForm.email.trim())) {
+      setCredentialsError('Please enter a valid email address');
+      return;
+    }
+
+    if (!credentialsForm.password) {
+      setCredentialsError('Password is required');
+      return;
+    }
+
+    if (credentialsForm.password.length < 6) {
+      setCredentialsError('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (credentialsForm.password !== credentialsForm.confirmPassword) {
+      setCredentialsError('Passwords do not match');
+      return;
+    }
+
+    // Update credentials
+    if (onUpdateCredentials) {
+      onUpdateCredentials({
+        username: credentialsForm.username.trim(),
+        password: credentialsForm.password,
+        email: credentialsForm.email.trim()
+      });
+      setShowCredentialsForm(false);
+      setCredentialsForm({
+        username: credentialsForm.username.trim(),
+        password: credentialsForm.password,
+        email: credentialsForm.email.trim(),
+        confirmPassword: ''
+      });
+    }
+  };
+
+  const resetCredentialsForm = () => {
+    setCredentialsForm({
+      username: currentCredentials?.username || '',
+      password: currentCredentials?.password || '',
+      email: currentCredentials?.email || '',
+      confirmPassword: ''
+    });
+    setCredentialsError('');
+    setShowCredentialsForm(false);
+  };
+
+  const handleDataRestored = () => {
+    // Reload the page to reflect restored data
+    window.location.reload();
+  };
+
+  return (
+    <div className="space-y-8">
+
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200">
+        <nav className="flex space-x-8">
+          <button
+            onClick={() => setActiveTab('general')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'general'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <SettingsIcon className="w-4 h-4" />
+              General
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('backup')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'backup'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <HardDrive className="w-4 h-4" />
+              Backup & Restore
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('data')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'data'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Data Management
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('about')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'about'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4" />
+              About
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'general' && (
+        <div className="space-y-8">
+          {/* Authentication Settings */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Authentication & Security
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  Manage login credentials and account settings
+                </p>
+              </div>
+            </div>
+
+            {/* Current Credentials Display */}
+            <div className="mb-6 p-4 bg-slate-50 rounded-lg">
+              <h4 className={getFontSizeClasses("font-medium text-slate-900 mb-3")}>
+                Current Account Information
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <User className="w-4 h-4 text-slate-600" />
+                  <span className={getFontSizeClasses("text-slate-700")}>
+                    Username: <span className="font-mono bg-white px-2 py-1 rounded border">
+                      {currentCredentials?.username || 'admin'}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-slate-600" />
+                  <span className={getFontSizeClasses("text-slate-700")}>
+                    Email: <span className="font-mono bg-white px-2 py-1 rounded border">
+                      {currentCredentials?.email || 'admin@example.com'}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Lock className="w-4 h-4 text-slate-600" />
+                  <span className={getFontSizeClasses("text-slate-700")}>
+                    Password: <span className="font-mono bg-white px-2 py-1 rounded border">
+                      {currentCredentials?.password || 'pass123'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Credentials Form */}
+            {showCredentialsForm ? (
+              <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
+                      Username *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={credentialsForm.username}
+                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, username: e.target.value }))}
+                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter username"
+                        required
+                      />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
+                      Email Address *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        value={credentialsForm.email}
+                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, email: e.target.value }))}
+                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter email address"
+                        required
+                      />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
+                      New Password *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={credentialsForm.password}
+                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, password: e.target.value }))}
+                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter new password"
+                        required
+                      />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
+                      Confirm Password *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={credentialsForm.confirmPassword}
+                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Confirm new password"
+                        required
+                      />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                </div>
+
+                {credentialsError && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span className={getFontSizeClasses("text-red-700 text-sm")}>{credentialsError}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    Update Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetCredentialsForm}
+                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCredentialsForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Lock className="w-4 h-4" />
+                  Update Account
+                </button>
+                {onLogout && (
+                  <button
+                    onClick={onLogout}
+                    className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className={getFontSizeClasses("font-medium text-amber-900")}>
+                    Security Information
+                  </h4>
+                  <ul className={getFontSizeClasses("text-amber-800 mt-1 space-y-1")}>
+                    <li>• Your email is used for account identification</li>
+                    <li>• Changing credentials will require you to sign in again</li>
+                    <li>• Keep your login information secure and private</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Time & Locale Settings */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <Clock className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Time & Region
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  Your current time and locale settings
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Current Time
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {formatDateTime(new Date().toISOString())}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Timezone
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {getCurrentUserTimezone()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Language & Region
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {getCurrentUserLocale()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-blue-600 text-xs font-bold">i</span>
+                </div>
+                <div>
+                  <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
+                    Automatic Detection
+                  </h4>
+                  <p className={getFontSizeClasses("text-blue-800 mt-1")}>
+                    Time and date formats are automatically detected from your browser settings. 
+                    All timestamps and relative times are displayed in your local timezone.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      )}
+
+      {activeTab === 'backup' && (
+        <BackupAndRestoreTab onDataRestored={handleDataRestored} />
+      )}
+
+      {activeTab === 'data' && (
+        <div className="space-y-6">
+          {/* Data Management */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                <Database className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Data Management
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  delete all data from your account
+                </p>
+              </div>
+            </div>
+
+            {/* Clear All Expenses */}
+            <div className="p-4 border border-red-200 rounded-lg bg-red-50">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className={getFontSizeClasses("font-semibold text-red-900 mb-1")}>
+                      Clear All Expenses
+                    </h4>
+                    <p className={getFontSizeClasses("text-red-700 mb-3")}>
+                      Permanently delete all expense records from your account. This action cannot be undone.
+                    </p>
+                    <div className={getFontSizeClasses("text-sm text-red-600 mb-4")}>
+                      Current expenses: <span className="font-semibold">{expenseCount}</span>
+                    </div>
+                    <button
+                      onClick={() => setShowClearConfirmation(true)}
+                      disabled={expenseCount === 0}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear All Expenses
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Warning Note */}
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className={getFontSizeClasses("font-medium text-amber-900")}>
+                    Data Safety Reminder
+                  </h4>
+                  <p className={getFontSizeClasses("text-amber-800 mt-1")}>
+                    This action will permanently delete all your expense data and cannot be undone.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Confirmation Modal */}
+      {showClearConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
+                  <p className="text-slate-500">This action cannot be undone</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-slate-700 mb-4">
+                  Are you sure you want to delete all <span className="font-semibold">{expenseCount}</span> expenses? 
+                  This will permanently remove all expense records, including:
+                </p>
+                <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                  <li>• All expense transactions</li>
+                  <li>• Associated notes and descriptions</li>
+                  <li>• Uploaded receipts and attachments</li>
+                  <li>• Store and location information</li>
+                </ul>
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    <strong>Warning:</strong> This action cannot be reversed once completed.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowClearConfirmation(false)}
+                  className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearAllExpenses}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
+                >
+                  Delete All Expenses
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'about' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  A comprehensive expense tracking application that helps you log, categorize, and analyze your spending. 
+                  Originally built in Bolt, it was successfully migrated to Replit's full-stack environment while preserving 
+                  all original functionality and adding enhanced reporting capabilities.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <Users className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-sm">Multi-User Support</h4>
+                    <p className="text-gray-600 text-xs">Manage expenses for multiple users with individual profiles and preferences</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <BarChart3 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-sm">Advanced Analytics</h4>
+                    <p className="text-gray-600 text-xs">Comprehensive reporting with spreadsheet-style analytics and trends</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-sm">Browser Storage</h4>
+                    <p className="text-gray-600 text-xs">Data persisted locally using localStorage for privacy and speed</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Download className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-sm">Import/Export</h4>
+                    <p className="text-gray-600 text-xs">CSV import/export for expenses, categories, and users</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-medium text-gray-900 mb-2">Technical Architecture</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Frontend:</span>
+                    <span className="font-medium text-gray-900">React + TypeScript + Tailwind CSS</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Backend:</span>
+                    <span className="font-medium text-gray-900">Express.js + RESTful API</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Router:</span>
+                    <span className="font-medium text-gray-900">Wouter (lightweight routing)</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">State:</span>
+                    <span className="font-medium text-gray-900">TanStack Query + Custom Hooks</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Storage:</span>
+                    <span className="font-medium text-gray-900">Browser localStorage</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-medium text-gray-900 mb-2">Key Features</h3>
+                <ul className="text-gray-600 text-sm space-y-1">
+                  <li>• Dashboard with real-time statistics and spending trends</li>
+                  <li>• Hierarchical category system with subcategories</li>
+                  <li>• Bulk expense entry and CSV import/export</li>
+                  <li>• Advanced filtering by user, date range, and categories</li>
+                  <li>• Comprehensive reports with spreadsheet-style analytics</li>
+                  <li>• User authentication with password reset functionality</li>
+                  <li>• Expense management and data tracking</li>
+                </ul>
+              </div>
+
+              <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-emerald-900 text-sm">Privacy & Security</h4>
+                    <p className="text-emerald-700 text-xs leading-relaxed">
+                      All data is stored locally in your browser. No information is sent to external servers, 
+                      ensuring complete privacy and control over your financial data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

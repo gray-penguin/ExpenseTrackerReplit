@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font size scaling CSS custom properties */
+:root {
+  --font-scale: 1;
+}
+
+/* Font size classes for dynamic scaling */
+.font-size-small {
+  --font-scale: 0.875;
+}
+
+.font-size-medium {
+  --font-scale: 1;
+}
+
+.font-size-large {
+  --font-scale: 1.125;
+}
+
+.font-size-extra-large {
+  --font-scale: 1.25;
+}
+
+/* Apply scaling to text elements */
+.font-size-small .text-xs { font-size: calc(0.75rem * var(--font-scale)); }
+.font-size-small .text-sm { font-size: calc(0.875rem * var(--font-scale)); }
+.font-size-small .text-base { font-size: calc(1rem * var(--font-scale)); }
+.font-size-small .text-lg { font-size: calc(1.125rem * var(--font-scale)); }
+.font-size-small .text-xl { font-size: calc(1.25rem * var(--font-scale)); }
+.font-size-small .text-2xl { font-size: calc(1.5rem * var(--font-scale)); }
+.font-size-small .text-3xl { font-size: calc(1.875rem * var(--font-scale)); }
+
+.font-size-medium .text-xs { font-size: calc(0.75rem * var(--font-scale)); }
+.font-size-medium .text-sm { font-size: calc(0.875rem * var(--font-scale)); }
+.font-size-medium .text-base { font-size: calc(1rem * var(--font-scale)); }
+.font-size-medium .text-lg { font-size: calc(1.125rem * var(--font-scale)); }
+.font-size-medium .text-xl { font-size: calc(1.25rem * var(--font-scale)); }
+.font-size-medium .text-2xl { font-size: calc(1.5rem * var(--font-scale)); }
+.font-size-medium .text-3xl { font-size: calc(1.875rem * var(--font-scale)); }
+
+.font-size-large .text-xs { font-size: calc(0.75rem * var(--font-scale)); }
+.font-size-large .text-sm { font-size: calc(0.875rem * var(--font-scale)); }
+.font-size-large .text-base { font-size: calc(1rem * var(--font-scale)); }
+.font-size-large .text-lg { font-size: calc(1.125rem * var(--font-scale)); }
+.font-size-large .text-xl { font-size: calc(1.25rem * var(--font-scale)); }
+.font-size-large .text-2xl { font-size: calc(1.5rem * var(--font-scale)); }
+.font-size-large .text-3xl { font-size: calc(1.875rem * var(--font-scale)); }
+
+.font-size-extra-large .text-xs { font-size: calc(0.75rem * var(--font-scale)); }
+.font-size-extra-large .text-sm { font-size: calc(0.875rem * var(--font-scale)); }
+.font-size-extra-large .text-base { font-size: calc(1rem * var(--font-scale)); }
+.font-size-extra-large .text-lg { font-size: calc(1.125rem * var(--font-scale)); }
+.font-size-extra-large .text-xl { font-size: calc(1.25rem * var(--font-scale)); }
+.font-size-extra-large .text-2xl { font-size: calc(1.5rem * var(--font-scale)); }
+.font-size-extra-large .text-3xl { font-size: calc(1.875rem * var(--font-scale)); }
+
+/* Smooth transitions for font size changes */
+* {
+  transition: font-size 0.2s ease-in-out;
+}

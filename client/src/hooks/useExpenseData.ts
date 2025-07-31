@@ -1,0 +1,130 @@
+import { useState, useEffect } from 'react';
+import { useLocalStorage } from './useLocalStorage';
+import { User, Category, Expense } from '../types';
+import { users as defaultUsers, categories as defaultCategories, expenses as defaultExpenses } from '../data/mockData';
+
+export function useExpenseData() {
+  // Use localStorage for persistence
+  const [users, setUsers] = useLocalStorage<User[]>('expense-tracker-users', defaultUsers);
+  const [categories, setCategories] = useLocalStorage<Category[]>('expense-tracker-categories', defaultCategories);
+  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expense-tracker-expenses', defaultExpenses);
+
+  // Helper functions for CRUD operations
+  const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
+    const newExpense: Expense = {
+      ...expense,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString()
+    };
+    setExpenses(prev => [...prev, newExpense]);
+    return newExpense;
+  };
+
+  const updateExpense = (id: string, updates: Partial<Expense>) => {
+    setExpenses(prev => prev.map(expense => 
+      expense.id === id ? { ...expense, ...updates } : expense
+    ));
+  };
+
+  const deleteExpense = (id: string) => {
+    setExpenses(prev => prev.filter(expense => expense.id !== id));
+  };
+
+  const addUser = (user: Omit<User, 'id'>) => {
+    const newUser: User = {
+      ...user,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+    setUsers(prev => [...prev, newUser]);
+    return newUser;
+  };
+
+  const updateUser = (id: string, updates: Partial<User>) => {
+    setUsers(prev => prev.map(user => 
+      user.id === id ? { ...user, ...updates } : user
+    ));
+  };
+
+  const deleteUser = (id: string) => {
+    // Also delete all expenses for this user
+    setExpenses(prev => prev.filter(expense => expense.userId !== id));
+    setUsers(prev => prev.filter(user => user.id !== id));
+  };
+
+  const addCategory = (category: Omit<Category, 'id'>) => {
+    const categoryId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const newCategory: Category = {
+      ...category,
+      id: categoryId,
+      subcategories: category.subcategories.map((sub, index) => ({
+        ...sub,
+        id: `${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+        categoryId: categoryId
+      }))
+    };
+    setCategories(prev => [...prev, newCategory]);
+    return newCategory;
+  };
+
+  const updateCategory = (id: string, updates: Partial<Category>) => {
+    setCategories(prev => prev.map(category => 
+      category.id === id ? { ...category, ...updates } : category
+    ));
+  };
+
+  const deleteCategory = (id: string) => {
+    // Also delete all expenses for this category
+    setExpenses(prev => prev.filter(expense => expense.categoryId !== id));
+    setCategories(prev => prev.filter(category => category.id !== id));
+  };
+
+  const importExpenses = (newExpenses: Expense[]) => {
+    setExpenses(prev => [...prev, ...newExpenses]);
+  };
+
+  const addBulkExpenses = (expenses: Omit<Expense, 'id' | 'createdAt'>[]) => {
+    const baseTime = Date.now();
+    const newExpenses: Expense[] = expenses.map((expense, index) => ({
+      ...expense,
+      id: `${baseTime}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString()
+    }));
+    setExpenses(prev => [...prev, ...newExpenses]);
+    return newExpenses;
+  };
+
+  const importUsers = (newUsers: User[]) => {
+    setUsers(prev => [...prev, ...newUsers]);
+  };
+
+  const importCategories = (newCategories: Category[]) => {
+    setCategories(prev => [...prev, ...newCategories]);
+  };
+
+  const clearAllExpenses = () => {
+    setExpenses([]);
+  };
+
+  return {
+    users,
+    categories,
+    expenses,
+    addExpense,
+    addBulkExpenses,
+    updateExpense,
+    deleteExpense,
+    addUser,
+    updateUser,
+    deleteUser,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    importExpenses,
+    importUsers,
+    importCategories,
+    clearAllExpenses,
+    setUsers,
+    setCategories,
+    setExpenses
+  };
+}
