@@ -21,6 +21,7 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
 
 export function useAuth() {
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
   const [isLoading, setIsLoading] = useState(true);
 
