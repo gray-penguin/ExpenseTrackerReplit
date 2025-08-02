@@ -489,7 +489,6 @@ export class IndexedDBStorage {
       this.setCategories(nestedCategories),
       this.setExpenses(processedExpenses),
       this.setCredentials(backup.credentials),
-      userId: (expense.userId || expense.personId)?.toString() || '',
     ]);
   }
 }
