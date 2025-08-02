@@ -479,6 +479,8 @@ export class IndexedDBStorage {
     const processedUsers = backup.users.map(user => ({
       ...user,
       id: user.id?.toString() || '',
+      username: user.username || user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user',
+      email: user.email || `${user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}@example.com`,
       defaultCategoryId: user.defaultCategoryId ? user.defaultCategoryId.toString() : undefined,
       defaultSubcategoryId: user.defaultSubcategoryId ? user.defaultSubcategoryId.toString() : undefined
     }));
@@ -487,7 +489,7 @@ export class IndexedDBStorage {
       this.setCategories(nestedCategories),
       this.setExpenses(processedExpenses),
       this.setCredentials(backup.credentials),
-      this.setSettings(backup.settings)
+      userId: (expense.userId || expense.personId)?.toString() || '',
     ]);
   }
 }
