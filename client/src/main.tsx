@@ -5,36 +5,10 @@ import App from './App.tsx';
 import { queryClient } from './lib/queryClient';
 import './index.css';
 
-// Register service worker for PWA functionality
-if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-        
-        // Check for updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New content is available, prompt user to refresh
-                if (confirm('New version available! Refresh to update?')) {
-                  window.location.reload();
-                }
-              }
-            });
-          }
-        });
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
+// PWA Installation Logic
+let deferredPrompt: any;
 
 // Listen for beforeinstallprompt event
-let deferredPrompt: any;
 window.addEventListener('beforeinstallprompt', (e) => {
   console.log('PWA install prompt available');
   e.preventDefault();
@@ -135,6 +109,34 @@ function showInstallPrompt() {
   setTimeout(() => {
     document.getElementById('pwa-install-banner')?.remove();
   }, 10000);
+}
+
+// Register service worker for PWA functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New content is available, prompt user to refresh
+                if (confirm('New version available! Refresh to update?')) {
+                  window.location.reload();
+                }
+              }
+            });
+          }
+        });
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
 }
 
 createRoot(document.getElementById('root')!).render(
