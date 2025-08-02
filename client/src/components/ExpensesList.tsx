@@ -85,6 +85,19 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
   const selectedCategoryData = categories.find(c => c.id === selectedCategory);
   const availableSubcategories = selectedCategoryData?.subcategories || [];
 
+  // Ensure subcategory is valid for the selected category
+  useEffect(() => {
+    if (selectedCategory && selectedSubcategory) {
+      const categoryData = categories.find(c => c.id === selectedCategory);
+      const isValidSubcategory = categoryData?.subcategories.some(sub => sub.id === selectedSubcategory);
+      
+      if (!isValidSubcategory) {
+        console.log('Invalid subcategory for selected category, clearing subcategory filter');
+        setSelectedSubcategory('');
+      }
+    }
+  }, [selectedCategory, selectedSubcategory, categories]);
+
   // Get unique locations from all expenses
   const getUniqueLocations = (): string[] => {
     const locationSet = new Set<string>();
@@ -109,11 +122,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
   );
 
   // Reset subcategory when category changes
-  React.useEffect(() => {
-    if (selectedCategory && !availableSubcategories.some(sub => sub.id === selectedSubcategory)) {
-      setSelectedSubcategory('');
-    }
-  }, [selectedCategory, availableSubcategories, selectedSubcategory]);
+  // This effect is now handled above with better validation
 
   // Reset to first page when filters change
   React.useEffect(() => {
