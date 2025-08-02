@@ -32,6 +32,20 @@ export default defineConfig({
         main: path.resolve(import.meta.dirname, "client", "index.html"),
       },
     },
+    rollupOptions: {
+      input: {
+        main: path.resolve(import.meta.dirname, "client", "index.html"),
+      },
+    },
+  },
+  publicDir: path.resolve(import.meta.dirname, "client", "public"),
+  server: {
+    fs: {
+      allow: [
+        path.resolve(import.meta.dirname, "client"),
+        path.resolve(import.meta.dirname, "shared"),
+      ],
+    },
   },
   publicDir: path.resolve(import.meta.dirname, "client", "public"),
   server: {
