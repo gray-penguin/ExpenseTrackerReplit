@@ -234,8 +234,12 @@ export class IndexedDBStorage {
     const categories = await this.getCategories();
     const expenses = await this.getExpenses();
 
-    // Only initialize if all stores are empty
-    if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
+    // Initialize if stores are empty OR if expenses have missing user associations
+    const hasCorruptedExpenses = expenses.some(expense => !expense.userId || expense.userId === '');
+    
+    if ((users.length === 0 && categories.length === 0 && expenses.length === 0) || hasCorruptedExpenses) {
+      console.log('Initializing mock data due to empty stores or corrupted user associations');
+      
       // Initialize mock users
       const mockUsers = [
         {
@@ -314,63 +318,84 @@ export class IndexedDBStorage {
         }
       ];
 
-      // Initialize mock expenses
-      const mockExpenses = [
-        {
-          id: '1',
-          userId: '1',
-          categoryId: '1',
-          subcategoryId: '1',
-          amount: 45.67,
-          description: 'Weekly fresh vegetables and fruits',
-          notes: 'Organic produce from farmers market',
-          storeName: 'Whole Foods Market',
-          storeLocation: 'Downtown',
-          date: '2025-01-15',
-          createdAt: '2025-01-15T10:30:00Z'
-        },
-        {
-          id: '2',
-          userId: '1',
-          categoryId: '1',
-          subcategoryId: '2',
-          amount: 32.89,
-          description: 'Chicken breast and milk',
-          storeName: 'Safeway',
-          storeLocation: 'Downtown',
-          date: '2025-01-14',
-          createdAt: '2025-01-14T18:45:00Z'
-        },
-        {
-          id: '3',
-          userId: '2',
-          categoryId: '2',
-          subcategoryId: '5',
-          amount: 125.45,
-          description: 'Monthly electricity bill',
-          notes: 'Higher usage due to cold weather',
-          storeName: 'Seattle City Light',
-          storeLocation: 'Online',
-          date: '2025-01-10',
-          createdAt: '2025-01-10T08:00:00Z'
-        },
-        {
-          id: '4',
-          userId: '2',
-          categoryId: '3',
-          subcategoryId: '12',
-          amount: 15.99,
-          description: 'Netflix subscription',
-          storeName: 'Netflix',
-          storeLocation: 'Online',
-          date: '2025-01-01',
-          createdAt: '2025-01-01T00:05:00Z'
-        }
-      ];
+      // If we have corrupted expenses, try to repair them first
+      let repairedExpenses = [];
+      if (hasCorruptedExpenses && expenses.length > 0) {
+        console.log('Attempting to repair corrupted expenses...');
+        repairedExpenses = expenses.map((expense, index) => {
+          // If userId is missing or empty, assign to alternating users
+          const assignedUserId = (!expense.userId || expense.userId === '') 
+            ? (index % 2 === 0 ? '1' : '2')
+            : expense.userId.toString();
+            
+          return {
+            ...expense,
+            userId: assignedUserId,
+            categoryId: expense.categoryId?.toString() || '1',
+            subcategoryId: expense.subcategoryId?.toString() || '1',
+            amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) || 0 : (expense.amount || 0)
+          };
+        });
+        console.log(`Repaired ${repairedExpenses.length} expenses with user associations`);
+      } else {
+        // Initialize with fresh mock expenses if no existing data
+        repairedExpenses = [
+          {
+            id: '1',
+            userId: '1',
+            categoryId: '1',
+            subcategoryId: '1',
+            amount: 45.67,
+            description: 'Weekly fresh vegetables and fruits',
+            notes: 'Organic produce from farmers market',
+            storeName: 'Whole Foods Market',
+            storeLocation: 'Downtown',
+            date: '2025-01-15',
+            createdAt: '2025-01-15T10:30:00Z'
+          },
+          {
+            id: '2',
+            userId: '1',
+            categoryId: '1',
+            subcategoryId: '2',
+            amount: 32.89,
+            description: 'Chicken breast and milk',
+            storeName: 'Safeway',
+            storeLocation: 'Downtown',
+            date: '2025-01-14',
+            createdAt: '2025-01-14T18:45:00Z'
+          },
+          {
+            id: '3',
+            userId: '2',
+            categoryId: '2',
+            subcategoryId: '5',
+            amount: 125.45,
+            description: 'Monthly electricity bill',
+            notes: 'Higher usage due to cold weather',
+            storeName: 'Seattle City Light',
+            storeLocation: 'Online',
+            date: '2025-01-10',
+            createdAt: '2025-01-10T08:00:00Z'
+          },
+          {
+            id: '4',
+            userId: '2',
+            categoryId: '3',
+            subcategoryId: '12',
+            amount: 15.99,
+            description: 'Netflix subscription',
+            storeName: 'Netflix',
+            storeLocation: 'Online',
+            date: '2025-01-01',
+            createdAt: '2025-01-01T00:05:00Z'
+          }
+        ];
+      }
 
       await this.setUsers(mockUsers);
       await this.setCategories(mockCategories);
-      await this.setExpenses(mockExpenses);
+      await this.setExpenses(repairedExpenses);
 
       // Set default credentials with Personal Team Expenses use case
       await this.setCredentials({
