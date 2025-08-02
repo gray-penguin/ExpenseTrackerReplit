@@ -843,7 +843,9 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600 font-medium">Sort by:</span>
             <div className="flex items-center gap-1">
-              {(['date', 'amount', 'description', 'user', 'category'] as SortField[]).map((field) => (
+              {(['date', 'amount', 'description', 'user', 'category'] as SortField[]).map((field) => {
+                const fieldLabel = field === 'user' ? useCaseConfig.userLabelSingular : getSortLabel(field);
+                return (
                 <button
                   key={field}
                   onClick={() => handleSort(field)}
@@ -853,10 +855,11 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
                       : 'text-slate-600 hover:bg-slate-100 border border-transparent'
                   }`}
                 >
-                  {getSortLabel(field)}
+                  {fieldLabel}
                   {getSortIcon(field)}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

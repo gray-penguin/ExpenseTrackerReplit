@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { User } from '@shared/schema';
 import { ChevronDown, Users, AtSign } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 interface UserSelectorProps {
   users: User[];
@@ -16,6 +18,8 @@ export function UserSelector({
   showAllUsers = true
 }: UserSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   return (
     <div className="relative">
@@ -42,7 +46,7 @@ export function UserSelector({
               <Users className="w-4 h-4 text-gray-500" />
             </div>
             <div className="flex-1 text-left">
-              <div className="font-medium text-gray-900">All Users</div>
+              <div className="font-medium text-gray-900">{useCaseConfig.terminology.allUsers}</div>
               <div className="text-xs text-gray-500">Combined view</div>
             </div>
           </>
@@ -66,7 +70,7 @@ export function UserSelector({
                   <Users className="w-4 h-4 text-gray-500" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-gray-900">All Users</div>
+                  <div className="font-medium text-gray-900">{useCaseConfig.terminology.allUsers}</div>
                   <div className="text-xs text-gray-500">Combined view</div>
                 </div>
               </button>

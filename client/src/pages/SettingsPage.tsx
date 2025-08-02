@@ -8,6 +8,9 @@ export function SettingsPage() {
   const { expenses, clearAllExpenses } = useExpenseData();
   const { credentials, updateCredentials, logout } = useAuth();
 
+  const handleUpdateUseCase = (useCase: string) => {
+    updateCredentials({ useCase });
+  };
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -27,6 +30,8 @@ export function SettingsPage() {
         onLogout={logout}
         onUpdateCredentials={updateCredentials}
         currentCredentials={credentials}
+        onUpdateUseCase={handleUpdateUseCase}
+        currentUseCase={credentials.useCase}
       />
     </div>
   );

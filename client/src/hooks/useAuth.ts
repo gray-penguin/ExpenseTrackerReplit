@@ -6,6 +6,7 @@ interface AuthCredentials {
   email: string;
   securityQuestion: string;
   securityAnswer: string;
+  useCase: string;
 }
 
 const DEFAULT_CREDENTIALS: AuthCredentials = {
@@ -13,7 +14,8 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
   password: 'pass123',
   email: 'admin@example.com',
   securityQuestion: 'What is your favorite color?',
-  securityAnswer: 'blue'
+  securityAnswer: 'blue',
+  useCase: 'personal-team'
 };
 
 export function useAuth() {

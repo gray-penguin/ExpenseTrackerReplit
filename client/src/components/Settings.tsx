@@ -553,6 +553,171 @@ export const Settings: React.FC<SettingsProps> = ({
         </div>
       )}
 
+      {activeTab === 'use-cases' && (
+        <div className="space-y-6">
+          {/* Current Use Case Display */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={`w-10 h-10 bg-${selectedUseCase.color}-100 rounded-xl flex items-center justify-center`}>
+                <selectedUseCase.icon className={`w-5 h-5 text-${selectedUseCase.color}-600`} />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Current Use Case
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  How your expense tracker is currently configured
+                </p>
+              </div>
+            </div>
+
+            <div className={`p-4 bg-${selectedUseCase.color}-50 border border-${selectedUseCase.color}-200 rounded-lg`}>
+              <div className="flex items-start gap-3">
+                <selectedUseCase.icon className={`w-6 h-6 text-${selectedUseCase.color}-600 mt-0.5`} />
+                <div>
+                  <h4 className={getFontSizeClasses(`font-semibold text-${selectedUseCase.color}-900`)}>
+                    {selectedUseCase.name}
+                  </h4>
+                  <p className={getFontSizeClasses(`text-${selectedUseCase.color}-700 mt-1`)}>
+                    {selectedUseCase.description}
+                  </p>
+                  <div className={getFontSizeClasses(`text-sm text-${selectedUseCase.color}-600 mt-2`)}>
+                    <strong>User Label:</strong> {selectedUseCase.userLabel} • <strong>Context:</strong> {selectedUseCase.expenseContext}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Use Case Selection */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Target className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Choose Your Use Case
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  Select the tracking scenario that best fits your needs
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {useCases.map((useCase) => {
+                const isSelected = currentUseCase === useCase.id;
+                const IconComponent = useCase.icon;
+                
+                return (
+                  <button
+                    key={useCase.id}
+                    onClick={() => handleUseCaseChange(useCase.id)}
+                    className={`text-left p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                      isSelected
+                        ? `border-${useCase.color}-500 bg-${useCase.color}-50 shadow-sm`
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-lg ${
+                        isSelected 
+                          ? `bg-${useCase.color}-100` 
+                          : 'bg-slate-100'
+                      } flex items-center justify-center`}>
+                        <IconComponent className={`w-5 h-5 ${
+                          isSelected 
+                            ? `text-${useCase.color}-600` 
+                            : 'text-slate-600'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={getFontSizeClasses(`font-semibold ${
+                          isSelected 
+                            ? `text-${useCase.color}-900` 
+                            : 'text-slate-900'
+                        }`)}>
+                          {useCase.name}
+                        </h4>
+                        <p className={getFontSizeClasses(`text-sm ${
+                          isSelected 
+                            ? `text-${useCase.color}-700` 
+                            : 'text-slate-600'
+                        } mt-1`)}>
+                          {useCase.description}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div className={`w-6 h-6 bg-${useCase.color}-500 rounded-full flex items-center justify-center`}>
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className={getFontSizeClasses(`text-xs font-medium ${
+                        isSelected 
+                          ? `text-${useCase.color}-800` 
+                          : 'text-slate-700'
+                      } uppercase tracking-wide`)}>
+                        Example Use Cases:
+                      </div>
+                      <ul className="space-y-1">
+                        {useCase.examples.map((example, index) => (
+                          <li key={index} className={getFontSizeClasses(`text-xs ${
+                            isSelected 
+                              ? `text-${useCase.color}-600` 
+                              : 'text-slate-500'
+                          } flex items-center gap-2`)}>
+                            <span className="w-1 h-1 bg-current rounded-full flex-shrink-0" />
+                            {example}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className={`mt-3 pt-3 border-t ${
+                      isSelected 
+                        ? `border-${useCase.color}-200` 
+                        : 'border-slate-200'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <div className={getFontSizeClasses(`text-xs ${
+                          isSelected 
+                            ? `text-${useCase.color}-700` 
+                            : 'text-slate-600'
+                        }`)}>
+                          <strong>Users become:</strong> {useCase.userLabel}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Impact Notice */}
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className={getFontSizeClasses("font-medium text-amber-900")}>
+                    Use Case Impact
+                  </h4>
+                  <ul className={getFontSizeClasses("text-amber-800 mt-1 space-y-1")}>
+                    <li>• Changing use cases updates terminology throughout the app</li>
+                    <li>• Your existing data remains unchanged and fully compatible</li>
+                    <li>• User interface labels will reflect the selected use case</li>
+                    <li>• All functionality remains the same, only presentation changes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'backup' && (
         <BackupAndRestoreTab onDataRestored={handleDataRestored} />
       )}

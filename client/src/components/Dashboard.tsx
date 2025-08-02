@@ -210,7 +210,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses, users, categorie
                     <span className="font-medium text-slate-900 text-left">{category.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900">{formatCurrency(total)}</span>
-                      <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${
+            <h4 className="text-emerald-100 text-sm font-medium mb-3 uppercase tracking-wide">Spending by {useCaseConfig.userLabelSingular}</h4>
                         isSelected ? 'rotate-90' : ''
                       }`} />
                     </div>
