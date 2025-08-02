@@ -66,9 +66,14 @@ self.addEventListener('fetch', event => {
   // Handle navigation requests (for SPA routing)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match('/');
+      caches.match('/')
+        .then(response => {
+          if (response) {
+            return response;
+          }
+          return fetch('/').catch(() => {
+            return new Response('App offline', { status: 503 });
+          });
         })
     );
     return;

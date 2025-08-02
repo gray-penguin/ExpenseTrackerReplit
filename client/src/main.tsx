@@ -8,9 +8,12 @@ import './index.css';
 // PWA Installation Logic
 let deferredPrompt: any;
 
+// Debug logging for PWA
+console.log('PWA: Script loaded');
+
 // Listen for beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('PWA install prompt available');
+  console.log('PWA: beforeinstallprompt event fired');
   e.preventDefault();
   deferredPrompt = e;
   
@@ -18,11 +21,22 @@ window.addEventListener('beforeinstallprompt', (e) => {
   showInstallPrompt();
 });
 
+// Also listen for appinstalled event
+window.addEventListener('appinstalled', () => {
+  console.log('PWA: App was installed');
+  deferredPrompt = null;
+});
+
 function showInstallPrompt() {
+  console.log('PWA: showInstallPrompt called');
+  
   // Don't show install prompt if already dismissed this session
   if (sessionStorage.getItem('pwa-install-dismissed')) {
+    console.log('PWA: Install prompt dismissed this session');
     return;
   }
+  
+  console.log('PWA: Creating install banner');
   
   // Create install banner
   const installBanner = document.createElement('div');
