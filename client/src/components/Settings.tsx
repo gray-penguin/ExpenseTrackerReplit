@@ -849,7 +849,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <div>
                 <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  A comprehensive expense tracking Progressive Web Application built using Bolt and Replit AI that helps you log, categorize, and analyze your spending. 
+                  A comprehensive expense tracking Progressive Web Application built using Bolt and Replit AI that helps you log, categorize, and analyze your spending.  Being a PWA allows the user to install this application on their device and use completly off-line.  No internet needed! (after install of course)
                 </p>
               </div>
 
@@ -874,7 +874,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-medium text-gray-900 text-sm">Local Storage</h4>
-                    <p className="text-gray-600 text-xs">Data persisted locally using IndexedDB for privacy and speed.  Being a PWA allows the user to install this application on their device and use completly off-line.  No internet needed! (after install of course)</p>
+                    <p className="text-gray-600 text-xs">Data persisted locally using IndexedDB for privacy and speed.</p>
                   </div>
                 </div>
 
