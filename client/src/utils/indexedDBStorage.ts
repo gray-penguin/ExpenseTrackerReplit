@@ -432,20 +432,38 @@ export class IndexedDBStorage {
   }
 
   async restoreFromBackup(backup: BackupData): Promise<void> {
-    // Transform flat categories and subcategories back to nested structure
-    const nestedCategories = backup.categories.map(category => ({
-      id: category.id.toString(),
-      name: category.name,
-      icon: category.icon,
-      color: category.color,
-      subcategories: backup.subcategories
-        .filter(sub => sub.categoryId === category.id)
-        .map(sub => ({
+    // Handle both old nested format and new flat format
+    let nestedCategories;
+    
+    if (backup.subcategories && Array.isArray(backup.subcategories)) {
+      // New flat format - transform flat categories and subcategories back to nested structure
+      nestedCategories = backup.categories.map(category => ({
+        id: category.id.toString(),
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        subcategories: backup.subcategories
+          .filter(sub => sub.categoryId === category.id)
+          .map(sub => ({
+            id: sub.id.toString(),
+            name: sub.name,
+            categoryId: category.id.toString()
+          }))
+      }));
+    } else {
+      // Old nested format - use categories as-is
+      nestedCategories = backup.categories.map(category => ({
+        id: category.id.toString(),
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        subcategories: (category.subcategories || []).map((sub: any) => ({
           id: sub.id.toString(),
           name: sub.name,
           categoryId: category.id.toString()
         }))
-    }));
+      }));
+    }
 
     await Promise.all([
       this.setUsers(backup.users),
