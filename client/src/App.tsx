@@ -9,6 +9,7 @@ import { Navbar } from './components/Navbar';
 import { LoginPage } from './components/LoginPage';
 import { FontSizeProvider } from './components/FontSizeProvider';
 import { useAuth } from './hooks/useAuth';
+import { useExpenseData } from './hooks/useExpenseData';
 
 function App() {
   const { 
