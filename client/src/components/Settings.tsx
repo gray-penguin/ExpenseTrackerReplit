@@ -873,8 +873,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 <div className="flex items-start gap-3">
                   <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Browser Storage</h4>
-                    <p className="text-gray-600 text-xs">Data persisted locally using localStorage for privacy and speed</p>
+                    <h4 className="font-medium text-gray-900 text-sm">Local Storage</h4>
+                    <p className="text-gray-600 text-xs">Data persisted locally using IndexedDB for privacy and speed</p>
                   </div>
                 </div>
 
