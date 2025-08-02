@@ -1,4 +1,4 @@
-const CACHE_NAME = 'expense-tracker-v2';
+const CACHE_NAME = 'expense-tracker-v3';
 const urlsToCache = [
   '/',
   '/expenses',
@@ -8,7 +8,8 @@ const urlsToCache = [
   '/settings',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/_redirects'
 ];
 
 // Install event - cache resources
@@ -62,6 +63,16 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Handle navigation requests (for SPA routing)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match('/');
+        })
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -87,12 +98,6 @@ self.addEventListener('fetch', event => {
 
           return response;
         });
-      })
-      .catch(() => {
-        // If both cache and network fail, return offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
       })
   );
 });

@@ -6,9 +6,9 @@ import { queryClient } from './lib/queryClient';
 import './index.css';
 
 // Register service worker for PWA functionality
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('SW registered: ', registration);
         
@@ -31,110 +31,110 @@ if ('serviceWorker' in navigator) {
         console.log('SW registration failed: ', registrationError);
       });
   });
+}
 
-  // Listen for beforeinstallprompt event
-  let deferredPrompt: any;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('PWA install prompt available');
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // Show custom install button or banner
-    showInstallPrompt();
-  });
+// Listen for beforeinstallprompt event
+let deferredPrompt: any;
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('PWA install prompt available');
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show custom install button or banner
+  showInstallPrompt();
+});
 
-  function showInstallPrompt() {
-    // Don't show install prompt if already dismissed this session
-    if (sessionStorage.getItem('pwa-install-dismissed')) {
-      return;
-    }
-    
-    // Create install banner
-    const installBanner = document.createElement('div');
-    installBanner.id = 'pwa-install-banner';
-    installBanner.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        padding: 12px 16px;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        font-family: system-ui, -apple-system, sans-serif;
-      ">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="
-            width: 32px;
-            height: 32px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-          ">💰</div>
-          <div>
-            <div style="font-weight: 600; font-size: 14px;">Install Expense Tracker</div>
-            <div style="font-size: 12px; opacity: 0.9;">Add to your home screen for quick access</div>
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button id="pwa-install-btn" style="
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-          ">Install</button>
-          <button id="pwa-dismiss-btn" style="
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-          ">×</button>
+function showInstallPrompt() {
+  // Don't show install prompt if already dismissed this session
+  if (sessionStorage.getItem('pwa-install-dismissed')) {
+    return;
+  }
+  
+  // Create install banner
+  const installBanner = document.createElement('div');
+  installBanner.id = 'pwa-install-banner';
+  installBanner.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 12px 16px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-family: system-ui, -apple-system, sans-serif;
+    ">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="
+          width: 32px;
+          height: 32px;
+          background: rgba(255,255,255,0.2);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+        ">💰</div>
+        <div>
+          <div style="font-weight: 600; font-size: 14px;">Install Expense Tracker</div>
+          <div style="font-size: 12px; opacity: 0.9;">Add to your home screen for quick access</div>
         </div>
       </div>
-    `;
-    
-    document.body.appendChild(installBanner);
-    
-    // Add event listeners
-    document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to install prompt: ${outcome}`);
-        deferredPrompt = null;
-        document.getElementById('pwa-install-banner')?.remove();
-      }
-    });
-    
-    document.getElementById('pwa-dismiss-btn')?.addEventListener('click', () => {
+      <div style="display: flex; gap: 8px;">
+        <button id="pwa-install-btn" style="
+          background: rgba(255,255,255,0.2);
+          border: 1px solid rgba(255,255,255,0.3);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        ">Install</button>
+        <button id="pwa-dismiss-btn" style="
+          background: transparent;
+          border: none;
+          color: white;
+          padding: 8px;
+          border-radius: 6px;
+          font-size: 18px;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: opacity 0.2s;
+        ">×</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(installBanner);
+  
+  // Add event listeners
+  document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${outcome}`);
+      deferredPrompt = null;
       document.getElementById('pwa-install-banner')?.remove();
-      // Remember dismissal for this session
-      sessionStorage.setItem('pwa-install-dismissed', 'true');
-    });
-    
-    // Auto-hide after 10 seconds
-    setTimeout(() => {
-      document.getElementById('pwa-install-banner')?.remove();
-    }, 10000);
-  }
+    }
+  });
+  
+  document.getElementById('pwa-dismiss-btn')?.addEventListener('click', () => {
+    document.getElementById('pwa-install-banner')?.remove();
+    // Remember dismissal for this session
+    sessionStorage.setItem('pwa-install-dismissed', 'true');
+  });
+  
+  // Auto-hide after 10 seconds
+  setTimeout(() => {
+    document.getElementById('pwa-install-banner')?.remove();
+  }, 10000);
 }
 
 createRoot(document.getElementById('root')!).render(
