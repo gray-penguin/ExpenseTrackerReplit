@@ -44,6 +44,11 @@ if ('serviceWorker' in navigator) {
   });
 
   function showInstallPrompt() {
+    // Don't show install prompt if already dismissed this session
+    if (sessionStorage.getItem('pwa-install-dismissed')) {
+      return;
+    }
+    
     // Create install banner
     const installBanner = document.createElement('div');
     installBanner.id = 'pwa-install-banner';
@@ -129,11 +134,6 @@ if ('serviceWorker' in navigator) {
     setTimeout(() => {
       document.getElementById('pwa-install-banner')?.remove();
     }, 10000);
-  }
-
-  // Don't show install prompt if already dismissed this session
-  if (sessionStorage.getItem('pwa-install-dismissed')) {
-    return;
   }
 }
 
