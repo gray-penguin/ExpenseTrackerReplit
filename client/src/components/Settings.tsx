@@ -7,6 +7,8 @@ import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock
 interface SettingsProps {
   onClearAllExpenses?: () => void;
   expenseCount?: number;
+  onClearAllCategories?: () => void;
+  categories?: any[];
   onLogout?: () => void;
   onUpdateCredentials?: (credentials: { username?: string; password?: string; email?: string }) => void;
   currentCredentials?: { username: string; password: string; email: string };
@@ -17,6 +19,8 @@ interface SettingsProps {
 export const Settings: React.FC<SettingsProps> = ({ 
   onClearAllExpenses,
   expenseCount = 0,
+  onClearAllCategories,
+  categories = [],
   onLogout,
   onUpdateCredentials,
   currentCredentials,
@@ -25,6 +29,7 @@ export const Settings: React.FC<SettingsProps> = ({
 }) => {
   const { getFontSizeClasses } = useFontSizeContext();
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+  const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'use-cases' | 'backup' | 'data' | 'about'>('general');
   const [credentialsForm, setCredentialsForm] = useState({
@@ -129,6 +134,13 @@ export const Settings: React.FC<SettingsProps> = ({
     if (onClearAllExpenses) {
       onClearAllExpenses();
       setShowClearConfirmation(false);
+    }
+  };
+
+  const handleClearAllCategories = () => {
+    if (onClearAllCategories) {
+      onClearAllCategories();
+      setShowClearCategoriesConfirmation(false);
     }
   };
 
@@ -277,33 +289,6 @@ export const Settings: React.FC<SettingsProps> = ({
             </div>
           </button>
         </nav>
-        {/* Clear All Categories */}
-        <div className="p-4 border border-red-200 rounded-lg bg-red-50 mt-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-              <div className="flex-1">
-                <h4 className={getFontSizeClasses("font-semibold text-red-900 mb-1")}>
-                  Clear All Categories
-                </h4>
-                <p className={getFontSizeClasses("text-red-700 mb-3")}>
-                  Permanently delete all categories and subcategories. This will also remove all associated expenses.
-                </p>
-                <div className={getFontSizeClasses("text-sm text-red-600 mb-4")}>
-                  Current categories: <span className="font-semibold">{categories?.length || 0}</span>
-                </div>
-                <button
-                  onClick={() => setShowClearCategoriesConfirmation(true)}
-                  disabled={(categories?.length || 0) === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Clear All Categories
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Tab Content */}
@@ -799,6 +784,34 @@ export const Settings: React.FC<SettingsProps> = ({
               </div>
             </div>
 
+            {/* Clear All Categories */}
+            <div className="p-4 border border-red-200 rounded-lg bg-red-50 mt-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className={getFontSizeClasses("font-semibold text-red-900 mb-1")}>
+                      Clear All Categories
+                    </h4>
+                    <p className={getFontSizeClasses("text-red-700 mb-3")}>
+                      Permanently delete all categories and subcategories. This will also remove all associated expenses.
+                    </p>
+                    <div className={getFontSizeClasses("text-sm text-red-600 mb-4")}>
+                      Current categories: <span className="font-semibold">{categories?.length || 0}</span>
+                    </div>
+                    <button
+                      onClick={() => setShowClearCategoriesConfirmation(true)}
+                      disabled={(categories?.length || 0) === 0}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear All Categories
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Warning Note */}
             <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-start gap-3">
@@ -862,6 +875,58 @@ export const Settings: React.FC<SettingsProps> = ({
                   className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
                 >
                   Delete All Expenses
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Categories Confirmation Modal */}
+      {showClearCategoriesConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Confirm Category Deletion</h3>
+                  <p className="text-slate-500">This action cannot be undone</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-slate-700 mb-4">
+                  Are you sure you want to delete all <span className="font-semibold">{categories.length}</span> categories? 
+                  This will permanently remove:
+                </p>
+                <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                  <li>• All categories and subcategories</li>
+                  <li>• All expenses associated with these categories</li>
+                  <li>• Category icons and color settings</li>
+                  <li>• User default category preferences</li>
+                </ul>
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    <strong>Warning:</strong> This will also delete all expenses since they require categories.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowClearCategoriesConfirmation(false)}
+                  className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearAllCategories}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
+                >
+                  Delete All Categories
                 </button>
               </div>
             </div>

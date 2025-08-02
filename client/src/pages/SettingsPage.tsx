@@ -5,8 +5,14 @@ import { useExpenseData } from "../hooks/useExpenseData";
 import { useAuth } from "../hooks/useAuth";
 
 export function SettingsPage() {
-  const { expenses, clearAllExpenses } = useExpenseData();
+  const { expenses, categories, clearAllExpenses, setCategories, setExpenses } = useExpenseData();
   const { credentials, updateCredentials, logout } = useAuth();
+
+  const handleClearAllCategories = () => {
+    // Clear both categories and expenses since expenses depend on categories
+    setCategories([]);
+    setExpenses([]);
+  };
 
   const handleUpdateUseCase = (useCase: string) => {
     updateCredentials({ useCase });
@@ -27,6 +33,8 @@ export function SettingsPage() {
       <Settings
         onClearAllExpenses={clearAllExpenses}
         expenseCount={expenses.length}
+        onClearAllCategories={handleClearAllCategories}
+        categories={categories}
         onLogout={logout}
         onUpdateCredentials={updateCredentials}
         currentCredentials={credentials}
