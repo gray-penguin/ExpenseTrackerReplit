@@ -4,6 +4,8 @@ import { ExpenseCard } from './ExpenseCard';
 import { BulkExpenseForm } from './BulkExpenseForm';
 import { Search, Filter, Tag, Users, DollarSign, Calendar, CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MapPin, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, PlusCircle, Plus } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
+import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 interface ExpensesListProps {
   expenses: Expense[];
@@ -42,6 +44,9 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
   initialCategoryId = '',
   initialSubcategoryId = ''
 }) => {
+  const { credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategoryId);
   const [selectedSubcategory, setSelectedSubcategory] = useState(initialSubcategoryId);
