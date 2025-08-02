@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { User, Category, Subcategory, Expense } from '../types';
 import { X, DollarSign, Calendar, FileText, Tag, Store, MapPin, Trash2, ChevronDown } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 interface ExpenseFormProps {
   users: User[];
@@ -21,6 +23,9 @@ export function ExpenseForm({
   onClose,
   onDelete
 }: ExpenseFormProps) {
+  const { credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
+  
   const [formData, setFormData] = useState({
     userId: expense?.userId || users[0]?.id?.toString() || '',
     categoryId: expense?.categoryId || '',
@@ -272,7 +277,7 @@ export function ExpenseForm({
           {/* User Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              User <span className="text-red-500">*</span>
+              {useCaseConfig.userLabelSingular} <span className="text-red-500">*</span>
             </label>
             <select
               id="expense-user"
@@ -282,7 +287,7 @@ export function ExpenseForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               required
             >
-              <option value="">Select a user</option>
+              <option value="">Select a {useCaseConfig.terminology.user}</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id.toString()}>
                   {user.name} ({user.username})

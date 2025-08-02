@@ -3,6 +3,8 @@ import { User, Category, Expense, ExpenseAttachment } from '../types';
 import { formatLastUsed, formatFrequency } from '../utils/formatters';
 import { X, Plus, Trash2, DollarSign, Calendar, FileText, Tag, Store, MapPin, Star, Copy, Save, ChevronDown, Upload, Eye, Paperclip, StickyNote, Users, Zap } from 'lucide-react';
 import * as Icons from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 interface StoreData {
   name: string;
@@ -69,6 +71,9 @@ export const BulkExpenseForm: React.FC<BulkExpenseFormProps> = ({
   onSubmit,
   onClose
 }) => {
+  const { credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
+  
   const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>([
     createEmptyExpenseItem(),
     createEmptyExpenseItem(),
@@ -380,7 +385,7 @@ export const BulkExpenseForm: React.FC<BulkExpenseFormProps> = ({
               {/* First row: User and Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-emerald-800 mb-2">Default User</label>
+                  <label className="block text-sm font-medium text-emerald-800 mb-2">Default {useCaseConfig.userLabelSingular}</label>
                   <div className="relative">
                     <select
                       value={globalDefaults.userId}
@@ -593,7 +598,7 @@ export const BulkExpenseForm: React.FC<BulkExpenseFormProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-1 mb-3">
                     {/* User */}
                     <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">User *</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">{useCaseConfig.userLabelSingular} *</label>
                       <div className="relative">
                         <select
                           value={item.userId}
@@ -601,7 +606,7 @@ export const BulkExpenseForm: React.FC<BulkExpenseFormProps> = ({
                           className="w-full px-2 py-2 pl-8 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
                           required
                         >
-                          <option value="">Select user</option>
+                          <option value="">Select {useCaseConfig.terminology.user}</option>
                           {users.map(user => (
                             <option key={user.id} value={user.id}>{user.name}</option>
                           ))}

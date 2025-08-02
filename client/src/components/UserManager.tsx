@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Category } from '../types';
+import { UseCaseConfig } from '../utils/useCaseConfig';
 
 import { Plus, Edit2, Trash2, Save, X, Users, User as UserIcon, Star, Tag, MapPin, AtSign, Mail } from 'lucide-react';
 import * as Icons from 'lucide-react';
@@ -8,6 +9,7 @@ interface UserManagerProps {
   users: User[];
   categories: Category[];
   onUpdateUsers: (users: User[]) => void;
+  useCaseConfig: UseCaseConfig;
 }
 
 interface UserFormData {
@@ -87,7 +89,8 @@ const getNextUserId = (users: User[]): string => {
 export const UserManager: React.FC<UserManagerProps> = ({
   users,
   categories,
-  onUpdateUsers
+  onUpdateUsers,
+  useCaseConfig
 }) => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showAddUser, setShowAddUser] = useState(false);
@@ -209,11 +212,11 @@ export const UserManager: React.FC<UserManagerProps> = ({
 
   const handleDeleteUser = (userId: string) => {
     if (users.length <= 1) {
-      alert('Cannot delete the last user. At least one user must exist.');
+      alert(`Cannot delete the last ${useCaseConfig.terminology.user}. At least one ${useCaseConfig.terminology.user} must exist.`);
       return;
     }
 
-    if (confirm('Are you sure you want to delete this user? All their expenses will also be deleted.')) {
+    if (confirm(`Are you sure you want to delete this ${useCaseConfig.terminology.user}? All their expenses will also be deleted.`)) {
       onUpdateUsers(users.filter(user => user.id !== userId));
     }
   };
@@ -263,8 +266,8 @@ export const UserManager: React.FC<UserManagerProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">User Management</h2>
-          <p className="text-slate-500 mt-1">Manage users and their default expense settings</p>
+          <h2 className="text-2xl font-bold text-slate-900">{useCaseConfig.terminology.userManagement}</h2>
+          <p className="text-slate-500 mt-1">Manage {useCaseConfig.terminology.users} and their default expense settings</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -272,7 +275,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Add User
+            {useCaseConfig.terminology.addUser}
           </button>
         </div>
       </div>
@@ -281,7 +284,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
       {(showAddUser || editingUser) && (
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">
-            {editingUser ? 'Edit User' : 'Add New User'}
+            {editingUser ? useCaseConfig.terminology.editUser : useCaseConfig.terminology.addUser}
           </h3>
           
           <div className="space-y-6">
@@ -497,7 +500,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
-              {editingUser ? 'Update' : 'Add'} User
+              {editingUser ? 'Update' : 'Add'} {useCaseConfig.userLabelSingular}
             </button>
             <button
               type="button"
@@ -584,13 +587,13 @@ export const UserManager: React.FC<UserManagerProps> = ({
             <Users className="w-8 h-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-semibold text-slate-900 mb-2">No users yet</h3>
-          <p className="text-slate-500 mb-4">Add your first user to start tracking expenses</p>
+          <p className="text-slate-500 mb-4">Add your first {useCaseConfig.terminology.user} to start tracking expenses</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => setShowAddUser(true)}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             >
-              Add User
+              {useCaseConfig.terminology.addUser}
             </button>
           </div>
         </div>
