@@ -3,9 +3,11 @@ export interface BackupData {
   timestamp: string;
   users: any[];
   categories: any[];
+  subcategories?: any[];
   expenses: any[];
   credentials: any;
   settings: any;
+  useCase?: string;
 }
 
 export class IndexedDBStorage {
@@ -400,7 +402,7 @@ export class IndexedDBStorage {
 
     // Transform categories to flat structure with timestamps
     const flatCategories = categories.map(category => ({
-      id: parseInt(category.id),
+      id: category.id.toString(),
       name: category.name,
       icon: category.icon,
       color: category.color,
@@ -411,13 +413,14 @@ export class IndexedDBStorage {
     // Extract subcategories as separate array with timestamps
     const flatSubcategories = categories.flatMap(category =>
       category.subcategories.map(subcategory => ({
-        id: parseInt(subcategory.id),
+        id: subcategory.id.toString(),
         name: subcategory.name,
-        categoryId: parseInt(category.id),
+        categoryId: category.id.toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }))
     );
+
     return {
       version: '1.0.0',
       timestamp: new Date().toISOString(),
