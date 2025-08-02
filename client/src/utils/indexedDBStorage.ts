@@ -45,10 +45,10 @@ export class IndexedDBStorage {
           db.createObjectStore(IndexedDBStorage.STORES.expenses, { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.credentials)) {
-          db.createObjectStore(IndexedDBStorage.STORES.credentials);
+          db.createObjectStore(IndexedDBStorage.STORES.credentials, { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.settings)) {
-          db.createObjectStore(IndexedDBStorage.STORES.settings);
+          db.createObjectStore(IndexedDBStorage.STORES.settings, { keyPath: 'id' });
         }
       };
     });
