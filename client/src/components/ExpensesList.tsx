@@ -901,7 +901,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
 
             // Debug logging to check user associations
             if (!user) {
-              console.warn('No user found for expense:', expense.id, 'userId:', `"${expense.userId}"`, 'available users:', users.map(u => ({ id: u.id, name: u.name })));
+              console.warn('No user found for expense:', expense.id, 'userId:', expense.userId, 'available users:', users.map(u => ({ id: u.id, name: u.name })));
             }
 
             // Provide fallback values to prevent undefined errors
