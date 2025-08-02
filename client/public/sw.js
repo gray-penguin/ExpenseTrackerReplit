@@ -7,8 +7,7 @@ const urlsToCache = [
   '/users',
   '/settings',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/icon.svg',
   '/_redirects'
 ];
 
