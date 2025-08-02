@@ -849,9 +849,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <div>
                 <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  A comprehensive expense tracking application that helps you log, categorize, and analyze your spending. 
-                  Originally built in Bolt, it was successfully migrated to Replit's full-stack environment while preserving 
-                  all original functionality and adding enhanced reporting capabilities.
+                  A comprehensive expense tracking Progressive Web Application built using Bolt and Replit AI that helps you log, categorize, and analyze your spending. 
                 </p>
               </div>
 
@@ -925,7 +923,6 @@ export const Settings: React.FC<SettingsProps> = ({
                   <li>• Comprehensive reports with spreadsheet-style analytics</li>
                   <li>• User authentication with password reset functionality</li>
                   <li>• Configurable use cases for different tracking scenarios</li>
-                  <li>• Multi-user expense management and data tracking</li>
                 </ul>
               </div>
 
