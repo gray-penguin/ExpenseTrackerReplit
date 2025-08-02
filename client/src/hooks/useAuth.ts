@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { indexedDBStorage } from '../utils/indexedDBStorage';
 
 interface AuthCredentials {
   username: string;
@@ -19,35 +20,46 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
 };
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    try {
-      const authState = localStorage.getItem('expense-tracker-auth');
-      return authState === 'true';
-    } catch {
-      return false;
-    }
-  });
 
-  const [credentials, setCredentials] = useState<AuthCredentials>(() => {
-    try {
-      const saved = localStorage.getItem('expense-tracker-credentials');
-      return saved ? JSON.parse(saved) : DEFAULT_CREDENTIALS;
-    } catch {
-      return DEFAULT_CREDENTIALS;
-    }
-  });
+  const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize auth state from IndexedDB
   useEffect(() => {
-    try {
-      localStorage.setItem('expense-tracker-credentials', JSON.stringify(credentials));
-    } catch (error) {
-      console.error('Error saving credentials:', error);
+    const initAuth = async () => {
+      try {
+        await indexedDBStorage.init();
+        await indexedDBStorage.initializeMockData();
+        
+        const [authState, savedCredentials] = await Promise.all([
+          indexedDBStorage.getAuthState(),
+          indexedDBStorage.getCredentials()
+        ]);
+        
+        setIsAuthenticated(authState);
+        setCredentials(savedCredentials);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  // Save credentials to IndexedDB when they change
+  useEffect(() => {
+    if (!isLoading) {
+      indexedDBStorage.setCredentials(credentials).catch(error => {
+        console.error('Error saving credentials:', error);
+      });
     }
-  }, [credentials]);
+  }, [credentials, isLoading]);
 
   const login = (username: string, password: string): boolean => {
     if (username === credentials.username && password === credentials.password) {
-      localStorage.setItem('expense-tracker-auth', 'true');
+      indexedDBStorage.setAuthState(true);
       setIsAuthenticated(true);
       return true;
     }
@@ -55,7 +67,7 @@ export function useAuth() {
   };
 
   const logout = () => {
-    localStorage.removeItem('expense-tracker-auth');
+    indexedDBStorage.setAuthState(false);
     setIsAuthenticated(false);
     // Force refresh to ensure clean state
     window.location.reload();
@@ -85,6 +97,7 @@ export function useAuth() {
 
   return {
     isAuthenticated,
+    isLoading,
     credentials,
     login,
     logout,

@@ -8,7 +8,10 @@ export function Navbar() {
   const { logout } = useAuth();
 
   const handleQuickBackup = () => {
-    FileBackupManager.downloadBackup();
+    FileBackupManager.downloadBackup().catch(error => {
+      console.error('Backup failed:', error);
+      alert('Backup failed. Please try again.');
+    });
   };
 
   const handleLogout = () => {

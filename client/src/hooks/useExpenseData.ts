@@ -1,13 +1,32 @@
 import { useState, useEffect } from 'react';
-import { useLocalStorage } from './useLocalStorage';
+import { useIndexedDBStorage } from './useIndexedDBStorage';
+import { indexedDBStorage } from '../utils/indexedDBStorage';
 import { User, Category, Expense } from '../types';
-import { users as defaultUsers, categories as defaultCategories, expenses as defaultExpenses } from '../data/mockData';
 
 export function useExpenseData() {
-  // Use localStorage for persistence
-  const [users, setUsers] = useLocalStorage<User[]>('expense-tracker-users', defaultUsers);
-  const [categories, setCategories] = useLocalStorage<Category[]>('expense-tracker-categories', defaultCategories);
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expense-tracker-expenses', defaultExpenses);
+  // Use IndexedDB for persistence
+  const [users, setUsers, { isLoading: usersLoading }] = useIndexedDBStorage<User[]>(
+    'users',
+    [],
+    () => indexedDBStorage.getUsers(),
+    (users) => indexedDBStorage.setUsers(users)
+  );
+  
+  const [categories, setCategories, { isLoading: categoriesLoading }] = useIndexedDBStorage<Category[]>(
+    'categories',
+    [],
+    () => indexedDBStorage.getCategories(),
+    (categories) => indexedDBStorage.setCategories(categories)
+  );
+  
+  const [expenses, setExpenses, { isLoading: expensesLoading }] = useIndexedDBStorage<Expense[]>(
+    'expenses',
+    [],
+    () => indexedDBStorage.getExpenses(),
+    (expenses) => indexedDBStorage.setExpenses(expenses)
+  );
+
+  const isLoading = usersLoading || categoriesLoading || expensesLoading;
 
   // Helper functions for CRUD operations
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
@@ -109,6 +128,7 @@ export function useExpenseData() {
     users,
     categories,
     expenses,
+    isLoading,
     addExpense,
     addBulkExpenses,
     updateExpense,

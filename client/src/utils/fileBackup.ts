@@ -14,6 +14,8 @@ export interface BackupLocation {
   lastUsed: string;
 }
 
+import { indexedDBStorage } from './indexedDBStorage';
+
 export class FileBackupManager {
   private static readonly BACKUP_VERSION = '1.0.0';
   private static readonly BACKUP_LOCATIONS_KEY = 'expense-tracker-backup-locations';
@@ -235,21 +237,9 @@ export class FileBackupManager {
   /**
    * Create a complete backup of all application data
    */
-  static createFullBackup(): BackupData {
-    const backup: BackupData = {
-      version: this.BACKUP_VERSION,
-      timestamp: new Date().toISOString(),
-      users: this.getLocalStorageItem('expense-tracker-users', []),
-      categories: this.getLocalStorageItem('expense-tracker-categories', []),
-      expenses: this.getLocalStorageItem('expense-tracker-expenses', []),
-      credentials: this.getLocalStorageItem('expense-tracker-credentials', {}),
-      settings: {
-        fontSize: this.getLocalStorageItem('expense-tracker-font-size', 'medium'),
-        auth: this.getLocalStorageItem('expense-tracker-auth', 'false')
-      }
-    };
 
-    return backup;
+  static async createFullBackup(): Promise<BackupData> {
+    return await indexedDBStorage.createFullBackup();
   }
 
   /**
@@ -259,7 +249,7 @@ export class FileBackupManager {
     const locationResult = await this.promptForBackupLocation();
     if (!locationResult) return;
 
-    const backup = this.createFullBackup();
+    const backup = await this.createFullBackup();
     this.downloadJSON(backup, locationResult.filename);
 
     // Save this as a recent location (simulated since we can't know actual path)
@@ -276,8 +266,8 @@ export class FileBackupManager {
   /**
    * Download backup as JSON file
    */
-  static downloadBackup(filename?: string): void {
-    const backup = this.createFullBackup();
+  static async downloadBackup(filename?: string): Promise<void> {
+    const backup = await this.createFullBackup();
     const timestamp = new Date().toISOString().split('T')[0];
     const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
     
@@ -287,8 +277,8 @@ export class FileBackupManager {
   /**
    * Download backup as human-readable format
    */
-  static downloadReadableBackup(filename?: string): void {
-    const backup = this.createFullBackup();
+  static async downloadReadableBackup(filename?: string): Promise<void> {
+    const backup = await this.createFullBackup();
     const timestamp = new Date().toISOString().split('T')[0];
     const defaultFilename = `expense-tracker-readable-${timestamp}.txt`;
     
@@ -310,12 +300,7 @@ export class FileBackupManager {
       }
 
       // Restore data
-      this.setLocalStorageItem('expense-tracker-users', backup.users);
-      this.setLocalStorageItem('expense-tracker-categories', backup.categories);
-      this.setLocalStorageItem('expense-tracker-expenses', backup.expenses);
-      this.setLocalStorageItem('expense-tracker-credentials', backup.credentials);
-      this.setLocalStorageItem('expense-tracker-font-size', backup.settings.fontSize);
-      this.setLocalStorageItem('expense-tracker-auth', backup.settings.auth);
+      await indexedDBStorage.restoreFromBackup(backup);
 
       return { 
         success: true, 
