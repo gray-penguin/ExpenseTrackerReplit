@@ -884,7 +884,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   <Download className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-medium text-gray-900 text-sm">Import/Export</h4>
-                    <p className="text-gray-600 text-xs">CSV import/export for expenses, categories, and users</p>
+                    <p className="text-gray-600 text-xs">JSON backup/restore for expenses, categories, and users</p>
                   </div>
                 </div>
               </div>
@@ -920,11 +920,12 @@ export const Settings: React.FC<SettingsProps> = ({
                 <ul className="text-gray-600 text-sm space-y-1">
                   <li>• Dashboard with real-time statistics and spending trends</li>
                   <li>• Hierarchical category system with subcategories</li>
-                  <li>• Bulk expense entry and CSV import/export</li>
+                  <li>• Bulk expense entry and JSON backup/restore</li>
                   <li>• Advanced filtering by user, date range, and categories</li>
                   <li>• Comprehensive reports with spreadsheet-style analytics</li>
                   <li>• User authentication with password reset functionality</li>
-                  <li>• Expense management and data tracking</li>
+                  <li>• Configurable use cases for different tracking scenarios</li>
+                  <li>• Multi-user expense management and data tracking</li>
                 </ul>
               </div>
 
