@@ -23,11 +23,15 @@ export function ExpensesList() {
     const categoryId = params.get('categoryId');
     const subcategoryId = params.get('subcategoryId');
     
+    console.log('ExpensesList page parsing URL params:', { categoryId, subcategoryId });
+    
     if (categoryId) {
       setInitialCategoryId(categoryId);
+      console.log('Setting initial category ID:', categoryId);
     }
     if (subcategoryId) {
       setInitialSubcategoryId(subcategoryId);
+      console.log('Setting initial subcategory ID:', subcategoryId);
     }
   }, [location, search]);
 
