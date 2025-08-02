@@ -32,6 +32,7 @@ export function useExpenseData() {
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
     const newExpense: Expense = {
       ...expense,
+      userId: expense.userId.toString(), // Ensure userId is always a string
       amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString()
@@ -43,6 +44,7 @@ export function useExpenseData() {
   const updateExpense = (id: string, updates: Partial<Expense>) => {
     const processedUpdates = {
       ...updates,
+      ...(updates.userId !== undefined && { userId: updates.userId.toString() }),
       ...(updates.amount !== undefined && { 
         amount: typeof updates.amount === 'string' ? parseFloat(updates.amount) : updates.amount 
       })

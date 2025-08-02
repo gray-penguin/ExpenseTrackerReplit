@@ -899,6 +899,11 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
             const category = categories.find(c => c.id === expense.categoryId);
             const subcategory = category?.subcategories.find(s => s.id === expense.subcategoryId);
 
+            // Debug logging to check user associations
+            if (!user) {
+              console.warn('No user found for expense:', expense.id, 'userId:', expense.userId, 'available users:', users.map(u => ({ id: u.id, name: u.name })));
+            }
+
             // Provide fallback values to prevent undefined errors
             const safeUser = user || { 
               id: 'unknown',
