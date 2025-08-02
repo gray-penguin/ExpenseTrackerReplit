@@ -465,10 +465,27 @@ export class IndexedDBStorage {
       }));
     }
 
+    // Ensure all expenses have proper numeric amounts and string IDs
+    const processedExpenses = backup.expenses.map(expense => ({
+      ...expense,
+      id: expense.id.toString(),
+      userId: expense.userId.toString(),
+      categoryId: expense.categoryId.toString(),
+      subcategoryId: expense.subcategoryId.toString(),
+      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount
+    }));
+
+    // Ensure all users have string IDs
+    const processedUsers = backup.users.map(user => ({
+      ...user,
+      id: user.id.toString(),
+      defaultCategoryId: user.defaultCategoryId ? user.defaultCategoryId.toString() : undefined,
+      defaultSubcategoryId: user.defaultSubcategoryId ? user.defaultSubcategoryId.toString() : undefined
+    }));
     await Promise.all([
-      this.setUsers(backup.users),
+      this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
-      this.setExpenses(backup.expenses),
+      this.setExpenses(processedExpenses),
       this.setCredentials(backup.credentials),
       this.setSettings(backup.settings)
     ]);
