@@ -849,7 +849,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <div>
                 <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  A comprehensive expense tracking Progressive Web Application built using Bolt and Replit AI that helps you log, categorize, and analyze your spending.  Being a PWA allows the user to install this application on their device and use completly off-line.  No internet needed! (after install of course)
+                  A comprehensive expense tracking Progressive Web Application that helps you log, categorize, and analyze your spending. Being a PWA allows you to install this application on your device and use it completely offline. No internet needed after installation!
                 </p>
               </div>
 
@@ -857,8 +857,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 <div className="flex items-start gap-3">
                   <Users className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Multiple Use Cases Supported</h4>
-                    <p className="text-gray-600 text-xs">Manage expenses for multiple use cases such as a company tracking project expenses or a household tracking expenses for family menbers.</p>
+                    <h4 className="font-medium text-gray-900 text-sm">Configurable Use Cases</h4>
+                    <p className="text-gray-600 text-xs">Adapt the interface for different scenarios: team expenses, project tracking, department budgets, client accounts, or location-based tracking.</p>
                   </div>
                 </div>
 
@@ -874,15 +874,15 @@ export const Settings: React.FC<SettingsProps> = ({
                   <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <h4 className="font-medium text-gray-900 text-sm">Local Storage</h4>
-                    <p className="text-gray-600 text-xs">Data persisted locally using IndexedDB for privacy and speed.</p>
+                    <p className="text-gray-600 text-xs">Data stored locally using IndexedDB for complete privacy and offline functionality.</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Download className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Import/Export</h4>
-                    <p className="text-gray-600 text-xs">JSON backup/restore for expenses, categories, and users</p>
+                    <h4 className="font-medium text-gray-900 text-sm">Backup & Restore</h4>
+                    <p className="text-gray-600 text-xs">Complete JSON backup/restore system for all your data including expenses, categories, and users</p>
                   </div>
                 </div>
               </div>
@@ -895,8 +895,8 @@ export const Settings: React.FC<SettingsProps> = ({
                     <span className="font-medium text-gray-900">React + TypeScript + Tailwind CSS</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Backend:</span>
-                    <span className="font-medium text-gray-900">Express.js + RESTful API</span>
+                    <span className="text-gray-600">Architecture:</span>
+                    <span className="font-medium text-gray-900">Single Page Application (SPA)</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Router:</span>
@@ -904,11 +904,11 @@ export const Settings: React.FC<SettingsProps> = ({
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">State:</span>
-                    <span className="font-medium text-gray-900">TanStack Query + Custom Hooks</span>
+                    <span className="font-medium text-gray-900">React Hooks + IndexedDB</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Storage:</span>
-                    <span className="font-medium text-gray-900">IndexedDB on local Device</span>
+                    <span className="font-medium text-gray-900">IndexedDB (Local Device)</span>
                   </div>
                 </div>
               </div>
@@ -918,11 +918,13 @@ export const Settings: React.FC<SettingsProps> = ({
                 <ul className="text-gray-600 text-sm space-y-1">
                   <li>• Dashboard with real-time statistics and spending trends</li>
                   <li>• Hierarchical category system with subcategories</li>
-                  <li>• Bulk expense entry and JSON backup/restore</li>
+                  <li>• Bulk expense entry with intelligent form suggestions</li>
                   <li>• Advanced filtering by user, date range, and categories</li>
                   <li>• Comprehensive reports with spreadsheet-style analytics</li>
                   <li>• User authentication with password reset functionality</li>
                   <li>• Configurable use cases for different tracking scenarios</li>
+                  <li>• Complete JSON backup and restore system</li>
+                  <li>• Progressive Web App with offline functionality</li>
                 </ul>
               </div>
 
@@ -932,8 +934,8 @@ export const Settings: React.FC<SettingsProps> = ({
                   <div>
                     <h4 className="font-medium text-emerald-900 text-sm">Privacy & Security</h4>
                     <p className="text-emerald-700 text-xs leading-relaxed">
-                      All data is stored locally in your browser. No information is sent to external servers, 
-                      ensuring complete privacy and control over your financial data.
+                      All data is stored locally in your browser using IndexedDB. No information is sent to external servers, 
+                      ensuring complete privacy and control over your financial data. Works completely offline after initial load.
                     </p>
                   </div>
                 </div>

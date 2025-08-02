@@ -475,7 +475,7 @@ export class IndexedDBStorage {
       userId: expense.userId?.toString() || '',
       categoryId: expense.categoryId?.toString() || '',
       subcategoryId: expense.subcategoryId?.toString() || '',
-      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount
+      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) || 0 : (expense.amount || 0)
     }));
 
     // Ensure all users have string IDs
