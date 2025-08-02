@@ -2,10 +2,12 @@ import { Link, useLocation } from 'wouter';
 import { BarChart3, Home, List, Tag, Users, Settings, Download, TrendingUp, LogOut } from 'lucide-react';
 import { FileBackupManager } from '../utils/fileBackup';
 import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 export function Navbar() {
   const [location] = useLocation();
-  const { logout } = useAuth();
+  const { logout, credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
     FileBackupManager.downloadBackup().catch(error => {
@@ -25,7 +27,7 @@ export function Navbar() {
     { name: 'Expenses', path: '/expenses', icon: List },
     { name: 'Reports', path: '/reports', icon: TrendingUp },
     { name: 'Categories', path: '/categories', icon: Tag },
-    { name: 'Users', path: '/users', icon: Users },
+    { name: useCaseConfig.userLabel, path: '/users', icon: Users },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
