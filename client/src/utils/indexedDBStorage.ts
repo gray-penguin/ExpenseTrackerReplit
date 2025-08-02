@@ -398,11 +398,32 @@ export class IndexedDBStorage {
       this.getSettings()
     ]);
 
+    // Transform categories to flat structure with timestamps
+    const flatCategories = categories.map(category => ({
+      id: parseInt(category.id),
+      name: category.name,
+      icon: category.icon,
+      color: category.color,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+
+    // Extract subcategories as separate array with timestamps
+    const flatSubcategories = categories.flatMap(category =>
+      category.subcategories.map(subcategory => ({
+        id: parseInt(subcategory.id),
+        name: subcategory.name,
+        categoryId: parseInt(category.id),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }))
+    );
     return {
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       users,
-      categories,
+      categories: flatCategories,
+      subcategories: flatSubcategories,
       expenses,
       credentials,
       settings,
@@ -411,9 +432,24 @@ export class IndexedDBStorage {
   }
 
   async restoreFromBackup(backup: BackupData): Promise<void> {
+    // Transform flat categories and subcategories back to nested structure
+    const nestedCategories = backup.categories.map(category => ({
+      id: category.id.toString(),
+      name: category.name,
+      icon: category.icon,
+      color: category.color,
+      subcategories: backup.subcategories
+        .filter(sub => sub.categoryId === category.id)
+        .map(sub => ({
+          id: sub.id.toString(),
+          name: sub.name,
+          categoryId: category.id.toString()
+        }))
+    }));
+
     await Promise.all([
       this.setUsers(backup.users),
-      this.setCategories(backup.categories),
+      this.setCategories(nestedCategories),
       this.setExpenses(backup.expenses),
       this.setCredentials(backup.credentials),
       this.setSettings(backup.settings)

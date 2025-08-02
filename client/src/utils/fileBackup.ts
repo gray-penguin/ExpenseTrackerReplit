@@ -3,6 +3,7 @@ export interface BackupData {
   timestamp: string;
   users: any[];
   categories: any[];
+  subcategories: any[];
   expenses: any[];
   credentials: any;
   settings: any;
@@ -376,6 +377,7 @@ export class FileBackupManager {
       backup.timestamp &&
       Array.isArray(backup.users) &&
       Array.isArray(backup.categories) &&
+      Array.isArray(backup.subcategories) &&
       Array.isArray(backup.expenses) &&
       backup.credentials &&
       backup.settings &&
