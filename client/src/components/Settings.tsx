@@ -857,8 +857,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 <div className="flex items-start gap-3">
                   <Users className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Multi-User Support</h4>
-                    <p className="text-gray-600 text-xs">Manage expenses for multiple users with individual profiles and preferences</p>
+                    <h4 className="font-medium text-gray-900 text-sm">Multiple Use Cases Supported</h4>
+                    <p className="text-gray-600 text-xs">Manage expenses for multiple use cases such as a company tracking project expenses or a household tracking expenses for family menbers.</p>
                   </div>
                 </div>
 
