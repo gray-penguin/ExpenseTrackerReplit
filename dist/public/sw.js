@@ -65,13 +65,39 @@ self.addEventListener('fetch', event => {
   // Handle navigation requests (for SPA routing)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/')
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
+            return response;
+          }
+          // If network fails, try cache
+          return caches.match('/');
+        })
+        .catch(() => {
+          // If both network and cache fail, return index.html
+          return caches.match('/')
+        })
         .then(response => {
           if (response) {
             return response;
           }
-          return fetch('/').catch(() => {
-            return new Response('App offline', { status: 503 });
+          // Final fallback
+          return new Response(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Expense Tracker</title>
+              <script>window.location.href = '/';</script>
+            </head>
+            <body>
+              <p>Loading Expense Tracker...</p>
+            </body>
+            </html>
+          `, { 
+            status: 200,
+            headers: { 'Content-Type': 'text/html' }
           });
         })
     );
