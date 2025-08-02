@@ -468,25 +468,33 @@ export class IndexedDBStorage {
       }));
     }
 
-    // Ensure all expenses have proper numeric amounts and string IDs
-    const processedExpenses = backup.expenses.map(expense => ({
+    // Handle both old format (personId) and new format (userId) for expenses
+    const processedExpenses = backup.expenses.map((expense: any) => ({
       ...expense,
       id: expense.id?.toString() || '',
-      userId: expense.userId?.toString() || '',
+      // Handle both personId (old format) and userId (new format)
+      userId: (expense.userId || expense.personId)?.toString() || '',
       categoryId: expense.categoryId?.toString() || '',
       subcategoryId: expense.subcategoryId?.toString() || '',
-      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) || 0 : (expense.amount || 0)
+      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) || 0 : (expense.amount || 0),
+      // Ensure we have createdAt field (some old backups might not have it)
+      createdAt: expense.createdAt || expense.updatedAt || new Date().toISOString()
     }));
 
-    // Ensure all users have string IDs
-    const processedUsers = backup.users.map(user => ({
+    // Ensure all users have string IDs and handle missing fields
+    const processedUsers = backup.users.map((user: any) => ({
       ...user,
       id: user.id?.toString() || '',
       username: user.username || user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user',
       email: user.email || `${user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}@example.com`,
+      // Ensure avatar exists
+      avatar: user.avatar || user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U',
+      // Ensure color exists
+      color: user.color || 'bg-blue-500',
       defaultCategoryId: user.defaultCategoryId ? user.defaultCategoryId.toString() : undefined,
       defaultSubcategoryId: user.defaultSubcategoryId ? user.defaultSubcategoryId.toString() : undefined
     }));
+
     await Promise.all([
       this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
