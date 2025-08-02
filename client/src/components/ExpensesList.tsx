@@ -486,7 +486,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
               onChange={(e) => setFilterUserId(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
             >
-              <option value="">All users</option>
+              <option value="">All {useCaseConfig.terminology.users}</option>
               {users.map(user => (
                 <option key={user.id} value={user.id}>{user.name}</option>
               ))}
@@ -748,7 +748,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
               </div>
               <span>Currently viewing expenses for <strong>{selectedUser.name}</strong></span>
               <span className="text-slate-400">•</span>
-              <span className="text-slate-500">Use the user filter above to compare with other users</span>
+              <span className="text-slate-500">Use the {useCaseConfig.terminology.user} filter above to compare with other {useCaseConfig.terminology.users}</span>
             </div>
           </div>
         )}
@@ -819,7 +819,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
         {/* User Totals */}
         {userTotals.length > 0 && (
           <div className="border-t border-emerald-400/30 pt-4">
-            <h4 className="text-emerald-100 text-sm font-medium mb-3 uppercase tracking-wide">Spending by User</h4>
+            <h4 className="text-emerald-100 text-sm font-medium mb-3 uppercase tracking-wide">Spending by {useCaseConfig.userLabelSingular}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {userTotals.map(({ user, total, count, percentage }) => (
                 <div key={user.id} className="bg-white/10 rounded-lg p-3">
