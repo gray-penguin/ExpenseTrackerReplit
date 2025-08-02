@@ -288,7 +288,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses, users, categorie
                       <div className={`w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center ${selectedCategory.color} flex-shrink-0`}>
                         <IconComponent className="w-4 h-4" />
                       </div>
-                    )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-slate-900 block truncate group-hover:text-emerald-600 transition-colors">{subcategory.name}</span>
