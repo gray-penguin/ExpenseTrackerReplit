@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
-import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers } from 'lucide-react';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -10,6 +10,8 @@ interface SettingsProps {
   onLogout?: () => void;
   onUpdateCredentials?: (credentials: { username?: string; password?: string; email?: string }) => void;
   currentCredentials?: { username: string; password: string; email: string };
+  onUpdateUseCase?: (useCase: string) => void;
+  currentUseCase?: string;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
@@ -17,12 +19,14 @@ export const Settings: React.FC<SettingsProps> = ({
   expenseCount = 0,
   onLogout,
   onUpdateCredentials,
-  currentCredentials
+  currentCredentials,
+  onUpdateUseCase,
+  currentUseCase = 'personal-team'
 }) => {
   const { getFontSizeClasses } = useFontSizeContext();
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'backup' | 'data' | 'about'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'use-cases' | 'backup' | 'data' | 'about'>('general');
   const [credentialsForm, setCredentialsForm] = useState({
     username: currentCredentials?.username || '',
     password: currentCredentials?.password || '',
@@ -31,8 +35,92 @@ export const Settings: React.FC<SettingsProps> = ({
   });
   const [credentialsError, setCredentialsError] = useState('');
 
+  // Use case definitions
+  const useCases = [
+    {
+      id: 'personal-team',
+      name: 'Personal Team Expenses',
+      description: 'Track expenses for team members, employees, or family members',
+      icon: Users,
+      color: 'emerald',
+      examples: [
+        'Company tracking employee expenses',
+        'Family budget management',
+        'Small business team expenses',
+        'Sales team expense tracking'
+      ],
+      userLabel: 'Team Members',
+      expenseContext: 'Track who spent what and where'
+    },
+    {
+      id: 'project-based',
+      name: 'Project-Based Tracking',
+      description: 'Track expenses associated with specific projects or jobs',
+      icon: Target,
+      color: 'blue',
+      examples: [
+        'Construction project costs',
+        'Client project expenses',
+        'Event planning budgets',
+        'Research project funding'
+      ],
+      userLabel: 'Projects',
+      expenseContext: 'Track project costs and budget allocation'
+    },
+    {
+      id: 'department-based',
+      name: 'Department Tracking',
+      description: 'Track expenses by department or business unit',
+      icon: Building,
+      color: 'purple',
+      examples: [
+        'Marketing department expenses',
+        'IT infrastructure costs',
+        'HR training and events',
+        'Operations and facilities'
+      ],
+      userLabel: 'Departments',
+      expenseContext: 'Track departmental spending and budgets'
+    },
+    {
+      id: 'client-based',
+      name: 'Client Account Tracking',
+      description: 'Track expenses by client account or customer',
+      icon: Briefcase,
+      color: 'orange',
+      examples: [
+        'Client project billable expenses',
+        'Customer account costs',
+        'Service delivery expenses',
+        'Account management costs'
+      ],
+      userLabel: 'Client Accounts',
+      expenseContext: 'Track client-specific expenses for billing'
+    },
+    {
+      id: 'location-based',
+      name: 'Location-Based Tracking',
+      description: 'Track expenses by office location or facility',
+      icon: Layers,
+      color: 'teal',
+      examples: [
+        'Multi-office company expenses',
+        'Retail store operational costs',
+        'Warehouse facility expenses',
+        'Regional office budgets'
+      ],
+      userLabel: 'Locations',
+      expenseContext: 'Track location-specific operational costs'
+    }
+  ];
 
+  const selectedUseCase = useCases.find(uc => uc.id === currentUseCase) || useCases[0];
 
+  const handleUseCaseChange = (useCaseId: string) => {
+    if (onUpdateUseCase) {
+      onUpdateUseCase(useCaseId);
+    }
+  };
   const handleClearAllExpenses = () => {
     if (onClearAllExpenses) {
       onClearAllExpenses();
@@ -130,6 +218,19 @@ export const Settings: React.FC<SettingsProps> = ({
             <div className="flex items-center gap-2">
               <SettingsIcon className="w-4 h-4" />
               General
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('use-cases')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'use-cases'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Use Cases
             </div>
           </button>
           <button
