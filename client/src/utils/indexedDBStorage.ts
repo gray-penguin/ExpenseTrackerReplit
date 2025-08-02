@@ -10,7 +10,7 @@ export interface BackupData {
 
 export class IndexedDBStorage {
   private static readonly DB_NAME = 'ExpenseTrackerDB';
-  private static readonly DB_VERSION = 2;
+  private static readonly DB_VERSION = 3;
   private static readonly STORES = {
     users: 'users',
     categories: 'categories',
@@ -34,6 +34,14 @@ export class IndexedDBStorage {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
 
+        // Delete existing stores if they exist to recreate with proper keyPath
+        if (db.objectStoreNames.contains(IndexedDBStorage.STORES.credentials)) {
+          db.deleteObjectStore(IndexedDBStorage.STORES.credentials);
+        }
+        if (db.objectStoreNames.contains(IndexedDBStorage.STORES.settings)) {
+          db.deleteObjectStore(IndexedDBStorage.STORES.settings);
+        }
+
         // Create object stores
         if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.users)) {
           db.createObjectStore(IndexedDBStorage.STORES.users, { keyPath: 'id' });
@@ -44,12 +52,10 @@ export class IndexedDBStorage {
         if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.expenses)) {
           db.createObjectStore(IndexedDBStorage.STORES.expenses, { keyPath: 'id' });
         }
-        if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.credentials)) {
-          db.createObjectStore(IndexedDBStorage.STORES.credentials, { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.settings)) {
-          db.createObjectStore(IndexedDBStorage.STORES.settings, { keyPath: 'id' });
-        }
+        
+        // Always create credentials and settings stores with proper keyPath
+        db.createObjectStore(IndexedDBStorage.STORES.credentials, { keyPath: 'id' });
+        db.createObjectStore(IndexedDBStorage.STORES.settings, { keyPath: 'id' });
       };
     });
   }
