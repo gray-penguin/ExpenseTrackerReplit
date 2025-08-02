@@ -285,7 +285,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses, users, categorie
                   className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left group cursor-pointer hover:shadow-sm border border-transparent hover:border-slate-200"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    {IconComponent && selectedCategory && (
                       <div className={`w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center ${selectedCategory.color} flex-shrink-0`}>
                         <IconComponent className="w-4 h-4" />
                       </div>
