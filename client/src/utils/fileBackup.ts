@@ -6,6 +6,7 @@ export interface BackupData {
   expenses: any[];
   credentials: any;
   settings: any;
+  useCase: string;
 }
 
 export interface BackupLocation {
@@ -377,7 +378,8 @@ export class FileBackupManager {
       Array.isArray(backup.categories) &&
       Array.isArray(backup.expenses) &&
       backup.credentials &&
-      backup.settings
+      backup.settings &&
+      backup.useCase
     );
   }
 
@@ -396,6 +398,7 @@ export class FileBackupManager {
       timeZoneName: 'short'
     }).format(new Date(backup.timestamp))}`);
     lines.push(`Version: ${backup.version}`);
+    lines.push(`Use Case: ${backup.useCase || 'personal-team'}`);
     lines.push('');
 
     // Users section

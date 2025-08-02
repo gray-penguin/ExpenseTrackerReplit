@@ -405,7 +405,8 @@ export class IndexedDBStorage {
       categories,
       expenses,
       credentials,
-      settings
+      settings,
+      useCase: credentials.useCase || 'personal-team'
     };
   }
 
