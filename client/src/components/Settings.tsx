@@ -908,7 +908,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Storage:</span>
-                    <span className="font-medium text-gray-900">Browser localStorage</span>
+                    <span className="font-medium text-gray-900">IndexedDB on local Device</span>
                   </div>
                 </div>
               </div>
