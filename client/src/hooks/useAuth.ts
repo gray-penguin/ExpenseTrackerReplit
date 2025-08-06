@@ -29,19 +29,34 @@ export function useAuth() {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        console.log('Auth: Starting initialization...');
         await indexedDBStorage.init();
+        console.log('Auth: IndexedDB initialized');
         await indexedDBStorage.initializeMockData();
+        console.log('Auth: Mock data initialized');
         
         const [authState, savedCredentials] = await Promise.all([
           indexedDBStorage.getAuthState(),
           indexedDBStorage.getCredentials()
         ]);
         
+        console.log('Auth: Retrieved auth state and credentials', { authState, savedCredentials });
         setIsAuthenticated(authState);
         setCredentials(savedCredentials);
       } catch (error) {
         console.error('Error initializing auth:', error);
+        // Set fallback values to prevent infinite loading
+        setIsAuthenticated(false);
+        setCredentials({
+          username: 'admin',
+          password: 'pass123',
+          email: 'admin@example.com',
+          securityQuestion: 'What is your favorite color?',
+          securityAnswer: 'blue',
+          useCase: 'personal-team'
+        });
       } finally {
+        console.log('Auth: Initialization complete, setting loading to false');
         setIsLoading(false);
       }
     };

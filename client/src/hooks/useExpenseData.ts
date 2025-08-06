@@ -27,6 +27,22 @@ export function useExpenseData() {
   );
 
   const isLoading = usersLoading || categoriesLoading || expensesLoading;
+  
+  // Add timeout to prevent infinite loading
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.warn('ExpenseData: Loading timeout reached, forcing completion');
+        setHasTimedOut(true);
+      }
+    }, 10000); // 10 second timeout
+    
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
+  
+  const finalIsLoading = isLoading && !hasTimedOut;
 
   // Helper functions for CRUD operations
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
@@ -156,7 +172,7 @@ export function useExpenseData() {
     users,
     categories,
     expenses,
-    isLoading,
+    isLoading: finalIsLoading,
     addExpense,
     addBulkExpenses,
     updateExpense,

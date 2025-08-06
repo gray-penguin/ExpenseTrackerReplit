@@ -231,6 +231,7 @@ export class IndexedDBStorage {
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
     try {
+      console.log('IndexedDB: Starting initializeMockData...');
       // Check if we have any real user data (non-mock data)
       const [users, categories, expenses, settings] = await Promise.all([
         this.getUsers(),
@@ -238,6 +239,13 @@ export class IndexedDBStorage {
         this.getExpenses(),
         this.getSettings()
       ]);
+      
+      console.log('IndexedDB: Current data counts:', {
+        users: users.length,
+        categories: categories.length,
+        expenses: expenses.length,
+        hasRealData: settings.hasRealData
+      });
 
       // Check if database has been initialized with real data before
       const hasRealData = settings.hasRealData === 'true';
@@ -255,7 +263,7 @@ export class IndexedDBStorage {
       );
       
       const hasNonMockExpenses = expenses.some(expense =>
-        !['Weekly fresh vegetables and fruits', 'Chicken breast and milk', 'Monthly electricity bill', 'Netflix subscription'].includes(expense.description)
+        !['Weekly fresh vegetables and fruits', 'Chicken breast and milk', 'Monthly electricity bill', 'Netflix subscription', 'Weekly grocery shopping', 'Gas for car'].includes(expense.description)
       );
 
       // If we detect any real user data, mark as real and don't overwrite
@@ -283,8 +291,6 @@ export class IndexedDBStorage {
   // Separate method for actually initializing mock data
   private async initializeMockDataInternal(): Promise<void> {
     try {
-      // Initialize mock users
-
       const mockUsers = [
         {
           id: '1',
@@ -419,6 +425,8 @@ export class IndexedDBStorage {
       await this.setUsers(mockUsers);
       await this.setCategories(mockCategories);
       await this.setExpenses(mockExpenses);
+      
+      console.log('IndexedDB: Mock data initialized successfully');
 
       // Set default credentials and mark as mock data (not real data yet)
       await this.setCredentials({
@@ -435,9 +443,16 @@ export class IndexedDBStorage {
         fontSize: 'small',
         auth: 'false'
       });
+      
+      console.log('IndexedDB: Default settings initialized');
     } catch (error) {
       console.error('Error during mock data initialization:', error);
-      // Don't throw - allow app to continue even if initialization fails
+      // Set fallback to prevent infinite loading
+      try {
+        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
+      } catch (fallbackError) {
+        console.error('Failed to set fallback settings:', fallbackError);
+      }
     }
   }
 
