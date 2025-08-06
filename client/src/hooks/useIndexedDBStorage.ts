@@ -14,33 +14,25 @@ export function useIndexedDBStorage<T>(
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log(`IndexedDBStorage: Loading ${storeName}...`);
         setIsLoading(true);
         setError(null);
         
-        // Only initialize once per session to prevent loops
-        if (!indexedDBStorage.db) {
-          await indexedDBStorage.init();
-          console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
-          await indexedDBStorage.initializeMockData();
-          console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
-        }
+        // Initialize IndexedDB if needed
+        await indexedDBStorage.init();
+        await indexedDBStorage.initializeMockData();
         
         const loadedData = await getMethod();
-        console.log(`IndexedDBStorage: ${storeName} - Data loaded:`, loadedData);
         setData(loadedData);
       } catch (err) {
         console.error(`Error loading ${storeName}:`, err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setData(defaultValue);
       } finally {
-        console.log(`IndexedDBStorage: ${storeName} - Loading complete`);
         setIsLoading(false);
       }
     };
 
     loadData();
-  }, []); // Remove storeName dependency to prevent re-initialization
 
   const updateData = async (newData: T | ((prev: T) => T)) => {
     try {

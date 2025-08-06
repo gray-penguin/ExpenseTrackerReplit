@@ -241,13 +241,10 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
-    if (this.initialized && this.db) {
-      // Check if we've already run initialization
-      const settings = await this.getSettings();
-      if (settings.initialized === 'true') {
-        console.log('IndexedDB: Already initialized, skipping mock data');
-        return;
-      }
+    // Only run once per session
+    if (this.initialized) {
+      console.log('IndexedDB: Already initialized, skipping mock data');
+      return;
     }
     
     try {
@@ -422,47 +419,15 @@ export class IndexedDBStorage {
           createdAt: '2025-01-10T08:00:00Z'
         },
         {
-          id: '4',
-          userId: '2',
-          categoryId: '3',
-          subcategoryId: '12',
-          amount: 15.99,
-          description: 'Netflix subscription',
-          storeName: 'Netflix',
-          storeLocation: 'Online',
-          date: '2025-01-01',
-          createdAt: '2025-01-01T00:05:00Z'
-        }
-      ];
-
-      await this.setUsers(mockUsers);
-      await this.setCategories(mockCategories);
-      await this.setExpenses(mockExpenses);
-      
-      console.log('IndexedDB: Mock data initialized successfully');
-
-      // Set default credentials and mark as mock data (not real data yet)
-      await this.setCredentials({
-        username: 'admin',
-        password: 'pass123',
-        email: 'admin@example.com',
-        securityQuestion: 'What is your favorite color?',
-        securityAnswer: 'blue',
-        useCase: 'personal-team'
       });
 
       // Set default settings without real data flag (will be set when user adds real data)
       await this.setSettings({
         fontSize: 'small',
         auth: 'false',
-        hasRealData: 'false',
-        initialized: 'true'
-      });
-      
       console.log('IndexedDB: Default settings initialized');
     } catch (error) {
       console.error('Error during mock data initialization:', error);
-      throw error; // Re-throw to be handled by parent timeout
     }
   }
 
