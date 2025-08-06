@@ -302,10 +302,10 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
             />
             <label
               htmlFor="backup-restore"
-              className={`flex items-center gap-3 p-4 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer text-left w-full ${
                 isRestoring
-                  ? 'border-slate-200 bg-slate-50 cursor-not-allowed'
-                  : 'border-slate-300 hover:border-orange-400 hover:bg-orange-50'
+                  ? 'cursor-not-allowed opacity-50'
+                  : ''
               }`}
             >
               <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
