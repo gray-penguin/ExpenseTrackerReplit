@@ -242,10 +242,6 @@ export class IndexedDBStorage {
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
     try {
-      const [users, categories, expenses] = await Promise.all([
-      ]
-      )
-      // Check if we've already initialized in this session
       const sessionKey = 'indexeddb-initialized-session';
       if (sessionStorage.getItem(sessionKey)) {
         return;
