@@ -14,7 +14,7 @@ export interface BackupData {
 
 export class IndexedDBStorage {
   private static readonly DB_NAME = 'ExpenseTrackerDB';
-  private static readonly DB_VERSION = 3;
+  private static readonly DB_VERSION = 4;
   private static readonly STORES = {
     users: 'users',
     categories: 'categories',
@@ -24,9 +24,15 @@ export class IndexedDBStorage {
   };
 
   private db: IDBDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    // Implement singleton pattern to prevent race conditions
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
       request.onerror = () => {
@@ -56,6 +62,8 @@ export class IndexedDBStorage {
         }
       };
     });
+
+    return this.initPromise;
   }
 
   private async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
