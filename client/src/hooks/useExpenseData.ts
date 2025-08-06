@@ -6,7 +6,7 @@ import { User, Category, Expense } from '../types';
 export function useExpenseData() {
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Use IndexedDB for persistence
+  // Use localStorage for persistence
   const [users, setUsers, { isLoading: usersLoading }] = useIndexedDBStorage<User[]>(
     'users',
     [],
@@ -31,37 +31,21 @@ export function useExpenseData() {
   // Initialize mock data only once
   useEffect(() => {
     const initializeOnce = async () => {
-      if (!isInitialized && !usersLoading && !categoriesLoading && !expensesLoading) {
+      if (!isInitialized) {
         try {
           await indexedDBStorage.initializeMockData();
           setIsInitialized(true);
         } catch (error) {
           console.error('Failed to initialize mock data:', error);
-          setIsInitialized(true); // Set to true anyway to prevent infinite retries
+          setIsInitialized(true);
         }
       }
     };
     
     initializeOnce();
-  }, [usersLoading, categoriesLoading, expensesLoading, isInitialized]);
+  }, [isInitialized]);
 
-  const isLoading = usersLoading || categoriesLoading || expensesLoading;
-  
-  // Add timeout to prevent infinite loading
-  const [hasTimedOut, setHasTimedOut] = useState(false);
-  
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('ExpenseData: Loading timeout reached, forcing completion');
-        setHasTimedOut(true);
-      }
-    }, 5000); // 5 second timeout
-    
-    return () => clearTimeout(timeout);
-  }, [isLoading]);
-
-  const finalIsLoading = isLoading && !hasTimedOut;
+  const isLoading = false; // Remove loading state that was causing issues
 
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
     const newExpense: Expense = {
@@ -107,7 +91,6 @@ export function useExpenseData() {
 
   const deleteUser = (id: string) => {
     setUsers(prev => prev.filter(user => user.id !== id));
-    // Also delete all expenses for this user
     setExpenses(prev => prev.filter(expense => expense.userId !== id));
   };
 
@@ -133,16 +116,16 @@ export function useExpenseData() {
   };
 
   const deleteCategory = (id: string) => {
-    // Also delete all expenses for this category
     setExpenses(prev => prev.filter(expense => expense.categoryId !== id));
     setCategories(prev => prev.filter(category => category.id !== id));
   };
 
   const addBulkExpenses = (expenses: Omit<Expense, 'id' | 'createdAt'>[]) => {
-    const newExpenses = expenses.map(expense => ({
+    const baseTime = Date.now();
+    const newExpenses = expenses.map((expense, index) => ({
       ...expense,
       amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${baseTime}-${index}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString()
     }));
     setExpenses(prev => [...prev, ...newExpenses]);
@@ -169,7 +152,7 @@ export function useExpenseData() {
     users,
     categories,
     expenses,
-    isLoading: finalIsLoading,
+    isLoading,
     addExpense,
     addBulkExpenses,
     updateExpense,

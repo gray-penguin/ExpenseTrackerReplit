@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { indexedDBStorage } from '../utils/indexedDBStorage';
 
 export function useIndexedDBStorage<T>(
   storeName: string,
@@ -8,31 +7,23 @@ export function useIndexedDBStorage<T>(
   setMethod: (value: T) => Promise<void>
 ) {
   const [data, setData] = useState<T>(defaultValue);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start with false
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Simple initialization without complex logic
-        await indexedDBStorage.init();
-        
         const loadedData = await getMethod();
         setData(loadedData);
       } catch (err) {
         console.error(`Error loading ${storeName}:`, err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setData(defaultValue);
-      } finally {
-        setIsLoading(false);
       }
     };
 
     loadData();
-  }, []); // Remove dependencies to prevent re-initialization
+  }, []);
 
   const updateData = async (newData: T | ((prev: T) => T)) => {
     try {

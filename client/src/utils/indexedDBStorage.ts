@@ -1,3 +1,5 @@
+import { User, Category, Expense } from '../types';
+
 export interface BackupData {
   version: string;
   timestamp: string;
@@ -10,223 +12,90 @@ export interface BackupData {
   useCase?: string;
 }
 
+// Simple localStorage-based storage that was working before
 export class IndexedDBStorage {
-  private static readonly DB_NAME = 'ExpenseTrackerDB';
-  private static readonly DB_VERSION = 3;
-  private static readonly STORES = {
-    users: 'users',
-    categories: 'categories',
-    expenses: 'expenses',
-    credentials: 'credentials',
-    settings: 'settings'
+  private static readonly STORAGE_KEYS = {
+    users: 'expense-tracker-users',
+    categories: 'expense-tracker-categories',
+    expenses: 'expense-tracker-expenses',
+    credentials: 'expense-tracker-credentials',
+    settings: 'expense-tracker-settings',
+    initialized: 'expense-tracker-initialized'
   };
 
-  public db: IDBDatabase | null = null;
-  private initialized: boolean = false;
-
   async init(): Promise<void> {
-    if (this.initialized && this.db) {
-      return; // Already initialized
+    // Simple initialization - just ensure localStorage is available
+    if (typeof localStorage === 'undefined') {
+      throw new Error('localStorage is not available');
     }
-    
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
-
-      request.onerror = () => {
-        reject(request.error);
-      };
-      request.onsuccess = () => {
-        this.db = request.result;
-        this.initialized = true;
-        console.log('IndexedDB: Database opened successfully');
-        resolve();
-      };
-
-      request.onupgradeneeded = (event) => {
-        console.log('IndexedDB: Database upgrade needed');
-        const db = (event.target as IDBOpenDBRequest).result;
-
-        // Delete existing stores if they exist to recreate with proper keyPath
-        if (db.objectStoreNames.contains(IndexedDBStorage.STORES.credentials)) {
-          db.deleteObjectStore(IndexedDBStorage.STORES.credentials);
-        }
-        if (db.objectStoreNames.contains(IndexedDBStorage.STORES.settings)) {
-          db.deleteObjectStore(IndexedDBStorage.STORES.settings);
-        }
-
-        // Create object stores
-        if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.users)) {
-          db.createObjectStore(IndexedDBStorage.STORES.users, { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.categories)) {
-          db.createObjectStore(IndexedDBStorage.STORES.categories, { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains(IndexedDBStorage.STORES.expenses)) {
-          db.createObjectStore(IndexedDBStorage.STORES.expenses, { keyPath: 'id' });
-        }
-        
-        // Always create credentials and settings stores with proper keyPath
-        db.createObjectStore(IndexedDBStorage.STORES.credentials, { keyPath: 'id' });
-        db.createObjectStore(IndexedDBStorage.STORES.settings, { keyPath: 'id' });
-        console.log('IndexedDB: Object stores created');
-      };
-    });
   }
 
-  private async ensureDB(): Promise<IDBDatabase> {
-    if (!this.db) {
-      await this.init();
+  private getFromStorage<T>(key: string, defaultValue: T): T {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+      console.error(`Error reading from localStorage key "${key}":`, error);
+      return defaultValue;
     }
-    if (!this.db) {
-      throw new Error('Failed to initialize IndexedDB');
+  }
+
+  private setToStorage<T>(key: string, value: T): void {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(`Error writing to localStorage key "${key}":`, error);
     }
-    return this.db;
   }
 
-  async getAll<T>(storeName: string): Promise<T[]> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.getAll();
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
+  async getUsers(): Promise<User[]> {
+    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.users, []);
   }
 
-  async get<T>(storeName: string, key: string): Promise<T | undefined> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.get(key);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
+  async setUsers(users: User[]): Promise<void> {
+    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.users, users);
   }
 
-  async set<T>(storeName: string, data: T): Promise<void> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.put(data);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
+  async getCategories(): Promise<Category[]> {
+    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.categories, []);
   }
 
-  async setAll<T>(storeName: string, items: T[]): Promise<void> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      
-      // Clear existing data first
-      const clearRequest = store.clear();
-      clearRequest.onsuccess = () => {
-        // Add all new items
-        let completed = 0;
-        const total = items.length;
-        
-        if (total === 0) {
-          resolve();
-          return;
-        }
-
-        items.forEach(item => {
-          const addRequest = store.put(item);
-          addRequest.onsuccess = () => {
-            completed++;
-            if (completed === total) {
-              resolve();
-            }
-          };
-          addRequest.onerror = () => reject(addRequest.error);
-        });
-      };
-      clearRequest.onerror = () => reject(clearRequest.error);
-    });
+  async setCategories(categories: Category[]): Promise<void> {
+    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.categories, categories);
   }
 
-  async delete(storeName: string, key: string): Promise<void> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.delete(key);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
+  async getExpenses(): Promise<Expense[]> {
+    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.expenses, []);
   }
 
-  async clear(storeName: string): Promise<void> {
-    const db = await this.ensureDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.clear();
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
-  }
-
-  // Specific methods for each data type
-  async getUsers(): Promise<any[]> {
-    return this.getAll(IndexedDBStorage.STORES.users);
-  }
-
-  async setUsers(users: any[]): Promise<void> {
-    return this.setAll(IndexedDBStorage.STORES.users, users);
-  }
-
-  async getCategories(): Promise<any[]> {
-    return this.getAll(IndexedDBStorage.STORES.categories);
-  }
-
-  async setCategories(categories: any[]): Promise<void> {
-    return this.setAll(IndexedDBStorage.STORES.categories, categories);
-  }
-
-  async getExpenses(): Promise<any[]> {
-    return this.getAll(IndexedDBStorage.STORES.expenses);
-  }
-
-  async setExpenses(expenses: any[]): Promise<void> {
-    return this.setAll(IndexedDBStorage.STORES.expenses, expenses);
+  async setExpenses(expenses: Expense[]): Promise<void> {
+    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.expenses, expenses);
   }
 
   async getCredentials(): Promise<any> {
-    const result = await this.get(IndexedDBStorage.STORES.credentials, 'main');
-    return result || {
+    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.credentials, {
       username: 'admin',
       password: 'pass123',
       email: 'admin@example.com',
       securityQuestion: 'What is your favorite color?',
       securityAnswer: 'blue',
       useCase: 'personal-team'
-    };
+    });
   }
 
   async setCredentials(credentials: any): Promise<void> {
-    return this.set(IndexedDBStorage.STORES.credentials, { id: 'main', ...credentials });
+    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.credentials, credentials);
   }
 
   async getSettings(): Promise<any> {
-    const result = await this.get(IndexedDBStorage.STORES.settings, 'main');
-    return result || {
+    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.settings, {
       fontSize: 'small',
       auth: 'false'
-    };
+    });
   }
 
   async setSettings(settings: any): Promise<void> {
-    return this.set(IndexedDBStorage.STORES.settings, { id: 'main', ...settings });
+    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.settings, settings);
   }
 
   async getAuthState(): Promise<boolean> {
@@ -239,143 +108,160 @@ export class IndexedDBStorage {
     await this.setSettings({ ...settings, auth: isAuthenticated ? 'true' : 'false' });
   }
 
-  // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
-    try {
-      const sessionKey = 'indexeddb-initialized-session';
-      if (sessionStorage.getItem(sessionKey)) {
-        return;
-      }
-      
-      const users = await this.getUsers();
-      if (users.length === 0) {
-        console.log('IndexedDB: Empty database detected, initializing with mock data');
-        await this.createMockData();
-        sessionStorage.setItem(sessionKey, 'true');
-      } else {
-        console.log('IndexedDB: Existing data found, skipping mock data initialization');
-      }
-    } catch (error) {
-      console.error('Error in initializeMockData:', error);
+    // Check if already initialized
+    const isInitialized = localStorage.getItem(IndexedDBStorage.STORAGE_KEYS.initialized);
+    if (isInitialized) {
+      return;
+    }
+
+    const users = await this.getUsers();
+    if (users.length === 0) {
+      console.log('Initializing with mock data');
+      await this.createMockData();
+      localStorage.setItem(IndexedDBStorage.STORAGE_KEYS.initialized, 'true');
     }
   }
 
-  // Separate method for creating mock data
   private async createMockData(): Promise<void> {
-    try {
-      const mockUsers = [
-        {
-          id: '1',
-          name: 'Alex Chen',
-          username: 'alexc',
-          email: 'alex.chen@example.com',
-          avatar: 'AC',
-          color: 'bg-emerald-500',
-          defaultCategoryId: '1',
-          defaultSubcategoryId: '1',
-          defaultStoreLocation: 'Downtown'
-        },
-        {
-          id: '2',
-          name: 'Sarah Johnson',
-          username: 'sarahj',
-          email: 'sarah.johnson@example.com',
-          avatar: 'SJ',
-          color: 'bg-blue-500',
-          defaultCategoryId: '2',
-          defaultSubcategoryId: '5',
-          defaultStoreLocation: 'Uptown'
-        }
-      ];
-
-      // Initialize mock categories
-      const mockCategories = [
-        {
-          id: '1',
-          name: 'Groceries',
-          icon: 'ShoppingCart',
-          color: 'text-green-600',
-          subcategories: [
-            { id: '1', name: 'Fresh Produce', categoryId: '1' },
-            { id: '2', name: 'Meat & Dairy', categoryId: '1' },
-            { id: '3', name: 'Pantry Items', categoryId: '1' },
-            { id: '4', name: 'Snacks & Beverages', categoryId: '1' }
-          ]
-        },
-        {
-          id: '2',
-          name: 'Utilities',
-          icon: 'Zap',
-          color: 'text-yellow-600',
-          subcategories: [
-            { id: '5', name: 'Electricity', categoryId: '2' },
-            { id: '6', name: 'Water & Sewer', categoryId: '2' },
-            { id: '7', name: 'Internet & Cable', categoryId: '2' },
-            { id: '8', name: 'Gas', categoryId: '2' }
-          ]
-        },
-        {
-          id: '3',
-          name: 'Entertainment',
-          icon: 'Music',
-          color: 'text-purple-600',
-          subcategories: [
-            { id: '9', name: 'Movies & Shows', categoryId: '3' },
-            { id: '10', name: 'Gaming', categoryId: '3' },
-            { id: '11', name: 'Concerts & Events', categoryId: '3' },
-            { id: '12', name: 'Subscriptions', categoryId: '3' }
-          ]
-        },
-        {
-          id: '4',
-          name: 'Automobile',
-          icon: 'Car',
-          color: 'text-blue-600',
-          subcategories: [
-            { id: '13', name: 'Fuel', categoryId: '4' },
-            { id: '14', name: 'Maintenance', categoryId: '4' },
-            { id: '15', name: 'Insurance', categoryId: '4' },
-            { id: '16', name: 'Parking & Tolls', categoryId: '4' }
-          ]
-        }
-      ];
-
-      // Initialize mock expenses
-      const mockExpenses = [
-        {
-          id: '1',
-          userId: '1',
-          categoryId: '1',
-          subcategoryId: '1',
-          amount: 45.67,
-          description: 'Weekly fresh vegetables and fruits',
-          storeLocation: 'Online',
-          date: '2025-01-10',
-          createdAt: '2025-01-10T08:00:00Z'
-        }
-      ];
-
-      await Promise.all([
-        this.setUsers(mockUsers),
-        this.setCategories(mockCategories),
-        this.setExpenses(mockExpenses)
-      ]);
-
-      // Initialize default settings
-      const existingSettings = await this.getSettings();
-      if (!existingSettings.fontSize) {
-        await this.setSettings({
-          fontSize: 'small',
-          auth: 'false'
-        });
-        console.log('IndexedDB: Default settings initialized');
+    const mockUsers = [
+      {
+        id: '1',
+        name: 'Alex Chen',
+        username: 'alexc',
+        email: 'alex.chen@example.com',
+        avatar: 'AC',
+        color: 'bg-emerald-500',
+        defaultCategoryId: '1',
+        defaultSubcategoryId: '1',
+        defaultStoreLocation: 'Downtown'
+      },
+      {
+        id: '2',
+        name: 'Sarah Johnson',
+        username: 'sarahj',
+        email: 'sarah.johnson@example.com',
+        avatar: 'SJ',
+        color: 'bg-blue-500',
+        defaultCategoryId: '2',
+        defaultSubcategoryId: '5',
+        defaultStoreLocation: 'Uptown'
       }
-    } catch (error) {
-      console.error('Error creating mock data:', error);
-    }
+    ];
+
+    const mockCategories = [
+      {
+        id: '1',
+        name: 'Groceries',
+        icon: 'ShoppingCart',
+        color: 'text-green-600',
+        subcategories: [
+          { id: '1', name: 'Fresh Produce', categoryId: '1' },
+          { id: '2', name: 'Meat & Dairy', categoryId: '1' },
+          { id: '3', name: 'Pantry Items', categoryId: '1' },
+          { id: '4', name: 'Snacks & Beverages', categoryId: '1' }
+        ]
+      },
+      {
+        id: '2',
+        name: 'Utilities',
+        icon: 'Zap',
+        color: 'text-yellow-600',
+        subcategories: [
+          { id: '5', name: 'Electricity', categoryId: '2' },
+          { id: '6', name: 'Water & Sewer', categoryId: '2' },
+          { id: '7', name: 'Internet & Cable', categoryId: '2' },
+          { id: '8', name: 'Gas', categoryId: '2' }
+        ]
+      },
+      {
+        id: '3',
+        name: 'Entertainment',
+        icon: 'Music',
+        color: 'text-purple-600',
+        subcategories: [
+          { id: '9', name: 'Movies & Shows', categoryId: '3' },
+          { id: '10', name: 'Gaming', categoryId: '3' },
+          { id: '11', name: 'Concerts & Events', categoryId: '3' },
+          { id: '12', name: 'Subscriptions', categoryId: '3' }
+        ]
+      },
+      {
+        id: '4',
+        name: 'Automobile',
+        icon: 'Car',
+        color: 'text-blue-600',
+        subcategories: [
+          { id: '13', name: 'Fuel', categoryId: '4' },
+          { id: '14', name: 'Maintenance', categoryId: '4' },
+          { id: '15', name: 'Insurance', categoryId: '4' },
+          { id: '16', name: 'Parking & Tolls', categoryId: '4' }
+        ]
+      }
+    ];
+
+    const mockExpenses = [
+      {
+        id: '1',
+        userId: '1',
+        categoryId: '1',
+        subcategoryId: '1',
+        amount: 89.45,
+        description: 'Weekly grocery shopping',
+        notes: 'Bought fresh vegetables and meat for the week',
+        storeName: 'Whole Foods Market',
+        storeLocation: 'Downtown',
+        date: '2025-01-18',
+        createdAt: '2025-01-18T10:30:00Z'
+      },
+      {
+        id: '2',
+        userId: '1',
+        categoryId: '4',
+        subcategoryId: '13',
+        amount: 45.00,
+        description: 'Gas for car',
+        notes: 'Filled up the tank',
+        storeName: 'Shell Station',
+        storeLocation: 'Main Street',
+        date: '2025-01-17',
+        createdAt: '2025-01-17T18:45:00Z'
+      },
+      {
+        id: '3',
+        userId: '2',
+        categoryId: '2',
+        subcategoryId: '5',
+        amount: 125.50,
+        description: 'Monthly electricity bill',
+        notes: 'Higher than usual due to winter heating',
+        storeName: 'City Electric',
+        storeLocation: '',
+        date: '2025-01-15',
+        createdAt: '2025-01-15T08:00:00Z'
+      },
+      {
+        id: '4',
+        userId: '2',
+        categoryId: '3',
+        subcategoryId: '12',
+        amount: 15.99,
+        description: 'Netflix subscription',
+        notes: 'Monthly streaming service',
+        storeName: 'Netflix',
+        storeLocation: 'Online',
+        date: '2025-01-14',
+        createdAt: '2025-01-14T20:00:00Z'
+      }
+    ];
+
+    await Promise.all([
+      this.setUsers(mockUsers),
+      this.setCategories(mockCategories),
+      this.setExpenses(mockExpenses)
+    ]);
   }
 
-  // Backup and restore methods
   async createFullBackup(): Promise<BackupData> {
     const [users, categories, expenses, credentials, settings] = await Promise.all([
       this.getUsers(),
@@ -385,7 +271,6 @@ export class IndexedDBStorage {
       this.getSettings()
     ]);
 
-    // Transform categories to flat structure with timestamps
     const flatCategories = categories.map(category => ({
       id: category.id.toString(),
       name: category.name,
@@ -395,7 +280,6 @@ export class IndexedDBStorage {
       updatedAt: new Date().toISOString()
     }));
 
-    // Extract subcategories as separate array with timestamps
     const flatSubcategories = categories.flatMap(category =>
       category.subcategories.map(subcategory => ({
         id: subcategory.id.toString(),
@@ -420,11 +304,9 @@ export class IndexedDBStorage {
   }
 
   async restoreFromBackup(backup: BackupData): Promise<void> {
-    // Handle both old nested format and new flat format
     let nestedCategories;
     
     if (backup.subcategories && Array.isArray(backup.subcategories)) {
-      // New flat format - transform flat categories and subcategories back to nested structure
       nestedCategories = backup.categories.map(category => ({
         id: category.id.toString(),
         name: category.name,
@@ -439,7 +321,6 @@ export class IndexedDBStorage {
           }))
       }));
     } else {
-      // Old nested format - use categories as-is
       nestedCategories = backup.categories.map(category => ({
         id: category.id.toString(),
         name: category.name,
@@ -453,28 +334,22 @@ export class IndexedDBStorage {
       }));
     }
 
-    // Handle both old format (personId) and new format (userId) for expenses
     const processedExpenses = backup.expenses.map((expense: any) => ({
       ...expense,
       id: expense.id?.toString() || '',
-      // Handle both personId (old format) and userId (new format)
       userId: (expense.userId || expense.personId)?.toString() || '',
       categoryId: expense.categoryId?.toString() || '',
       subcategoryId: expense.subcategoryId?.toString() || '',
       amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) || 0 : (expense.amount || 0),
-      // Ensure we have createdAt field (some old backups might not have it)
       createdAt: expense.createdAt || expense.updatedAt || new Date().toISOString()
     }));
 
-    // Ensure all users have string IDs and handle missing fields
     const processedUsers = backup.users.map((user: any) => ({
       ...user,
       id: user.id?.toString() || '',
       username: user.username || user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user',
       email: user.email || `${user.name?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}@example.com`,
-      // Ensure avatar exists
       avatar: user.avatar || user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U',
-      // Ensure color exists
       color: user.color || 'bg-blue-500',
       defaultCategoryId: user.defaultCategoryId ? user.defaultCategoryId.toString() : undefined,
       defaultSubcategoryId: user.defaultSubcategoryId ? user.defaultSubcategoryId.toString() : undefined
@@ -490,5 +365,4 @@ export class IndexedDBStorage {
   }
 }
 
-// Create singleton instance
 export const indexedDBStorage = new IndexedDBStorage();
