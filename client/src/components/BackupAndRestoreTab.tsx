@@ -269,21 +269,8 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            onClick={handleDownloadBackupWithPrompt}
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-left"
-          >
-            <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <Download className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <div className="font-medium text-slate-900">Backup with Custom Name</div>
-              <div className="text-sm text-slate-500">Choose your own filename</div>
-            </div>
-          </button>
-
-          <button
             onClick={handleDownloadBackup}
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-left"
+            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-left w-full"
           >
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Download className="w-5 h-5 text-blue-600" />
