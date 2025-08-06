@@ -23,23 +23,7 @@ export function useAuth() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Initialize auth state from IndexedDB
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        console.log('Auth: Starting initialization...');
-        
-        await indexedDBStorage.init();
-        console.log('Auth: IndexedDB initialized');
-        
         await indexedDBStorage.initializeMockData();
-        console.log('Auth: Mock data initialized');
-        
-        const [authState, savedCredentials] = await Promise.all([
-          indexedDBStorage.getAuthState(),
-          indexedDBStorage.getCredentials()
         ]);
         
         console.log('Auth: Retrieved auth state and credentials', { authState, savedCredentials });

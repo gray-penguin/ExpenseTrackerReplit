@@ -21,6 +21,7 @@ export function SettingsPage() {
   const handleDataRestored = () => {
     // Reload the page to reflect restored data
     window.location.reload();
+    window.location.reload();
   };
 
   return (
