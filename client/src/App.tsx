@@ -26,6 +26,8 @@ function App() {
 
   // Show loading state while initializing
   if (authLoading || dataLoading) {
+    return (
+      <div>Loading...</div>
     );
   }
   
@@ -51,6 +53,7 @@ function App() {
               onResetPassword={resetPassword}
               userEmail={credentials.email}
               securityQuestion={credentials.securityQuestion}
+            />
           </div>
         </div>
       </FontSizeProvider>
