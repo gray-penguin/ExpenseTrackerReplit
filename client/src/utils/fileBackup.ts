@@ -289,6 +289,35 @@ export class FileBackupManager {
   }
 
   /**
+   * Create a blank backup file for users to set up new backup files
+   */
+  static async createBlankBackupFile(): Promise<void> {
+    const timestamp = new Date().toISOString();
+    const blankBackup: BackupData = {
+      version: this.BACKUP_VERSION,
+      timestamp,
+      users: [],
+      categories: [],
+      subcategories: [],
+      expenses: [],
+      credentials: {
+        email: '',
+        password: '',
+        securityQuestion: '',
+        securityAnswer: ''
+      },
+      settings: {
+        fontSize: 'medium',
+        theme: 'light'
+      },
+      useCase: 'personal-team'
+    };
+
+    const filename = `expense-tracker-blank-${new Date().toISOString().split('T')[0]}.json`;
+    this.downloadJSON(blankBackup, filename);
+  }
+
+  /**
    * Restore data from backup file
    */
   static async restoreFromFile(file: File): Promise<{ success: boolean; message: string }> {

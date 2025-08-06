@@ -235,6 +235,16 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
+    try {
+      const [users, categories, expenses, settings] = await Promise.all([
+        this.getUsers(),
+        this.getCategories(),
+        this.getExpenses(),
+        this.getSettings()
+      ]);
+
+      const hasRealData = settings.hasRealData === 'true';
+
       if (hasRealData) {
         console.log('IndexedDB: Real user data detected, skipping mock data initialization');
         return;
@@ -289,6 +299,12 @@ export class IndexedDBStorage {
         {
           id: '2',
           name: 'Sarah Johnson',
+          username: 'sarahj',
+          email: 'sarah.johnson@example.com',
+          avatar: 'SJ',
+          color: 'bg-blue-500',
+          defaultCategoryId: '2',
+          defaultSubcategoryId: '5',
           defaultStoreLocation: 'Uptown'
         }
       ];
@@ -538,6 +554,7 @@ export class IndexedDBStorage {
       this.setCategories(nestedCategories),
       this.setExpenses(processedExpenses),
       this.setCredentials(backup.credentials),
+      this.setSettings(backup.settings)
     ]);
   }
 }

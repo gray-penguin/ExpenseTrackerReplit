@@ -29,6 +29,8 @@ function App() {
     return (
       <div>Loading...</div>
     );
+      <div>Loading...</div>
+    );
   }
   
   // Show login page if not authenticated
