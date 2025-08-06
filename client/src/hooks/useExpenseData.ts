@@ -40,6 +40,11 @@ export function useExpenseData() {
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeout);
+  }, [isLoading]);
+
+  const finalIsLoading = isLoading && !hasTimedOut;
+
+  const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
     const newExpense: Expense = {
       ...expense,
       amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount,
@@ -61,6 +66,12 @@ export function useExpenseData() {
       expense.id === id ? { ...expense, ...processedUpdates } : expense
     ));
   };
+
+  const deleteExpense = (id: string) => {
+    setExpenses(prev => prev.filter(expense => expense.id !== id));
+  };
+
+  const addUser = (user: Omit<User, 'id'>) => {
     const newUser: User = {
       ...user,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -76,6 +87,12 @@ export function useExpenseData() {
   };
 
   const deleteUser = (id: string) => {
+    setUsers(prev => prev.filter(user => user.id !== id));
+    // Also delete all expenses for this user
+    setExpenses(prev => prev.filter(expense => expense.userId !== id));
+  };
+
+  const addCategory = (category: Omit<Category, 'id'>) => {
     const categoryId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newCategory: Category = {
       ...category,
@@ -91,14 +108,38 @@ export function useExpenseData() {
   };
 
   const updateCategory = (id: string, updates: Partial<Category>) => {
+    setCategories(prev => prev.map(category => 
+      category.id === id ? { ...category, ...updates } : category
+    ));
+  };
+
+  const deleteCategory = (id: string) => {
     // Also delete all expenses for this category
     setExpenses(prev => prev.filter(expense => expense.categoryId !== id));
     setCategories(prev => prev.filter(category => category.id !== id));
+  };
+
+  const addBulkExpenses = (expenses: Omit<Expense, 'id' | 'createdAt'>[]) => {
+    const newExpenses = expenses.map(expense => ({
+      ...expense,
+      amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString()
     }));
     setExpenses(prev => [...prev, ...newExpenses]);
     return newExpenses;
   };
-    setCategories(prev => [...prev, ...newCategories]);
+
+  const importExpenses = (expenses: Expense[]) => {
+    setExpenses(expenses);
+  };
+
+  const importUsers = (users: User[]) => {
+    setUsers(users);
+  };
+
+  const importCategories = (categories: Category[]) => {
+    setCategories(categories);
   };
 
   const clearAllExpenses = () => {
