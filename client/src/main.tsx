@@ -9,7 +9,7 @@ import './index.css';
 let deferredPrompt: any;
 
 // Debug logging for PWA
-console.log('PWA: Script loaded');
+console.log('PWA: Script loaded, starting app initialization');
 
 // Listen for beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -25,6 +25,15 @@ window.addEventListener('beforeinstallprompt', (e) => {
 window.addEventListener('appinstalled', () => {
   console.log('PWA: App was installed');
   deferredPrompt = null;
+});
+
+// Add error boundary for the entire app
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
 });
 
 function showInstallPrompt() {

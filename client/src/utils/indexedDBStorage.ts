@@ -24,16 +24,24 @@ export class IndexedDBStorage {
   private db: IDBDatabase | null = null;
 
   async init(): Promise<void> {
+    // Add timeout to prevent hanging in production
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('IndexedDB initialization timeout')), 5000);
+    });
+    
+    const initPromise = new Promise<void>((resolve, reject) => {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
+        console.log('IndexedDB: Database opened successfully');
         resolve();
       };
 
       request.onupgradeneeded = (event) => {
+        console.log('IndexedDB: Database upgrade needed');
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Delete existing stores if they exist to recreate with proper keyPath
@@ -58,8 +66,11 @@ export class IndexedDBStorage {
         // Always create credentials and settings stores with proper keyPath
         db.createObjectStore(IndexedDBStorage.STORES.credentials, { keyPath: 'id' });
         db.createObjectStore(IndexedDBStorage.STORES.settings, { keyPath: 'id' });
+        console.log('IndexedDB: Object stores created');
       };
     });
+    
+    return Promise.race([initPromise, timeoutPromise]);
   }
 
   private async ensureDB(): Promise<IDBDatabase> {
@@ -230,6 +241,27 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Mock data initialization timeout')), 3000);
+    });
+    
+    const initPromise = this.initializeMockDataInternal();
+    
+    try {
+      await Promise.race([initPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Mock data initialization failed or timed out:', error);
+      // Set minimal fallback settings to prevent infinite loading
+      try {
+        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
+      } catch (fallbackError) {
+        console.error('Failed to set fallback settings:', fallbackError);
+      }
+    }
+  }
+
+  private async initializeMockDataInternal(): Promise<void> {
     try {
       console.log('IndexedDB: Starting initializeMockData...');
       // Check if we have any real user data (non-mock data)
@@ -276,7 +308,7 @@ export class IndexedDBStorage {
       // Only initialize mock data if all stores are completely empty
       if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
         console.log('IndexedDB: Empty database detected, initializing with mock data');
-        await this.initializeMockDataInternal();
+        await this.createMockData();
       } else {
         console.log('IndexedDB: Existing data found, skipping mock data initialization');
         // Mark that we have real data to prevent future overwrites
@@ -284,12 +316,17 @@ export class IndexedDBStorage {
       }
     } catch (error) {
       console.error('Error in initializeMockData:', error);
-      // On error, don't initialize anything to be safe
+      // Set fallback to prevent infinite loading
+      try {
+        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
+      } catch (fallbackError) {
+        console.error('Failed to set fallback settings:', fallbackError);
+      }
     }
   }
 
-  // Separate method for actually initializing mock data
-  private async initializeMockDataInternal(): Promise<void> {
+  // Separate method for creating mock data
+  private async createMockData(): Promise<void> {
     try {
       const mockUsers = [
         {
@@ -447,12 +484,7 @@ export class IndexedDBStorage {
       console.log('IndexedDB: Default settings initialized');
     } catch (error) {
       console.error('Error during mock data initialization:', error);
-      // Set fallback to prevent infinite loading
-      try {
-        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
-      } catch (fallbackError) {
-        console.error('Failed to set fallback settings:', fallbackError);
-      }
+      throw error; // Re-throw to be handled by parent timeout
     }
   }
 

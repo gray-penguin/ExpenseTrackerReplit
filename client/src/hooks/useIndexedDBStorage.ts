@@ -18,11 +18,21 @@ export function useIndexedDBStorage<T>(
         setIsLoading(true);
         setError(null);
         
-        // Initialize IndexedDB and mock data if needed
-        await indexedDBStorage.init();
-        console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
-        await indexedDBStorage.initializeMockData();
-        console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
+        // Add timeout for initialization
+        const initTimeout = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Initialization timeout')), 4000);
+        });
+        
+        // Initialize IndexedDB and mock data if needed with timeout
+        await Promise.race([
+          (async () => {
+            await indexedDBStorage.init();
+            console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
+            await indexedDBStorage.initializeMockData();
+            console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
+          })(),
+          initTimeout
+        ]);
         
         const result = await getMethod();
         console.log(`IndexedDBStorage: ${storeName} - Data loaded:`, result);

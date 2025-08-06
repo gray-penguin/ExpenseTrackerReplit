@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Route, Switch } from 'wouter';
 import { Dashboard } from './pages/Dashboard';
 import { ExpensesList } from './pages/ExpensesList';
@@ -23,8 +24,20 @@ function App() {
   } = useAuth();
   const { isLoading: dataLoading } = useExpenseData();
 
-  // Show loading state while initializing
-  if (authLoading || dataLoading) {
+  // Add timeout to prevent infinite loading in production
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log('App: Loading timeout reached, forcing app to load');
+      setHasTimedOut(true);
+    }, 5000); // 5 second timeout for production
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Show loading state while initializing (with timeout)
+  if ((authLoading || dataLoading) && !hasTimedOut) {
     return (
       <FontSizeProvider>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -34,6 +47,7 @@ function App() {
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Expense Tracker</h2>
             <p className="text-gray-600">Initializing your data...</p>
+            <p className="text-gray-400 text-sm mt-2">If this takes too long, the app will load automatically</p>
           </div>
         </div>
       </FontSizeProvider>
