@@ -243,6 +243,14 @@ export class IndexedDBStorage {
         this.getSettings()
       ]);
 
+      // Check if user has real data flag set
+      const hasRealData = settings.hasRealData === 'true';
+
+      if (hasRealData) {
+        console.log('IndexedDB: Real user data detected, skipping mock data initialization');
+        return;
+      }
+
       const hasRealData = settings.hasRealData === 'true';
 
       if (hasRealData) {
@@ -264,6 +272,7 @@ export class IndexedDBStorage {
       if (hasNonMockUsers || hasNonMockExpenses || users.length > 2 || expenses.length > 4) {
         console.log('IndexedDB: Non-mock data detected, preserving existing data');
         await this.setSettings({ ...settings, hasRealData: 'true' });
+        await this.setSettings({ ...settings, hasRealData: 'true' });
         return;
       }
 
@@ -273,6 +282,8 @@ export class IndexedDBStorage {
         await this.createMockData();
       } else {
         console.log('IndexedDB: Existing data found, skipping mock data initialization');
+        // Mark that we have real data to prevent future overwrites
+        await this.setSettings({ ...settings, hasRealData: 'true' });
         // Mark that we have real data to prevent future overwrites
         await this.setSettings({ ...settings, hasRealData: 'true' });
       }
@@ -434,7 +445,8 @@ export class IndexedDBStorage {
       // Set default settings without real data flag (will be set when user adds real data)
       await this.setSettings({
         fontSize: 'small',
-        auth: 'false'
+        auth: 'false',
+        hasRealData: 'false'
       });
       
       console.log('IndexedDB: Default settings initialized');
