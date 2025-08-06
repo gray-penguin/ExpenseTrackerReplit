@@ -243,15 +243,17 @@ export class IndexedDBStorage {
   async initializeMockData(): Promise<void> {
     try {
       const [users, categories, expenses] = await Promise.all([
-        this.getUsers(),
-        this.getCategories(),
-        this.getExpenses(),
-        this.getSettings()
-      ]);
-      // Only initialize mock data if all stores are completely empty
-      if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
+      // Check if we've already initialized in this session
+      const sessionKey = 'indexeddb-initialized-session';
+      if (sessionStorage.getItem(sessionKey)) {
+        return;
+      }
+      
+      const users = await this.getUsers();
+      if (users.length === 0) {
         console.log('IndexedDB: Empty database detected, initializing with mock data');
         await this.createMockData();
+        sessionStorage.setItem(sessionKey, 'true');
       } else {
         console.log('IndexedDB: Existing data found, skipping mock data initialization');
       }
@@ -362,11 +364,14 @@ export class IndexedDBStorage {
       ]);
 
       // Initialize default settings
-      await this.setSettings({
-        fontSize: 'small',
-        auth: 'false'
-      });
-      console.log('IndexedDB: Default settings initialized');
+      const existingSettings = await this.getSettings();
+      if (!existingSettings.fontSize) {
+        await this.setSettings({
+          fontSize: 'small',
+          auth: 'false'
+        });
+        console.log('IndexedDB: Default settings initialized');
+      }
     } catch (error) {
       console.error('Error creating mock data:', error);
     }

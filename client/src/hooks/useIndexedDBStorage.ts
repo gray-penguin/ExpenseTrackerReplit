@@ -17,9 +17,8 @@ export function useIndexedDBStorage<T>(
         setIsLoading(true);
         setError(null);
         
-        // Initialize IndexedDB if needed
+        // Simple initialization without complex logic
         await indexedDBStorage.init();
-        await indexedDBStorage.initializeMockData();
         
         const loadedData = await getMethod();
         setData(loadedData);
@@ -33,7 +32,7 @@ export function useIndexedDBStorage<T>(
     };
 
     loadData();
-  }, []);
+  }, []); // Remove dependencies to prevent re-initialization
 
   const updateData = async (newData: T | ((prev: T) => T)) => {
     try {

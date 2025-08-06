@@ -4,6 +4,8 @@ import { indexedDBStorage } from '../utils/indexedDBStorage';
 import { User, Category, Expense } from '../types';
 
 export function useExpenseData() {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   // Use IndexedDB for persistence
   const [users, setUsers, { isLoading: usersLoading }] = useIndexedDBStorage<User[]>(
     'users',
@@ -25,6 +27,23 @@ export function useExpenseData() {
     () => indexedDBStorage.getExpenses(),
     (expenses) => indexedDBStorage.setExpenses(expenses)
   );
+
+  // Initialize mock data only once
+  useEffect(() => {
+    const initializeOnce = async () => {
+      if (!isInitialized && !usersLoading && !categoriesLoading && !expensesLoading) {
+        try {
+          await indexedDBStorage.initializeMockData();
+          setIsInitialized(true);
+        } catch (error) {
+          console.error('Failed to initialize mock data:', error);
+          setIsInitialized(true); // Set to true anyway to prevent infinite retries
+        }
+      }
+    };
+    
+    initializeOnce();
+  }, [usersLoading, categoriesLoading, expensesLoading, isInitialized]);
 
   const isLoading = usersLoading || categoriesLoading || expensesLoading;
   
