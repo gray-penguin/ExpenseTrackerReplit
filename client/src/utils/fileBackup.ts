@@ -330,7 +330,7 @@ export class FileBackupManager {
     try {
       const timestamp = new Date().toISOString();
       const blankBackup: BackupData = {
-        version: '1.0.0',
+        version: this.BACKUP_VERSION,
         timestamp,
         users: [],
         categories: [],
@@ -357,56 +357,6 @@ export class FileBackupManager {
       console.error('Create blank backup failed:', error);
       alert('Create blank backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
-  }
-
-  /**
-   * Create a complete backup of all application data
-   */
-  static async createFullBackup(): Promise<BackupData> {
-    return await indexedDBStorage.createFullBackup();
-  }
-
-  /**
-   * Download backup as human-readable format
-   */
-  static async downloadReadableBackup(filename?: string): Promise<void> {
-    const backup = await this.createFullBackup();
-    const timestamp = new Date().toISOString().split('T')[0];
-    const defaultFilename = `expense-tracker-readable-${timestamp}.txt`;
-    
-    const readable = this.formatReadableBackup(backup);
-    this.downloadText(readable, filename || defaultFilename);
-  }
-
-  /**
-   * Create a blank backup file for users to set up new backup files
-   */
-  static async createBlankBackupFile(): Promise<void> {
-    const timestamp = new Date().toISOString();
-    const blankBackup: BackupData = {
-      version: this.BACKUP_VERSION,
-      timestamp,
-      users: [],
-      categories: [],
-      subcategories: [],
-      expenses: [],
-      credentials: {
-        username: 'admin',
-        password: 'pass123',
-        email: 'admin@example.com',
-        securityQuestion: 'What is your favorite color?',
-        securityAnswer: 'blue',
-        useCase: 'personal-team'
-      },
-      settings: {
-        fontSize: 'small',
-        auth: 'false'
-      },
-      useCase: 'personal-team'
-    };
-
-    const filename = `expense-tracker-blank-${new Date().toISOString().split('T')[0]}.json`;
-    this.downloadJSON(blankBackup, filename);
   }
 
   /**
