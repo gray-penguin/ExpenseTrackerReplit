@@ -30,6 +30,9 @@ export function useExpenseData() {
 
   // Helper functions for CRUD operations
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
+    // Mark that we now have real user data
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     const newExpense: Expense = {
       ...expense,
       amount: typeof expense.amount === 'string' ? parseFloat(expense.amount) : expense.amount,
@@ -57,6 +60,9 @@ export function useExpenseData() {
   };
 
   const addUser = (user: Omit<User, 'id'>) => {
+    // Mark that we now have real user data
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     const newUser: User = {
       ...user,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -78,6 +84,9 @@ export function useExpenseData() {
   };
 
   const addCategory = (category: Omit<Category, 'id'>) => {
+    // Mark that we now have real user data
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     const categoryId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newCategory: Category = {
       ...category,
@@ -105,10 +114,16 @@ export function useExpenseData() {
   };
 
   const importExpenses = (newExpenses: Expense[]) => {
+    // Mark that we now have real user data when importing
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     setExpenses(prev => [...prev, ...newExpenses]);
   };
 
   const addBulkExpenses = (expenses: Omit<Expense, 'id' | 'createdAt'>[]) => {
+    // Mark that we now have real user data
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     const baseTime = Date.now();
     const newExpenses: Expense[] = expenses.map((expense, index) => ({
       ...expense,
@@ -120,10 +135,16 @@ export function useExpenseData() {
   };
 
   const importUsers = (newUsers: User[]) => {
+    // Mark that we now have real user data when importing
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     setUsers(prev => [...prev, ...newUsers]);
   };
 
   const importCategories = (newCategories: Category[]) => {
+    // Mark that we now have real user data when importing
+    indexedDBStorage.setSettings({ fontSize: 'small', auth: 'true', hasRealData: 'true' }).catch(console.error);
+    
     setCategories(prev => [...prev, ...newCategories]);
   };
 
