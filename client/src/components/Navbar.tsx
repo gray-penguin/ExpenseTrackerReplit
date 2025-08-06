@@ -16,12 +16,6 @@ export function Navbar() {
     });
   };
 
-  const handleLogout = () => {
-    if (confirm('Are you sure you want to log out?')) {
-      logout();
-    }
-  };
-
   const navigation = [
     { name: 'Dashboard', path: '/', icon: Home },
     { name: 'Expenses', path: '/expenses', icon: List },
