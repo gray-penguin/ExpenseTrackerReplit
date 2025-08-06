@@ -17,6 +17,11 @@ export function SettingsPage() {
   const handleUpdateUseCase = (useCase: string) => {
     updateCredentials({ useCase });
   };
+
+  const handleDataRestored = () => {
+    // Data will be automatically updated through the hooks
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
