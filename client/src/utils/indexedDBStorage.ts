@@ -241,20 +241,13 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
-    // Only run once per session
-    if (this.initialized) {
-      console.log('IndexedDB: Already initialized, skipping mock data');
-      return;
-    }
-    
     try {
-      const [users, categories, expenses, settings] = await Promise.all([
+      const [users, categories, expenses] = await Promise.all([
         this.getUsers(),
         this.getCategories(),
         this.getExpenses(),
         this.getSettings()
       ]);
-
       // Only initialize mock data if all stores are completely empty
       if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
         console.log('IndexedDB: Empty database detected, initializing with mock data');
@@ -356,33 +349,6 @@ export class IndexedDBStorage {
           subcategoryId: '1',
           amount: 45.67,
           description: 'Weekly fresh vegetables and fruits',
-          notes: 'Organic produce from farmers market',
-          storeName: 'Whole Foods Market',
-          storeLocation: 'Downtown',
-          date: '2025-01-15',
-          createdAt: '2025-01-15T10:30:00Z'
-        },
-        {
-          id: '2',
-          userId: '1',
-          categoryId: '1',
-          subcategoryId: '2',
-          amount: 32.89,
-          description: 'Chicken breast and milk',
-          storeName: 'Safeway',
-          storeLocation: 'Downtown',
-          date: '2025-01-14',
-          createdAt: '2025-01-14T18:45:00Z'
-        },
-        {
-          id: '3',
-          userId: '2',
-          categoryId: '2',
-          subcategoryId: '5',
-          amount: 125.45,
-          description: 'Monthly electricity bill',
-          notes: 'Higher usage due to cold weather',
-          storeName: 'Seattle City Light',
           storeLocation: 'Online',
           date: '2025-01-10',
           createdAt: '2025-01-10T08:00:00Z'
@@ -395,15 +361,14 @@ export class IndexedDBStorage {
         this.setExpenses(mockExpenses)
       ]);
 
-      // Set default settings without real data flag (will be set when user adds real data)
+      // Initialize default settings
       await this.setSettings({
         fontSize: 'small',
         auth: 'false'
       });
-      
       console.log('IndexedDB: Default settings initialized');
     } catch (error) {
-      console.error('Error during mock data initialization:', error);
+      console.error('Error creating mock data:', error);
     }
   }
 
