@@ -33,6 +33,8 @@ export function useIndexedDBStorage<T>(
     };
 
     loadData();
+  }
+  )
 
   const updateData = async (newData: T | ((prev: T) => T)) => {
     try {
