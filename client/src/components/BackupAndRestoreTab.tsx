@@ -97,8 +97,6 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
       });
     } finally {
       setIsRestoring(false);
-      // Reset file input
-      event.target.value = '';
     }
   };
 
@@ -331,19 +329,6 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
             <div>
               <div className="font-medium text-slate-900">Readable Report</div>
               <div className="text-sm text-slate-500">Human-readable summary</div>
-            </div>
-          </button>
-
-          <button
-            onClick={handleCreateBlankBackup}
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-left"
-          >
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FilePlus className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <div className="font-medium text-slate-900">Create Blank Backup</div>
-              <div className="text-sm text-slate-500">Empty backup template</div>
             </div>
           </button>
         </div>
