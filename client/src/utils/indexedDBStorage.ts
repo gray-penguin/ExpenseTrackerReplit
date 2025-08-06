@@ -255,43 +255,12 @@ export class IndexedDBStorage {
         this.getSettings()
       ]);
 
-      // Check if user has real data flag set
-      const hasRealData = settings.hasRealData === 'true';
-
-      if (hasRealData) {
-        console.log('IndexedDB: Real user data detected, skipping mock data initialization');
-        await this.setSettings({ ...settings, initialized: 'true' });
-        return;
-      }
-
-      // Check for any non-mock data indicators
-      const hasNonMockUsers = users.some(user => 
-        !['Alex Chen', 'Sarah Johnson'].includes(user.name) ||
-        !['alexc', 'sarahj'].includes(user.username)
-      );
-      
-      const hasNonMockExpenses = expenses.some(expense =>
-        !['Weekly fresh vegetables and fruits', 'Chicken breast and milk', 'Monthly electricity bill', 'Netflix subscription', 'Weekly grocery shopping', 'Gas for car'].includes(expense.description)
-      );
-
-      // If we detect any real user data, mark as real and don't overwrite
-      if (hasNonMockUsers || hasNonMockExpenses || users.length > 2 || expenses.length > 4) {
-        console.log('IndexedDB: Non-mock data detected, preserving existing data');
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        return;
-      }
-
       // Only initialize mock data if all stores are completely empty
       if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
         console.log('IndexedDB: Empty database detected, initializing with mock data');
         await this.createMockData();
       } else {
         console.log('IndexedDB: Existing data found, skipping mock data initialization');
-        // Mark that we have real data to prevent future overwrites
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        // Mark that we have real data to prevent future overwrites
-        await this.setSettings({ ...settings, hasRealData: 'true' });
       }
     } catch (error) {
       console.error('Error in initializeMockData:', error);
@@ -417,18 +386,6 @@ export class IndexedDBStorage {
           storeLocation: 'Online',
           date: '2025-01-10',
           createdAt: '2025-01-10T08:00:00Z'
-        },
-        {
-          id: '4',
-          userId: '2',
-          categoryId: '3',
-          subcategoryId: '12',
-          amount: 15.99,
-          description: 'Netflix subscription',
-          storeName: 'Netflix',
-          storeLocation: 'Online',
-          date: '2025-01-12',
-          createdAt: '2025-01-12T12:00:00Z'
         }
       ];
 
@@ -443,6 +400,7 @@ export class IndexedDBStorage {
         fontSize: 'small',
         auth: 'false'
       });
+      
       console.log('IndexedDB: Default settings initialized');
     } catch (error) {
       console.error('Error during mock data initialization:', error);
