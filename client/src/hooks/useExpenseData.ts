@@ -37,7 +37,7 @@ export function useExpenseData() {
         console.warn('ExpenseData: Loading timeout reached, forcing completion');
         setHasTimedOut(true);
       }
-    }, 10000); // 10 second timeout
+    }, 5000); // 5 second timeout
     
     return () => clearTimeout(timeout);
   }, [isLoading]);

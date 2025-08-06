@@ -18,10 +18,13 @@ export function useIndexedDBStorage<T>(
         setIsLoading(true);
         setError(null);
         
-        await indexedDBStorage.init();
-        console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
-        await indexedDBStorage.initializeMockData();
-        console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
+        // Only initialize once per session to prevent loops
+        if (!indexedDBStorage.db) {
+          await indexedDBStorage.init();
+          console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
+          await indexedDBStorage.initializeMockData();
+          console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
+        }
         
         const loadedData = await getMethod();
         console.log(`IndexedDBStorage: ${storeName} - Data loaded:`, loadedData);
@@ -37,7 +40,7 @@ export function useIndexedDBStorage<T>(
     };
 
     loadData();
-  }, [storeName]);
+  }, []); // Remove storeName dependency to prevent re-initialization
 
   const updateData = async (newData: T | ((prev: T) => T)) => {
     try {

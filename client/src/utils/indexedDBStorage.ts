@@ -21,9 +21,14 @@ export class IndexedDBStorage {
     settings: 'settings'
   };
 
-  private db: IDBDatabase | null = null;
+  public db: IDBDatabase | null = null;
+  private initialized: boolean = false;
 
   async init(): Promise<void> {
+    if (this.initialized && this.db) {
+      return; // Already initialized
+    }
+    
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
@@ -32,6 +37,7 @@ export class IndexedDBStorage {
       };
       request.onsuccess = () => {
         this.db = request.result;
+        this.initialized = true;
         console.log('IndexedDB: Database opened successfully');
         resolve();
       };
@@ -235,6 +241,15 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
+    if (this.initialized && this.db) {
+      // Check if we've already run initialization
+      const settings = await this.getSettings();
+      if (settings.initialized === 'true') {
+        console.log('IndexedDB: Already initialized, skipping mock data');
+        return;
+      }
+    }
+    
     try {
       const [users, categories, expenses, settings] = await Promise.all([
         this.getUsers(),
@@ -248,6 +263,7 @@ export class IndexedDBStorage {
 
       if (hasRealData) {
         console.log('IndexedDB: Real user data detected, skipping mock data initialization');
+        await this.setSettings({ ...settings, initialized: 'true' });
         return;
       }
 
@@ -439,7 +455,8 @@ export class IndexedDBStorage {
       await this.setSettings({
         fontSize: 'small',
         auth: 'false',
-        hasRealData: 'false'
+        hasRealData: 'false',
+        initialized: 'true'
       });
       
       console.log('IndexedDB: Default settings initialized');
