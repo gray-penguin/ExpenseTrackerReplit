@@ -268,12 +268,15 @@ export class FileBackupManager {
    * Download backup as JSON file
    */
   static async downloadBackup(filename?: string): Promise<void> {
+    console.log('FileBackupManager.downloadBackup called with filename:', filename);
     try {
       const backup = await indexedDBStorage.createFullBackup();
+      console.log('Backup data created:', backup);
       const timestamp = new Date().toISOString().split('T')[0];
       const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
       
       this.downloadJSON(backup, filename || defaultFilename);
+      console.log('Download initiated for file:', filename || defaultFilename);
     } catch (error) {
       console.error('Backup failed:', error);
       alert('Backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -284,11 +287,14 @@ export class FileBackupManager {
    * Download backup with location prompt
    */
   static async downloadBackupWithPrompt(): Promise<void> {
+    console.log('FileBackupManager.downloadBackupWithPrompt called');
     try {
       const locationResult = await this.promptForBackupLocation();
+      console.log('Location result:', locationResult);
       if (!locationResult) return;
 
       const backup = await indexedDBStorage.createFullBackup();
+      console.log('Backup data for prompt:', backup);
       this.downloadJSON(backup, locationResult.filename);
 
       // Save this as a recent location (simulated since we can't know actual path)
@@ -310,12 +316,15 @@ export class FileBackupManager {
    * Download backup as human-readable format
    */
   static async downloadReadableBackup(filename?: string): Promise<void> {
+    console.log('FileBackupManager.downloadReadableBackup called');
     try {
       const backup = await indexedDBStorage.createFullBackup();
+      console.log('Readable backup data:', backup);
       const timestamp = new Date().toISOString().split('T')[0];
       const defaultFilename = `expense-tracker-readable-${timestamp}.txt`;
       
       const readable = this.formatReadableBackup(backup);
+      console.log('Formatted readable backup length:', readable.length);
       this.downloadText(readable, filename || defaultFilename);
     } catch (error) {
       console.error('Readable backup failed:', error);
@@ -327,6 +336,7 @@ export class FileBackupManager {
    * Create a blank backup file for users to set up new backup files
    */
   static async createBlankBackupFile(): Promise<void> {
+    console.log('FileBackupManager.createBlankBackupFile called');
     try {
       const timestamp = new Date().toISOString();
       const blankBackup: BackupData = {
@@ -352,6 +362,7 @@ export class FileBackupManager {
       };
 
       const filename = `expense-tracker-blank-${new Date().toISOString().split('T')[0]}.json`;
+      console.log('Creating blank backup with filename:', filename);
       this.downloadJSON(blankBackup, filename);
     } catch (error) {
       console.error('Create blank backup failed:', error);

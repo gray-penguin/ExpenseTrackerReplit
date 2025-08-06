@@ -652,6 +652,7 @@ export class IndexedDBStorage {
   }
 
   async createFullBackup(): Promise<BackupData> {
+    console.log('IndexedDBStorage.createFullBackup called');
     try {
       const [users, categories, expenses, credentials, settings] = await Promise.all([
         this.getUsers(),
@@ -661,6 +662,13 @@ export class IndexedDBStorage {
         this.getSettings()
       ]);
 
+      console.log('Retrieved data for backup:', { 
+        usersCount: users.length, 
+        categoriesCount: categories.length, 
+        expensesCount: expenses.length,
+        credentials: !!credentials,
+        settings: !!settings
+      });
       const flatCategories = categories.map(category => ({
         id: category.id.toString(),
         name: category.name,
@@ -680,7 +688,7 @@ export class IndexedDBStorage {
         }))
       );
 
-      return {
+      const backupData = {
         version: '1.0.0',
         timestamp: new Date().toISOString(),
         users,
@@ -691,6 +699,9 @@ export class IndexedDBStorage {
         settings,
         useCase: credentials.useCase || 'personal-team'
       };
+
+      console.log('Created backup data:', backupData);
+      return backupData;
     } catch (error) {
       console.error('Error creating backup:', error);
       throw new Error('Failed to create backup: ' + (error instanceof Error ? error.message : 'Unknown error'));

@@ -10,6 +10,7 @@ export function Navbar() {
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
+    console.log('Quick backup button clicked');
     FileBackupManager.downloadBackup().catch(error => {
       console.error('Backup failed:', error);
       alert('Backup failed. Please try again.');
