@@ -445,22 +445,160 @@ export class FileBackupManager {
   private static downloadBlob(blob: Blob, filename: string): void {
     console.log('downloadBlob called with filename:', filename, 'blob size:', blob.size);
     try {
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      console.log('Object URL created:', url);
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      console.log('Link element created and added to DOM');
-      link.click();
-      console.log('Link clicked - download should start');
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      console.log('Cleanup completed');
+      // Try multiple download methods for better compatibility
+      if (navigator.userAgent.includes('WebContainer')) {
+        // Development environment - use alternative method
+        console.log('WebContainer detected, using alternative download method');
+        this.downloadBlobAlternative(blob, filename);
+      } else {
+        // Production environment - use standard method
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        console.log('Object URL created:', url);
+        
+        // Set attributes
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        console.log('Link element created and added to DOM');
+        
+        // Force click with multiple methods
+        link.click();
+        
+        // Alternative click methods for better compatibility
+        if (typeof link.click === 'function') {
+          link.click();
+        } else {
+          // Fallback for older browsers
+          const event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          });
+          link.dispatchEvent(event);
+        }
+        
+        console.log('Link clicked - download should start');
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          console.log('Cleanup completed');
+        }, 100);
+      }
     } catch (error) {
       console.error('Error in downloadBlob:', error);
+      // Fallback to alternative method if standard method fails
+      console.log('Standard download failed, trying alternative method');
+      this.downloadBlobAlternative(blob, filename);
+    }
+  }
+
+  private static downloadBlobAlternative(blob: Blob, filename: string): void {
+    console.log('Using alternative download method for:', filename);
+    try {
+      // Method 1: Try using the File System Access API if available
+      if ('showSaveFilePicker' in window) {
+        console.log('Using File System Access API');
+        this.downloadWithFileSystemAPI(blob, filename);
+        return;
+      }
+      
+      // Method 2: Force download using data URL for smaller files
+      if (blob.size < 50 * 1024 * 1024) { // Less than 50MB
+        console.log('Using data URL method');
+        const reader = new FileReader();
+        reader.onload = function() {
+          const link = document.createElement('a');
+          link.href = reader.result as string;
+          link.download = filename;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          console.log('Data URL download completed');
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+      
+      // Method 3: Show save dialog with copy-paste option
+      console.log('Showing manual save dialog');
+      this.showManualSaveDialog(blob, filename);
+      
+    } catch (error) {
+      console.error('Alternative download method failed:', error);
+      this.showManualSaveDialog(blob, filename);
+    }
+  }
+
+  private static async downloadWithFileSystemAPI(blob: Blob, filename: string): Promise<void> {
+    try {
+      const fileHandle = await (window as any).showSaveFilePicker({
+        suggestedName: filename,
+        types: [{
+          description: 'JSON files',
+          accept: { 'application/json': ['.json'] }
+        }]
+      });
+      
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      console.log('File saved using File System Access API');
+    } catch (error) {
+      console.error('File System Access API failed:', error);
       throw error;
+    }
+  }
+
+  private static async showManualSaveDialog(blob: Blob, filename: string): Promise<void> {
+    try {
+      const text = await blob.text();
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[70]';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl">
+          <div class="p-6 border-b border-slate-200">
+            <h3 class="text-lg font-bold text-slate-900">Manual Backup Save</h3>
+            <p class="text-slate-500">Copy the backup data and save it manually</p>
+          </div>
+          <div class="p-6">
+            <p class="text-sm text-slate-700 mb-4">
+              Your browser prevented the automatic download. Please copy the backup data below and save it as <strong>${filename}</strong>:
+            </p>
+            <textarea 
+              readonly 
+              class="w-full h-64 p-3 border border-slate-300 rounded-lg font-mono text-xs"
+              onclick="this.select()"
+            >${text}</textarea>
+            <div class="flex gap-3 mt-4">
+              <button 
+                onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.value).then(() => alert('Copied to clipboard!')).catch(() => alert('Copy failed - please select and copy manually'))"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Copy to Clipboard
+              </button>
+              <button 
+                onclick="document.body.removeChild(this.closest('.fixed'))"
+                class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      console.log('Manual save dialog shown');
+    } catch (error) {
+      console.error('Failed to show manual save dialog:', error);
+      alert('Backup failed: Unable to create backup file. Please try again.');
     }
   }
 
