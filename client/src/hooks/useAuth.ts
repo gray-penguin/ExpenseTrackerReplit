@@ -20,9 +20,16 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
 };
 
 export function useAuth() {
-
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const [authState, savedCredentials] = await Promise.all([
+          indexedDBStorage.getAuthState(),
+          indexedDBStorage.getCredentials(),
         await indexedDBStorage.initializeMockData();
         ]);
         
