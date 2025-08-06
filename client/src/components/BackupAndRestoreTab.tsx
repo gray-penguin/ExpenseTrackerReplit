@@ -57,20 +57,18 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
 
   const handleDownloadBackup = () => {
     const filename = getFormattedFilename();
-    FileBackupManager.downloadBackup(filename);
+    // Direct download without async/await to ensure proper user interaction
+    FileBackupManager.downloadBackup(filename).catch(error => {
+      console.error('Backup failed:', error);
+      alert('Backup failed. Please try again.');
+    });
   };
 
   const handleDownloadBackupWithPrompt = async () => {
-    await FileBackupManager.downloadBackupWithPrompt();
-  };
-
-  const handleDownloadReadableBackup = () => {
-    const filename = defaultFilename.replace('.json', '.txt').replace('{date}', new Date().toISOString().split('T')[0]);
-    FileBackupManager.downloadReadableBackup(filename);
-  };
-
-  const handleCreateBlankBackup = async () => {
-    await FileBackupManager.createBlankBackupFile();
+    FileBackupManager.downloadBackupWithPrompt().catch(error => {
+      console.error('Backup with prompt failed:', error);
+      alert('Backup failed. Please try again.');
+    });
   };
 
   const handleFileRestore = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,8 +276,8 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
               <Download className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <div className="font-medium text-slate-900">Smart Backup</div>
-              <div className="text-sm text-slate-500">Choose location and filename</div>
+              <div className="font-medium text-slate-900">Backup with Custom Name</div>
+              <div className="text-sm text-slate-500">Choose your own filename</div>
             </div>
           </button>
 
