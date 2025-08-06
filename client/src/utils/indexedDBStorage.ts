@@ -246,41 +246,11 @@ export class IndexedDBStorage {
       console.log('IndexedDB: Already initialized, skipping mock data');
       return;
     }
-    
-    try {
-      const [users, categories, expenses, settings] = await Promise.all([
         this.getUsers(),
         this.getCategories(),
         this.getExpenses(),
         this.getSettings()
       ]);
-
-      // Check if user has real data flag set
-      const hasRealData = settings.hasRealData === 'true';
-
-      if (hasRealData) {
-        console.log('IndexedDB: Real user data detected, skipping mock data initialization');
-        await this.setSettings({ ...settings, initialized: 'true' });
-        return;
-      }
-
-      // Check for any non-mock data indicators
-      const hasNonMockUsers = users.some(user => 
-        !['Alex Chen', 'Sarah Johnson'].includes(user.name) ||
-        !['alexc', 'sarahj'].includes(user.username)
-      );
-      
-      const hasNonMockExpenses = expenses.some(expense =>
-        !['Weekly fresh vegetables and fruits', 'Chicken breast and milk', 'Monthly electricity bill', 'Netflix subscription', 'Weekly grocery shopping', 'Gas for car'].includes(expense.description)
-      );
-
-      // If we detect any real user data, mark as real and don't overwrite
-      if (hasNonMockUsers || hasNonMockExpenses || users.length > 2 || expenses.length > 4) {
-        console.log('IndexedDB: Non-mock data detected, preserving existing data');
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        return;
-      }
 
       // Only initialize mock data if all stores are completely empty
       if (users.length === 0 && categories.length === 0 && expenses.length === 0) {
@@ -288,14 +258,9 @@ export class IndexedDBStorage {
         await this.createMockData();
       } else {
         console.log('IndexedDB: Existing data found, skipping mock data initialization');
-        // Mark that we have real data to prevent future overwrites
-        await this.setSettings({ ...settings, hasRealData: 'true' });
-        // Mark that we have real data to prevent future overwrites
-        await this.setSettings({ ...settings, hasRealData: 'true' });
       }
     } catch (error) {
       console.error('Error in initializeMockData:', error);
-    }
   }
 
   // Separate method for creating mock data
