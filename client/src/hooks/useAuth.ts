@@ -31,26 +31,10 @@ export function useAuth() {
       try {
         console.log('Auth: Starting initialization...');
         
-        // Add timeout for IndexedDB operations
-        const initPromise = Promise.race([
-          indexedDBStorage.init(),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('IndexedDB init timeout')), 6000)
-          )
-        ]);
-        
-        await initPromise;
+        await indexedDBStorage.init();
         console.log('Auth: IndexedDB initialized');
         
-        // Add timeout for mock data initialization
-        const mockDataPromise = Promise.race([
-          indexedDBStorage.initializeMockData(),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Mock data init timeout')), 2000)
-          )
-        ]);
-        
-        await mockDataPromise;
+        await indexedDBStorage.initializeMockData();
         console.log('Auth: Mock data initialized');
         
         const [authState, savedCredentials] = await Promise.all([
@@ -63,7 +47,7 @@ export function useAuth() {
         setCredentials(savedCredentials);
       } catch (error) {
         console.error('Error initializing auth:', error);
-        // Set fallback values and force completion to prevent infinite loading
+        // Set fallback values
         setIsAuthenticated(false);
         setCredentials({
           username: 'admin',

@@ -25,19 +25,12 @@ export class IndexedDBStorage {
 
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Add timeout to prevent hanging in production
-      const timeoutId = setTimeout(() => {
-        reject(new Error('IndexedDB initialization timeout'));
-      }, 5000);
-
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
       request.onerror = () => {
-        clearTimeout(timeoutId);
         reject(request.error);
       };
       request.onsuccess = () => {
-        clearTimeout(timeoutId);
         this.db = request.result;
         console.log('IndexedDB: Database opened successfully');
         resolve();
@@ -242,27 +235,6 @@ export class IndexedDBStorage {
 
   // Initialize with mock data if database is empty
   async initializeMockData(): Promise<void> {
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Mock data initialization timeout')), 3000);
-    });
-    
-    const initPromise = this.initializeMockDataInternal();
-    
-    try {
-      await Promise.race([initPromise, timeoutPromise]);
-    } catch (error) {
-      console.error('Mock data initialization failed or timed out:', error);
-      // Set minimal fallback settings to prevent infinite loading
-      try {
-        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
-      } catch (fallbackError) {
-        console.error('Failed to set fallback settings:', fallbackError);
-      }
-    }
-  }
-
-  private async initializeMockDataInternal(): Promise<void> {
     try {
       console.log('IndexedDB: Starting initializeMockData...');
       // Check if we have any real user data (non-mock data)
@@ -317,12 +289,6 @@ export class IndexedDBStorage {
       }
     } catch (error) {
       console.error('Error in initializeMockData:', error);
-      // Set fallback to prevent infinite loading
-      try {
-        await this.setSettings({ fontSize: 'small', auth: 'false', hasRealData: 'false' });
-      } catch (fallbackError) {
-        console.error('Failed to set fallback settings:', fallbackError);
-      }
     }
   }
 

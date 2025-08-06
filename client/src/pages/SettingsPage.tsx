@@ -19,7 +19,8 @@ export function SettingsPage() {
   };
 
   const handleDataRestored = () => {
-    // Data will be automatically updated through the hooks
+    // Reload the page to reflect restored data
+    window.location.reload();
   };
 
   return (

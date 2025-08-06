@@ -209,7 +209,7 @@ export const Settings: React.FC<SettingsProps> = ({
   };
 
   const handleDataRestored = () => {
-    // Reload the page to reflect restored data
+    // Data will be automatically updated through the hooks
     window.location.reload();
   };
 
