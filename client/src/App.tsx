@@ -27,7 +27,12 @@ function App() {
   // Show loading state while initializing
   if (authLoading || dataLoading) {
     return (
-      <div>Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your expense tracker...</p>
+        </div>
+      </div>
     );
   }
   

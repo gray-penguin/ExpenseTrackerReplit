@@ -30,7 +30,6 @@ export function useAuth() {
         const [authState, savedCredentials] = await Promise.all([
           indexedDBStorage.getAuthState(),
           indexedDBStorage.getCredentials(),
-        await indexedDBStorage.initializeMockData();
         ]);
         
         console.log('Auth: Retrieved auth state and credentials', { authState, savedCredentials });

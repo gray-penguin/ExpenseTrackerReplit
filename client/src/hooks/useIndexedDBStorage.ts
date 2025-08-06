@@ -22,6 +22,17 @@ export function useIndexedDBStorage<T>(
         console.log(`IndexedDBStorage: ${storeName} - IndexedDB initialized`);
         await indexedDBStorage.initializeMockData();
         console.log(`IndexedDBStorage: ${storeName} - Mock data check complete`);
+        
+        const loadedData = await getMethod();
+        console.log(`IndexedDBStorage: ${storeName} - Data loaded:`, loadedData);
+        setData(loadedData);
+      } catch (err) {
+        console.error(`Error loading ${storeName}:`, err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setData(defaultValue);
+      } finally {
+        console.log(`IndexedDBStorage: ${storeName} - Loading complete`);
+        setIsLoading(false);
       }
     };
 

@@ -239,7 +239,6 @@ export class FileBackupManager {
   /**
    * Create a complete backup of all application data
    */
-
   static async createFullBackup(): Promise<BackupData> {
     return await indexedDBStorage.createFullBackup();
   }
@@ -301,14 +300,16 @@ export class FileBackupManager {
       subcategories: [],
       expenses: [],
       credentials: {
-        email: '',
-        password: '',
-        securityQuestion: '',
-        securityAnswer: ''
+        username: 'admin',
+        password: 'pass123',
+        email: 'admin@example.com',
+        securityQuestion: 'What is your favorite color?',
+        securityAnswer: 'blue',
+        useCase: 'personal-team'
       },
       settings: {
-        fontSize: 'medium',
-        theme: 'light'
+        fontSize: 'small',
+        auth: 'false'
       },
       useCase: 'personal-team'
     };
