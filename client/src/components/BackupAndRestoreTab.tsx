@@ -277,7 +277,7 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
             </div>
             <div>
               <div className="font-medium text-slate-900">Quick Backup</div>
-              <div className="text-sm text-slate-500">Download with default name</div>
+              <div className="text-sm text-slate-500">Download a JSON backup file to save your data</div>
             </div>
           </button>
         </div>
