@@ -281,6 +281,8 @@ export class IndexedDBStorage {
   }
 
   // Separate method for actually initializing mock data
+  private async initializeMockDataInternal(): Promise<void> {
+    try {
       // Initialize mock users
       const mockUsers = [
         {
