@@ -73,6 +73,11 @@ export function Navbar() {
               Backup
             </button>
             
+            {/* Backup Warning Text */}
+            <div className="text-red-600 text-xs font-medium">
+              Please backup your data before exiting!
+            </div>
+            
             {/* Logout Button */}
             <button
               onClick={handleLogout}
