@@ -10,24 +10,7 @@ export function Navbar() {
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
-    FileBackupManager.downloadBackup()
-      .then(() => {
-        // Give a brief moment for the download to start
-        setTimeout(() => {
-          // Try to close the browser tab/window
-          window.close();
-          
-          // If window.close() doesn't work (some browsers block it), 
-          // show a message to the user
-          setTimeout(() => {
-            alert('Backup complete! You can now safely close this tab.');
-          }, 500);
-        }, 1000);
-      })
-      .catch(error => {
-        console.error('Backup failed:', error);
-        alert('Backup failed. Please try again.');
-      });
+    FileBackupManager.downloadBackup();
   };
 
   const navigation = [
