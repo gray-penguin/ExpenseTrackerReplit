@@ -26,7 +26,6 @@ function App() {
 
   // Show loading state while initializing
   if (authLoading || dataLoading) {
-    return (
       <div>Loading...</div>
     );
   }
