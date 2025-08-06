@@ -364,10 +364,6 @@ export class FileBackupManager {
    */
   static async createFullBackup(): Promise<BackupData> {
     return await indexedDBStorage.createFullBackup();
-    const timestamp = new Date().toISOString().split('T')[0];
-    const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
-    
-    this.downloadJSON(backup, filename || defaultFilename);
   }
 
   /**
