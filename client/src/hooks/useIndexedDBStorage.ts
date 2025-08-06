@@ -20,7 +20,7 @@ export function useIndexedDBStorage<T>(
         
         // Add timeout for initialization
         const initTimeout = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Initialization timeout')), 4000);
+          setTimeout(() => reject(new Error('Initialization timeout')), 6000);
         });
         
         // Initialize IndexedDB and mock data if needed with timeout

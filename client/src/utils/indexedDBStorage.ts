@@ -24,19 +24,20 @@ export class IndexedDBStorage {
   private db: IDBDatabase | null = null;
 
   async init(): Promise<void> {
-    // Add timeout to prevent hanging in production
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('IndexedDB initialization timeout')), 5000);
-    });
-    
-    const initPromise = new Promise<void>((resolve, reject) => {
-    }
-    )
     return new Promise((resolve, reject) => {
+      // Add timeout to prevent hanging in production
+      const timeoutId = setTimeout(() => {
+        reject(new Error('IndexedDB initialization timeout'));
+      }, 5000);
+
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        clearTimeout(timeoutId);
+        reject(request.error);
+      };
       request.onsuccess = () => {
+        clearTimeout(timeoutId);
         this.db = request.result;
         console.log('IndexedDB: Database opened successfully');
         resolve();
@@ -71,8 +72,6 @@ export class IndexedDBStorage {
         console.log('IndexedDB: Object stores created');
       };
     });
-    
-    return Promise.race([initPromise, timeoutPromise]);
   }
 
   private async ensureDB(): Promise<IDBDatabase> {

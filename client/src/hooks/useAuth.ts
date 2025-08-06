@@ -35,7 +35,7 @@ export function useAuth() {
         const initPromise = Promise.race([
           indexedDBStorage.init(),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('IndexedDB init timeout')), 3000)
+            setTimeout(() => reject(new Error('IndexedDB init timeout')), 6000)
           )
         ]);
         
