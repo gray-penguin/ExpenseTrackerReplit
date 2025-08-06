@@ -72,8 +72,10 @@ export function Navbar() {
               <Download className="w-4 h-4" />
               Backup
             </button>
-            
-            {/* Backup Warning Text */}
+          </div>
+          
+          {/* Backup Warning Text - positioned below backup button */}
+          <div className="absolute top-full right-4 mt-1">
             <div className="text-red-600 text-xs font-medium">
               Please backup your data before exiting!
             </div>
