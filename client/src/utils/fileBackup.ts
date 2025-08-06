@@ -275,7 +275,9 @@ export class FileBackupManager {
       const timestamp = new Date().toISOString().split('T')[0];
       const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
       
-      this.downloadJSON(backup, filename || defaultFilename);
+      const finalFilename = filename || defaultFilename;
+      console.log('About to call downloadJSON with filename:', finalFilename);
+      this.downloadJSON(backup, finalFilename);
       console.log('Download initiated for file:', filename || defaultFilename);
     } catch (error) {
       console.error('Backup failed:', error);
@@ -295,7 +297,9 @@ export class FileBackupManager {
 
       const backup = await indexedDBStorage.createFullBackup();
       console.log('Backup data for prompt:', backup);
+      console.log('About to call downloadJSON with filename:', locationResult.filename);
       this.downloadJSON(backup, locationResult.filename);
+      console.log('downloadJSON call completed');
 
       // Save this as a recent location (simulated since we can't know actual path)
       if (!locationResult.location) {
@@ -417,10 +421,18 @@ export class FileBackupManager {
   }
 
   private static downloadJSON(data: any, filename: string): void {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { 
-      type: 'application/json;charset=utf-8;' 
-    });
-    this.downloadBlob(blob, filename);
+    console.log('downloadJSON called with filename:', filename, 'data size:', JSON.stringify(data).length);
+    try {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { 
+        type: 'application/json;charset=utf-8;' 
+      });
+      console.log('Blob created, size:', blob.size);
+      this.downloadBlob(blob, filename);
+      console.log('downloadBlob called successfully');
+    } catch (error) {
+      console.error('Error in downloadJSON:', error);
+      throw error;
+    }
   }
 
   private static downloadText(text: string, filename: string): void {
@@ -431,15 +443,25 @@ export class FileBackupManager {
   }
 
   private static downloadBlob(blob: Blob, filename: string): void {
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    console.log('downloadBlob called with filename:', filename, 'blob size:', blob.size);
+    try {
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      console.log('Object URL created:', url);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      console.log('Link element created and added to DOM');
+      link.click();
+      console.log('Link clicked - download should start');
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      console.log('Cleanup completed');
+    } catch (error) {
+      console.error('Error in downloadBlob:', error);
+      throw error;
+    }
   }
 
   private static readFileAsText(file: File): Promise<string> {
