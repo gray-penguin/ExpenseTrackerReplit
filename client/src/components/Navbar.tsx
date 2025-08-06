@@ -10,7 +10,24 @@ export function Navbar() {
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
-    FileBackupManager.downloadBackup();
+    FileBackupManager.downloadBackup()
+      .then(() => {
+        // Give a brief moment for the download to start
+        setTimeout(() => {
+          // Try to close the browser tab/window
+          window.close();
+          
+          // If window.close() doesn't work (some browsers block it), 
+          // show a message to the user
+          setTimeout(() => {
+            alert('Backup complete! You can now safely close this tab.');
+          }, 500);
+        }, 1000);
+      })
+      .catch(error => {
+        console.error('Backup failed:', error);
+        alert('Backup failed. Please try again.');
+      });
   };
 
   const navigation = [
@@ -63,7 +80,7 @@ export function Navbar() {
             {/* Quick Backup Button */}
             <button
               onClick={handleQuickBackup}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm min-w-[140px]"
+              className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
               title="Download backup and close application"
             >
               <Download className="w-4 h-4" />
