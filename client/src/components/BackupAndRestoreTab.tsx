@@ -102,8 +102,6 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
     }
   };
 
-  const backupLocations = FileBackupManager.getBackupLocations();
-
   return (
     <div className="space-y-6">
       <div>
@@ -263,29 +261,6 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
           )}
         </div>
       </div>
-
-      {/* Backup Locations */}
-      {backupLocations.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-            <FolderOpen className="w-4 h-4" />
-            Recent Backup Locations
-          </h4>
-          <div className="space-y-2">
-            {backupLocations.slice(0, 3).map((location, index) => (
-              <div key={index} className="flex items-center justify-between text-sm">
-                <div>
-                  <div className="font-medium text-blue-900">{location.name}</div>
-                  <div className="text-blue-700 text-xs">{location.path}</div>
-                </div>
-                <div className="text-blue-600 text-xs">
-                  {new Date(location.lastUsed).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Manual Backup Section */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
