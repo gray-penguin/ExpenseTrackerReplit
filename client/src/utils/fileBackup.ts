@@ -268,7 +268,102 @@ export class FileBackupManager {
    * Download backup as JSON file
    */
   static async downloadBackup(filename?: string): Promise<void> {
-    const backup = await this.createFullBackup();
+    try {
+      const backup = await indexedDBStorage.createFullBackup();
+      const timestamp = new Date().toISOString().split('T')[0];
+      const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
+      
+      this.downloadJSON(backup, filename || defaultFilename);
+    } catch (error) {
+      console.error('Backup failed:', error);
+      alert('Backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  /**
+   * Download backup with location prompt
+   */
+  static async downloadBackupWithPrompt(): Promise<void> {
+    try {
+      const locationResult = await this.promptForBackupLocation();
+      if (!locationResult) return;
+
+      const backup = await indexedDBStorage.createFullBackup();
+      this.downloadJSON(backup, locationResult.filename);
+
+      // Save this as a recent location (simulated since we can't know actual path)
+      if (!locationResult.location) {
+        const newLocation: BackupLocation = {
+          path: 'Downloads', // Browser default
+          name: 'Downloads Folder',
+          lastUsed: new Date().toISOString()
+        };
+        this.saveBackupLocation(newLocation);
+      }
+    } catch (error) {
+      console.error('Backup with prompt failed:', error);
+      alert('Backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  /**
+   * Download backup as human-readable format
+   */
+  static async downloadReadableBackup(filename?: string): Promise<void> {
+    try {
+      const backup = await indexedDBStorage.createFullBackup();
+      const timestamp = new Date().toISOString().split('T')[0];
+      const defaultFilename = `expense-tracker-readable-${timestamp}.txt`;
+      
+      const readable = this.formatReadableBackup(backup);
+      this.downloadText(readable, filename || defaultFilename);
+    } catch (error) {
+      console.error('Readable backup failed:', error);
+      alert('Readable backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  /**
+   * Create a blank backup file for users to set up new backup files
+   */
+  static async createBlankBackupFile(): Promise<void> {
+    try {
+      const timestamp = new Date().toISOString();
+      const blankBackup: BackupData = {
+        version: '1.0.0',
+        timestamp,
+        users: [],
+        categories: [],
+        subcategories: [],
+        expenses: [],
+        credentials: {
+          username: 'admin',
+          password: 'pass123',
+          email: 'admin@example.com',
+          securityQuestion: 'What is your favorite color?',
+          securityAnswer: 'blue',
+          useCase: 'personal-team'
+        },
+        settings: {
+          fontSize: 'small',
+          auth: 'false'
+        },
+        useCase: 'personal-team'
+      };
+
+      const filename = `expense-tracker-blank-${new Date().toISOString().split('T')[0]}.json`;
+      this.downloadJSON(blankBackup, filename);
+    } catch (error) {
+      console.error('Create blank backup failed:', error);
+      alert('Create blank backup failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  /**
+   * Create a complete backup of all application data
+   */
+  static async createFullBackup(): Promise<BackupData> {
+    return await indexedDBStorage.createFullBackup();
     const timestamp = new Date().toISOString().split('T')[0];
     const defaultFilename = `expense-tracker-backup-${timestamp}.json`;
     

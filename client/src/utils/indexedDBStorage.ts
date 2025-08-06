@@ -652,44 +652,49 @@ export class IndexedDBStorage {
   }
 
   async createFullBackup(): Promise<BackupData> {
-    const [users, categories, expenses, credentials, settings] = await Promise.all([
-      this.getUsers(),
-      this.getCategories(),
-      this.getExpenses(),
-      this.getCredentials(),
-      this.getSettings()
-    ]);
+    try {
+      const [users, categories, expenses, credentials, settings] = await Promise.all([
+        this.getUsers(),
+        this.getCategories(),
+        this.getExpenses(),
+        this.getCredentials(),
+        this.getSettings()
+      ]);
 
-    const flatCategories = categories.map(category => ({
-      id: category.id.toString(),
-      name: category.name,
-      icon: category.icon,
-      color: category.color,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-
-    const flatSubcategories = categories.flatMap(category =>
-      category.subcategories.map(subcategory => ({
-        id: subcategory.id.toString(),
-        name: subcategory.name,
-        categoryId: category.id.toString(),
+      const flatCategories = categories.map(category => ({
+        id: category.id.toString(),
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      }))
-    );
+      }));
 
-    return {
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
-      users,
-      categories: flatCategories,
-      subcategories: flatSubcategories,
-      expenses,
-      credentials,
-      settings,
-      useCase: credentials.useCase || 'personal-team'
-    };
+      const flatSubcategories = categories.flatMap(category =>
+        category.subcategories.map(subcategory => ({
+          id: subcategory.id.toString(),
+          name: subcategory.name,
+          categoryId: category.id.toString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }))
+      );
+
+      return {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        users,
+        categories: flatCategories,
+        subcategories: flatSubcategories,
+        expenses,
+        credentials,
+        settings,
+        useCase: credentials.useCase || 'personal-team'
+      };
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      throw new Error('Failed to create backup: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
   }
 
   async restoreFromBackup(backup: BackupData): Promise<void> {
