@@ -103,8 +103,6 @@ export function useAuth() {
   const logout = () => {
     indexedDBStorage.setAuthState(false);
     setIsAuthenticated(false);
-    // Force refresh to ensure clean state
-    window.location.reload();
   };
 
   const updateCredentials = (newCredentials: Partial<AuthCredentials>) => {

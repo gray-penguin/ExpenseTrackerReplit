@@ -88,10 +88,7 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
       });
 
       if (result.success && onDataRestored) {
-        // Delay to show success message, then reload
-        setTimeout(() => {
-          onDataRestored();
-        }, 1500);
+        onDataRestored();
       }
     } catch (error) {
       setRestoreMessage({

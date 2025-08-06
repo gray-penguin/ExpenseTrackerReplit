@@ -124,10 +124,6 @@ export const Settings: React.FC<SettingsProps> = ({
   const handleUseCaseChange = (useCaseId: string) => {
     if (onUpdateUseCase) {
       onUpdateUseCase(useCaseId);
-      // Force refresh to update all UI elements with new terminology
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
     }
   };
   const handleClearAllExpenses = () => {
