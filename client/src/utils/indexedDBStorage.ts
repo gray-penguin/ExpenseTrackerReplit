@@ -12,90 +12,268 @@ export interface BackupData {
   useCase?: string;
 }
 
-// Simple localStorage-based storage that was working before
 export class IndexedDBStorage {
-  private static readonly STORAGE_KEYS = {
-    users: 'expense-tracker-users',
-    categories: 'expense-tracker-categories',
-    expenses: 'expense-tracker-expenses',
-    credentials: 'expense-tracker-credentials',
-    settings: 'expense-tracker-settings',
-    initialized: 'expense-tracker-initialized'
+  private static readonly DB_NAME = 'ExpenseTrackerDB';
+  private static readonly DB_VERSION = 1;
+  private static readonly STORES = {
+    users: 'users',
+    categories: 'categories',
+    expenses: 'expenses',
+    credentials: 'credentials',
+    settings: 'settings'
   };
 
+  private db: IDBDatabase | null = null;
+
   async init(): Promise<void> {
-    // Simple initialization - just ensure localStorage is available
-    if (typeof localStorage === 'undefined') {
-      throw new Error('localStorage is not available');
-    }
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
+
+      request.onerror = () => {
+        console.error('IndexedDB failed to open:', request.error);
+        reject(new Error('Failed to open IndexedDB'));
+      };
+
+      request.onsuccess = () => {
+        this.db = request.result;
+        console.log('IndexedDB opened successfully');
+        resolve();
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        
+        // Create object stores
+        Object.values(IndexedDBStorage.STORES).forEach(storeName => {
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName, { keyPath: 'id' });
+          }
+        });
+
+        // Create a simple key-value store for settings and credentials
+        if (!db.objectStoreNames.contains('keyValue')) {
+          db.createObjectStore('keyValue');
+        }
+      };
+    });
   }
 
-  private getFromStorage<T>(key: string, defaultValue: T): T {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch (error) {
-      console.error(`Error reading from localStorage key "${key}":`, error);
-      return defaultValue;
+  private async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
+    if (!this.db) {
+      await this.init();
     }
+    
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    const transaction = this.db.transaction([storeName], mode);
+    return transaction.objectStore(storeName);
   }
 
-  private setToStorage<T>(key: string, value: T): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error(`Error writing to localStorage key "${key}":`, error);
+  private async getKeyValueStore(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
+    if (!this.db) {
+      await this.init();
     }
+    
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    const transaction = this.db.transaction(['keyValue'], mode);
+    return transaction.objectStore('keyValue');
   }
 
   async getUsers(): Promise<User[]> {
-    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.users, []);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.users);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting users from IndexedDB:', error);
+      return [];
+    }
   }
 
   async setUsers(users: User[]): Promise<void> {
-    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.users, users);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.users, 'readwrite');
+      
+      // Clear existing users
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new users
+      for (const user of users) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(user);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting users in IndexedDB:', error);
+    }
   }
 
   async getCategories(): Promise<Category[]> {
-    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.categories, []);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.categories);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting categories from IndexedDB:', error);
+      return [];
+    }
   }
 
   async setCategories(categories: Category[]): Promise<void> {
-    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.categories, categories);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.categories, 'readwrite');
+      
+      // Clear existing categories
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new categories
+      for (const category of categories) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(category);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting categories in IndexedDB:', error);
+    }
   }
 
   async getExpenses(): Promise<Expense[]> {
-    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.expenses, []);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.expenses);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting expenses from IndexedDB:', error);
+      return [];
+    }
   }
 
   async setExpenses(expenses: Expense[]): Promise<void> {
-    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.expenses, expenses);
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.expenses, 'readwrite');
+      
+      // Clear existing expenses
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new expenses
+      for (const expense of expenses) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(expense);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting expenses in IndexedDB:', error);
+    }
   }
 
   async getCredentials(): Promise<any> {
-    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.credentials, {
-      username: 'admin',
-      password: 'pass123',
-      email: 'admin@example.com',
-      securityQuestion: 'What is your favorite color?',
-      securityAnswer: 'blue',
-      useCase: 'personal-team'
-    });
+    try {
+      const store = await this.getKeyValueStore();
+      return new Promise((resolve, reject) => {
+        const request = store.get('credentials');
+        request.onsuccess = () => {
+          resolve(request.result || {
+            username: 'admin',
+            password: 'pass123',
+            email: 'admin@example.com',
+            securityQuestion: 'What is your favorite color?',
+            securityAnswer: 'blue',
+            useCase: 'personal-team'
+          });
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting credentials from IndexedDB:', error);
+      return {
+        username: 'admin',
+        password: 'pass123',
+        email: 'admin@example.com',
+        securityQuestion: 'What is your favorite color?',
+        securityAnswer: 'blue',
+        useCase: 'personal-team'
+      };
+    }
   }
 
   async setCredentials(credentials: any): Promise<void> {
-    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.credentials, credentials);
+    try {
+      const store = await this.getKeyValueStore('readwrite');
+      await new Promise<void>((resolve, reject) => {
+        const request = store.put(credentials, 'credentials');
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error setting credentials in IndexedDB:', error);
+    }
   }
 
   async getSettings(): Promise<any> {
-    return this.getFromStorage(IndexedDBStorage.STORAGE_KEYS.settings, {
-      fontSize: 'small',
-      auth: 'false'
-    });
+    try {
+      const store = await this.getKeyValueStore();
+      return new Promise((resolve, reject) => {
+        const request = store.get('settings');
+        request.onsuccess = () => {
+          resolve(request.result || {
+            fontSize: 'small',
+            auth: 'false'
+          });
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting settings from IndexedDB:', error);
+      return {
+        fontSize: 'small',
+        auth: 'false'
+      };
+    }
   }
 
   async setSettings(settings: any): Promise<void> {
-    this.setToStorage(IndexedDBStorage.STORAGE_KEYS.settings, settings);
+    try {
+      const store = await this.getKeyValueStore('readwrite');
+      await new Promise<void>((resolve, reject) => {
+        const request = store.put(settings, 'settings');
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error setting settings in IndexedDB:', error);
+    }
   }
 
   async getAuthState(): Promise<boolean> {
@@ -109,17 +287,18 @@ export class IndexedDBStorage {
   }
 
   async initializeMockData(): Promise<void> {
-    // Check if already initialized
-    const isInitialized = localStorage.getItem(IndexedDBStorage.STORAGE_KEYS.initialized);
-    if (isInitialized) {
-      return;
-    }
+    try {
+      // Check if already initialized by looking for users
+      const existingUsers = await this.getUsers();
+      if (existingUsers.length > 0) {
+        console.log('Mock data already exists, skipping initialization');
+        return;
+      }
 
-    const users = await this.getUsers();
-    if (users.length === 0) {
       console.log('Initializing with mock data');
       await this.createMockData();
-      localStorage.setItem(IndexedDBStorage.STORAGE_KEYS.initialized, 'true');
+    } catch (error) {
+      console.error('Error initializing mock data:', error);
     }
   }
 
@@ -260,6 +439,208 @@ export class IndexedDBStorage {
       this.setCategories(mockCategories),
       this.setExpenses(mockExpenses)
     ]);
+  }
+
+  async getUsers(): Promise<User[]> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.users);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting users from IndexedDB:', error);
+      return [];
+    }
+  }
+
+  async setUsers(users: User[]): Promise<void> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.users, 'readwrite');
+      
+      // Clear existing users
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new users
+      for (const user of users) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(user);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting users in IndexedDB:', error);
+    }
+  }
+
+  async getCategories(): Promise<Category[]> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.categories);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting categories from IndexedDB:', error);
+      return [];
+    }
+  }
+
+  async setCategories(categories: Category[]): Promise<void> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.categories, 'readwrite');
+      
+      // Clear existing categories
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new categories
+      for (const category of categories) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(category);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting categories in IndexedDB:', error);
+    }
+  }
+
+  async getExpenses(): Promise<Expense[]> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.expenses);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting expenses from IndexedDB:', error);
+      return [];
+    }
+  }
+
+  async setExpenses(expenses: Expense[]): Promise<void> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.expenses, 'readwrite');
+      
+      // Clear existing expenses
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new expenses
+      for (const expense of expenses) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(expense);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting expenses in IndexedDB:', error);
+    }
+  }
+
+  async getCredentials(): Promise<any> {
+    try {
+      const store = await this.getKeyValueStore();
+      return new Promise((resolve, reject) => {
+        const request = store.get('credentials');
+        request.onsuccess = () => {
+          resolve(request.result || {
+            username: 'admin',
+            password: 'pass123',
+            email: 'admin@example.com',
+            securityQuestion: 'What is your favorite color?',
+            securityAnswer: 'blue',
+            useCase: 'personal-team'
+          });
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting credentials from IndexedDB:', error);
+      return {
+        username: 'admin',
+        password: 'pass123',
+        email: 'admin@example.com',
+        securityQuestion: 'What is your favorite color?',
+        securityAnswer: 'blue',
+        useCase: 'personal-team'
+      };
+    }
+  }
+
+  async setCredentials(credentials: any): Promise<void> {
+    try {
+      const store = await this.getKeyValueStore('readwrite');
+      await new Promise<void>((resolve, reject) => {
+        const request = store.put(credentials, 'credentials');
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error setting credentials in IndexedDB:', error);
+    }
+  }
+
+  async getSettings(): Promise<any> {
+    try {
+      const store = await this.getKeyValueStore();
+      return new Promise((resolve, reject) => {
+        const request = store.get('settings');
+        request.onsuccess = () => {
+          resolve(request.result || {
+            fontSize: 'small',
+            auth: 'false'
+          });
+        };
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting settings from IndexedDB:', error);
+      return {
+        fontSize: 'small',
+        auth: 'false'
+      };
+    }
+  }
+
+  async setSettings(settings: any): Promise<void> {
+    try {
+      const store = await this.getKeyValueStore('readwrite');
+      await new Promise<void>((resolve, reject) => {
+        const request = store.put(settings, 'settings');
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error setting settings in IndexedDB:', error);
+    }
+  }
+
+  async getAuthState(): Promise<boolean> {
+    const settings = await this.getSettings();
+    return settings.auth === 'true';
+  }
+
+  async setAuthState(isAuthenticated: boolean): Promise<void> {
+    const settings = await this.getSettings();
+    await this.setSettings({ ...settings, auth: isAuthenticated ? 'true' : 'false' });
   }
 
   async createFullBackup(): Promise<BackupData> {
