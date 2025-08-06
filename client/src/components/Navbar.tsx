@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'wouter';
-import { BarChart3, Home, List, Tag, Users, Settings, Download, TrendingUp, LogOut } from 'lucide-react';
+import { BarChart3, Home, List, Tag, Users, Settings, Download, TrendingUp } from 'lucide-react';
 import { FileBackupManager } from '../utils/fileBackup';
-import { useAuth } from '../hooks/useAuth';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
+import { useAuth } from '../hooks/useAuth';
 
 export function Navbar() {
   const [location] = useLocation();
-  const { logout, credentials } = useAuth();
+  const { credentials } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
@@ -77,16 +77,6 @@ export function Navbar() {
             <div className="text-red-600 text-xs font-medium">
               Please backup your data before exiting!
             </div>
-            
-            {/* Logout Button */}
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm"
-              title="Log out"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
           </div>
 
           {/* Mobile menu button - TODO: implement mobile navigation */}
