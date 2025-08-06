@@ -30,6 +30,8 @@ export class IndexedDBStorage {
     });
     
     const initPromise = new Promise<void>((resolve, reject) => {
+    }
+    )
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, IndexedDBStorage.DB_VERSION);
 
