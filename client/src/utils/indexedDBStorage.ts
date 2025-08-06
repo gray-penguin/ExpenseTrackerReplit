@@ -251,13 +251,6 @@ export class IndexedDBStorage {
         return;
       }
 
-      const hasRealData = settings.hasRealData === 'true';
-
-      if (hasRealData) {
-        console.log('IndexedDB: Real user data detected, skipping mock data initialization');
-        return;
-      }
-
       // Check for any non-mock data indicators
       const hasNonMockUsers = users.some(user => 
         !['Alex Chen', 'Sarah Johnson'].includes(user.name) ||
