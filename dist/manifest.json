@@ -1,7 +1,7 @@
 {
   "name": "Expense Tracker",
   "short_name": "ExpenseTracker",
-  "description": "Multi-Use expense tracking application",
+  "description": "Multi-user expense tracking application with offline support",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -17,15 +17,15 @@
   "icons": [
     {
       "src": "/icon.svg",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon.svg",
-      "sizes": "512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -37,7 +37,8 @@
       "icons": [
         {
           "src": "/icon.svg",
-          "sizes": "192x192"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -49,25 +50,10 @@
       "icons": [
         {
           "src": "/icon.svg",
-          "sizes": "192x192"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Expense Tracker Dashboard"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Expense Tracker Mobile View"
     }
   ]
 }
