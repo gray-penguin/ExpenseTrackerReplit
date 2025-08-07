@@ -1,7 +1,7 @@
 {
   "name": "Expense Tracker",
   "short_name": "ExpenseTracker",
-  "description": "Multi-user expense tracking application with offline support",
+  "description": "Multi-Use expense tracking application with offline support",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -61,5 +61,6 @@
         }
       ]
     }
-  ]
+  ],
+  "id": "graypenguin"
 }
