@@ -1,7 +1,7 @@
 {
   "name": "Expense Tracker",
   "short_name": "ExpenseTracker",
-  "description": "Multi-user expense tracking application",
+  "description": "Multi-Use expense tracking application",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,7 +9,11 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["finance", "productivity", "business"],
+  "categories": [
+    "finance",
+    "productivity",
+    "business"
+  ],
   "icons": [
     {
       "src": "/icon.svg",
@@ -39,7 +43,7 @@
     },
     {
       "name": "View Dashboard",
-      "short_name": "Dashboard", 
+      "short_name": "Dashboard",
       "description": "View expense dashboard",
       "url": "/",
       "icons": [
@@ -59,7 +63,7 @@
       "label": "Expense Tracker Dashboard"
     },
     {
-      "src": "/screenshot-narrow.png", 
+      "src": "/screenshot-narrow.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
