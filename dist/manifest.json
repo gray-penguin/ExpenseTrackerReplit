@@ -1,7 +1,7 @@
 {
   "name": "Expense Tracker",
   "short_name": "ExpenseTracker",
-  "description": "Multi-user expense tracking application with offline support",
+  "description": "Multi-Use expense tracking application with offline support",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -34,6 +34,15 @@
       "purpose": "any"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/ET-ScreenShot.png",
+      "sizes": "any",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Expense Tracker Dashboard"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add Expense",
@@ -62,5 +71,14 @@
       ]
     }
   ],
-  "dir": "ltr"
+  "dir": "ltr",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "id": "graypenguin",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "scope_extensions": [
+    {
+      "origin": "https://expense-tracker.graypenguin.com"
+    }
+  ]
 }
