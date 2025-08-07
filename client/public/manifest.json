@@ -34,6 +34,15 @@
       "purpose": "any"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/ET-ScreenShot.png",
+      "sizes": "any",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Expense Tracker Dashboard"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add Expense",
