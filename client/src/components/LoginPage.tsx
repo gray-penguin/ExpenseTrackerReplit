@@ -565,10 +565,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-2xl mb-4 shadow-lg">
-            <BarChart3 className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">FinanceTracker</h1>
+          <img 
+            src="/icon.svg" 
+            alt="ExpenseTracker" 
+            className="w-16 h-16 mx-auto mb-4 shadow-lg rounded-2xl"
+          />
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">ExpenseTracker</h1>
           <p className="text-slate-600">Multi-user expense management</p>
         </div>
 

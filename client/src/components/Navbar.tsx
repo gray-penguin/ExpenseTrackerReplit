@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { BarChart3, Home, List, Tag, Users, Settings, Download, TrendingUp } from 'lucide-react';
+import { Home, List, Tag, Users, Settings, Download, TrendingUp } from 'lucide-react';
 import { FileBackupManager } from '../utils/fileBackup';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
 import { useAuth } from '../hooks/useAuth';
@@ -32,11 +32,13 @@ export function Navbar() {
         <div className="flex items-center py-6">
           {/* Logo */}
           <div className="flex items-center gap-3 mr-16">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-              <BarChart3 className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="/icon.svg" 
+              alt="ExpenseTracker" 
+              className="w-10 h-10"
+            />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">FinanceTracker</h1>
+              <h1 className="text-xl font-bold text-gray-900">ExpenseTracker</h1>
             </div>
           </div>
 
