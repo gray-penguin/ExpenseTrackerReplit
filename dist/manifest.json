@@ -71,6 +71,14 @@
       ]
     }
   ],
+  "dir": "ltr",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "id": "graypenguin",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "scope_extensions": [
+    {
+      "origin": "https://expense-tracker.graypenguin.com"
+    }
+  ]
 }
