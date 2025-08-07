@@ -81,6 +81,13 @@ export function useAuth() {
 
   const updateCredentials = (newCredentials: Partial<AuthCredentials>) => {
     setCredentials(prev => ({ ...prev, ...newCredentials }));
+    
+    // If use case is being updated, trigger a re-render by updating localStorage immediately
+    if (newCredentials.useCase) {
+      // Force immediate update to trigger component re-renders
+      const updatedCreds = { ...credentials, ...newCredentials };
+      setCredentials(updatedCreds);
+    }
   };
 
   const verifySecurityAnswer = (answer: string): boolean => {

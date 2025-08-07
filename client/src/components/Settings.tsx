@@ -124,6 +124,11 @@ export const Settings: React.FC<SettingsProps> = ({
   const handleUseCaseChange = (useCaseId: string) => {
     if (onUpdateUseCase) {
       onUpdateUseCase(useCaseId);
+      // Force a re-render by updating the page title immediately
+      const newConfig = useCases.find(uc => uc.id === useCaseId);
+      if (newConfig) {
+        document.title = `Expense Tracker - ${newConfig.name}`;
+      }
     }
   };
   const handleClearAllExpenses = () => {
