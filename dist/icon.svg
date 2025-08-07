@@ -1,9 +1,16 @@
 <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="192" height="192" rx="40" fill="#10b981"/>
-  <path d="M48 96L96 48L144 96L96 144L48 96Z" fill="white"/>
-  <path d="M72 96L96 72L120 96L96 120L72 96Z" fill="#10b981"/>
-  <circle cx="96" cy="64" r="8" fill="white"/>
-  <circle cx="96" cy="128" r="8" fill="white"/>
-  <circle cx="64" cy="96" r="8" fill="white"/>
-  <circle cx="128" cy="96" r="8" fill="white"/>
+  <!-- Green background circle -->
+  <circle cx="96" cy="96" r="96" fill="#059669"/>
+  
+  <!-- Intertwined E and T in white -->
+  <g fill="white">
+    <!-- Letter E -->
+    <path d="M45 60 L45 132 L90 132 L90 120 L60 120 L60 102 L85 102 L85 90 L60 90 L60 72 L90 72 L90 60 Z"/>
+    
+    <!-- Letter T -->
+    <path d="M102 60 L102 72 L120 72 L120 132 L135 132 L135 72 L153 72 L153 60 Z"/>
+    
+    <!-- Intertwining element - connecting curve -->
+    <path d="M90 85 Q96 82 102 85" stroke="white" stroke-width="3" fill="none" opacity="0.8"/>
+  </g>
 </svg>
