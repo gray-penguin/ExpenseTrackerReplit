@@ -71,5 +71,6 @@
       ]
     }
   ],
-  "id": "graypenguin"
+  "id": "graypenguin",
+  "prefer_related_applications": false
 }
