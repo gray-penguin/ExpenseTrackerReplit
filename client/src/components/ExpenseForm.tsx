@@ -399,6 +399,7 @@ export function ExpenseForm({
                 onFocus={() => setShowDescriptionSuggestions(true)}
                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="What did you spend money on?"
+                autocomplete="off"
                 required
               />
               {/* Always show dropdown button for testing */}
@@ -468,6 +469,7 @@ export function ExpenseForm({
                 onFocus={() => setShowStoreSuggestions(true)}
                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Where did you make this purchase?"
+                autocomplete="off"
               />
               <button
                 type="button"
@@ -535,6 +537,7 @@ export function ExpenseForm({
                 onFocus={() => setShowLocationSuggestions(true)}
                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Store location or area"
+                autocomplete="off"
               />
               <button
                 type="button"
