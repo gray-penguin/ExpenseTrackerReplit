@@ -1,12 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
-import { Calendar, Filter, TrendingUp, X, Eye } from 'lucide-react';
+import { Calendar, Filter, TrendingUp, X, Eye, Users } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { Expense } from '../types';
+import { useAuth } from '../hooks/useAuth';
+import { getUseCaseConfig } from '../utils/useCaseConfig';
 
 export const ReportsPage: React.FC = () => {
   const { expenses, categories, users } = useExpenseData();
+  const { credentials } = useAuth();
+  const useCaseConfig = getUseCaseConfig(credentials.useCase);
+  const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 7)); // Current month
@@ -72,15 +77,16 @@ export const ReportsPage: React.FC = () => {
   const filteredExpenses = useMemo(() => {
     const result = expenses.filter(expense => {
       const expenseDate = expense.date.slice(0, 7); // YYYY-MM format
+      const userMatch = selectedUserId === 'all' || expense.userId === selectedUserId;
       const categoryMatch = selectedCategoryId === 'all' || expense.categoryId === selectedCategoryId;
       // Ensure proper inclusive date range comparison
       const dateMatch = expenseDate >= startDate && expenseDate <= endDate;
       
-      return categoryMatch && dateMatch;
+      return userMatch && categoryMatch && dateMatch;
     });
     
     return result;
-  }, [expenses, selectedCategoryId, startDate, endDate]);
+  }, [expenses, selectedUserId, selectedCategoryId, startDate, endDate]);
 
   // Get subcategories for the selected category
   const subcategories = useMemo(() => {
@@ -180,6 +186,7 @@ export const ReportsPage: React.FC = () => {
 
 
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+  const selectedUser = users.find(u => u.id === selectedUserId);
 
   // Handle cell click to show expense details
   const handleCellClick = (subcategoryId: string, monthKey: string) => {
@@ -218,6 +225,28 @@ export const ReportsPage: React.FC = () => {
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
         <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex items-center gap-1">
+            <Users className="w-4 h-4 text-gray-500" />
+            <label htmlFor="user-filter" className="text-xs font-medium text-gray-700">
+              {useCaseConfig.userLabelSingular}:
+            </label>
+            <select
+              id="user-filter"
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">{useCaseConfig.terminology.allUsers}</option>
+              {users
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
           <div className="flex items-center gap-1">
             <Filter className="w-4 h-4 text-gray-500" />
             <label htmlFor="category-filter" className="text-xs font-medium text-gray-700">
@@ -294,9 +323,9 @@ export const ReportsPage: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="text-lg font-bold text-orange-600">
-              {selectedCategoryId === 'all' ? 'All' : selectedCategory?.name || 'N/A'}
+              {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name || 'N/A'}
             </div>
-            <div className="text-xs text-gray-600">Category Filter</div>
+            <div className="text-xs text-gray-600">{useCaseConfig.userLabelSingular} Filter</div>
           </div>
         </div>
       </div>
@@ -305,7 +334,7 @@ export const ReportsPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-3 border-b border-gray-200">
           <h3 className="text-sm font-semibold text-gray-900">
-            Expense Breakdown - {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name} ({startDate === endDate ? startDate : `${startDate} to ${endDate}`})
+            Expense Breakdown - {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name} - {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name} ({startDate === endDate ? startDate : `${startDate} to ${endDate}`})
           </h3>
         </div>
         
