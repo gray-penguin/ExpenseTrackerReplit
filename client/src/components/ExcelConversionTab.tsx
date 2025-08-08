@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ExcelParser } from '../utils/excelParser';
 import { FileSpreadsheet, Download, Upload, AlertCircle, CheckCircle, FileText, ArrowRight, Copy, Eye, X } from 'lucide-react';
 
 export const ExcelConversionTab: React.FC = () => {
@@ -65,45 +66,7 @@ export const ExcelConversionTab: React.FC = () => {
   };
 
   const downloadSampleExcel = () => {
-    // Create CSV content that can be opened in Excel
-    const csvContent = [
-      // Users sheet data
-      'USERS SHEET:',
-      'ID,Name,Username,Email,Avatar,Color,Default Category ID,Default Subcategory ID,Default Store Location',
-      '1,"Alex Chen",alexc,alex.chen@example.com,AC,bg-emerald-500,1,1,Downtown',
-      '2,"Sarah Johnson",sarahj,sarah.johnson@example.com,SJ,bg-blue-500,2,2,Uptown',
-      '',
-      'CATEGORIES SHEET:',
-      'ID,Name,Icon,Color',
-      '1,Groceries,ShoppingCart,text-green-600',
-      '2,Utilities,Zap,text-yellow-600',
-      '3,Entertainment,Music,text-purple-600',
-      '4,Transportation,Car,text-blue-600',
-      '',
-      'SUBCATEGORIES SHEET:',
-      'ID,Name,Category ID',
-      '1,"Fresh Produce",1',
-      '2,"Meat & Dairy",1',
-      '3,Electricity,2',
-      '4,"Water & Sewer",2',
-      '',
-      'EXPENSES SHEET:',
-      'ID,User ID,Category ID,Subcategory ID,Amount,Description,Store Name,Store Location,Date,Created At',
-      '1,1,1,1,89.45,"Weekly grocery shopping","Whole Foods Market",Downtown,2025-01-18,2025-01-18T10:30:00Z',
-      '2,1,2,3,125.50,"Monthly electricity bill","City Electric",,2025-01-15,2025-01-15T08:00:00Z',
-      '3,2,1,2,67.32,"Lunch ingredients","Trader Joes",Uptown,2025-01-16,2025-01-16T15:30:00Z'
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'expense-tracker-excel-template.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    ExcelParser.downloadExcelTemplate();
   };
 
   const downloadSampleJSON = () => {
@@ -130,15 +93,55 @@ export const ExcelConversionTab: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // For now, we'll provide instructions since we can't actually parse Excel files in the browser
-      // In a real implementation, you'd use a library like xlsx or similar
-      setError('Excel file parsing is not yet implemented. Please use the CSV template and convert manually, or export your Excel data as CSV and use the manual conversion guide below.');
+      const result = await ExcelParser.parseExcelFile(file);
+      
+      if (result.success && result.data) {
+        const jsonBackup = ExcelParser.generateBackupJSON(result.data);
+        setJsonOutput(jsonBackup);
+        
+        if (result.warnings.length > 0) {
+          console.warn('Excel parsing warnings:', result.warnings);
+        }
+      } else {
+        setError(`Excel parsing failed:\n${result.errors.join('\n')}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process file');
     } finally {
       setIsProcessing(false);
       event.target.value = '';
     }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Copied to clipboard!');
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Copied to clipboard!');
+    }
+  };
+
+  const downloadJSON = () => {
+    if (!jsonOutput) return;
+    
+    const blob = new Blob([jsonOutput], { type: 'application/json;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'converted-expense-backup.json');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const copyToClipboard = async (text: string) => {
@@ -278,7 +281,7 @@ export const ExcelConversionTab: React.FC = () => {
           {error && (
             <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertCircle className="w-5 h-5 text-red-600" />
-              <span className="text-red-700 text-sm">{error}</span>
+              <div className="text-red-700 text-sm whitespace-pre-wrap">{error}</div>
             </div>
           )}
         </div>
@@ -361,10 +364,10 @@ export const ExcelConversionTab: React.FC = () => {
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <h5 className="font-medium text-amber-900 mb-2">Recommended Online Tools:</h5>
             <div className="text-sm text-amber-800 space-y-1">
-              <p>• <strong>CSV to JSON:</strong> csvjson.com, convertcsv.com</p>
-              <p>• <strong>Excel to CSV:</strong> Use Excel's built-in "Save As" → CSV function</p>
-              <p>• <strong>JSON Formatter:</strong> jsonformatter.org (to validate your JSON)</p>
-              <p>• <strong>Text Editor:</strong> VS Code, Notepad++, or any text editor for manual editing</p>
+              <p>• <strong>Direct Upload:</strong> Upload .xlsx or .xls files directly for automatic conversion</p>
+              <p>• <strong>CSV Alternative:</strong> Export Excel sheets as CSV if needed</p>
+              <p>• <strong>JSON Validation:</strong> Use jsonformatter.org to validate output</p>
+              <p>• <strong>Backup Format:</strong> Generated JSON is ready for direct restoration</p>
             </div>
           </div>
         </div>
@@ -434,10 +437,10 @@ export const ExcelConversionTab: React.FC = () => {
           <div className="space-y-3">
             <h5 className="font-medium text-slate-800">Important Notes:</h5>
             <div className="text-sm text-slate-600 space-y-1">
-              <div>• IDs must be unique within each sheet</div>
-              <div>• Dates should be in YYYY-MM-DD format</div>
-              <div>• Colors use Tailwind CSS classes</div>
-              <div>• Icons use Lucide React icon names</div>
+              <div>• Upload .xlsx or .xls files directly</div>
+              <div>• System handles Excel date formats automatically</div>
+              <div>• Validates all data relationships</div>
+              <div>• Generates complete backup JSON for restoration</div>
             </div>
           </div>
         </div>
