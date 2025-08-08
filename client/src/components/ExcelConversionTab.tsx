@@ -443,21 +443,6 @@ export const ExcelConversionTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Future Enhancement Notice */}
-      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center mt-0.5">
-            <span className="text-slate-600 text-xs font-bold">!</span>
-          </div>
-          <div>
-            <h4 className="font-medium text-slate-900">Future Enhancement</h4>
-            <p className="text-slate-600 text-sm mt-1">
-              Direct Excel file parsing will be added in a future update. For now, please use the manual 
-              conversion process with the provided templates and online tools.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

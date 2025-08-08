@@ -275,7 +275,7 @@ export const Settings: React.FC<SettingsProps> = ({
           >
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              Excel Import
+              Import Expenses
             </div>
           </button>
           <button
