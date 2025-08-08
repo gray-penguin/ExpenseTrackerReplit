@@ -1046,7 +1046,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   <li>• User authentication with password reset functionality</li>
                   <li>• Configurable use cases for different tracking scenarios</li>
                   <li>• Complete JSON backup and restore system</li>
-                  <li>• Excel file import with automatic data validation and conversion</li>
+                  <li>• Excel to JSON conversion with automatic data validation and conversion</li>
                   <li>• Progressive Web App with offline functionality</li>
                 </ul>
               </div>
