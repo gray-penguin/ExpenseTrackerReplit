@@ -999,6 +999,14 @@ export const Settings: React.FC<SettingsProps> = ({
                     <p className="text-gray-600 text-xs">Complete JSON backup/restore system for all your data including expenses, categories, and users</p>
                   </div>
                 </div>
+
+                <div className="flex items-start gap-3">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-sm">Excel Import & Conversion</h4>
+                    <p className="text-gray-600 text-xs">Direct Excel file import with automatic parsing and JSON conversion for seamless data migration</p>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -1038,6 +1046,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   <li>• User authentication with password reset functionality</li>
                   <li>• Configurable use cases for different tracking scenarios</li>
                   <li>• Complete JSON backup and restore system</li>
+                  <li>• Excel file import with automatic data validation and conversion</li>
                   <li>• Progressive Web App with offline functionality</li>
                 </ul>
               </div>
