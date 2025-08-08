@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
-import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet } from 'lucide-react';
 import { FileText } from 'lucide-react';
 import { ExcelConversionTab } from './ExcelConversionTab.tsx';
 
