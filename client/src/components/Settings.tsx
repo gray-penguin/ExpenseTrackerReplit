@@ -288,7 +288,7 @@ export const Settings: React.FC<SettingsProps> = ({
           >
             <div className="flex items-center gap-2">
               <Database className="w-4 h-4" />
-              Data Management
+              Delete Data
             </div>
           </button>
           <button
@@ -768,10 +768,10 @@ export const Settings: React.FC<SettingsProps> = ({
               </div>
               <div>
                 <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
-                  Data Management
+                  Delete Data
                 </h3>
                 <p className={getFontSizeClasses("text-slate-500")}>
-                  delete all data from your account
+                  Permanently delete all data from your account
                 </p>
               </div>
             </div>
