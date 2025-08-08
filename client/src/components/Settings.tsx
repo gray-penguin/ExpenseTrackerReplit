@@ -3,6 +3,8 @@ import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
 import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { ExcelConversionTab } from './ExcelConversionTab';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -31,7 +33,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'use-cases' | 'backup' | 'data' | 'about'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'use-cases' | 'backup' | 'excel' | 'data' | 'about'>('general');
   const [credentialsForm, setCredentialsForm] = useState({
     username: currentCredentials?.username || '',
     password: currentCredentials?.password || '',
@@ -261,6 +263,19 @@ export const Settings: React.FC<SettingsProps> = ({
             <div className="flex items-center gap-2">
               <HardDrive className="w-4 h-4" />
               Backup & Restore
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('excel')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'excel'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Excel Import
             </div>
           </button>
           <button
@@ -737,6 +752,10 @@ export const Settings: React.FC<SettingsProps> = ({
 
       {activeTab === 'backup' && (
         <BackupAndRestoreTab onDataRestored={handleDataRestored} />
+      )}
+
+      {activeTab === 'excel' && (
+        <ExcelConversionTab />
       )}
 
       {activeTab === 'data' && (
