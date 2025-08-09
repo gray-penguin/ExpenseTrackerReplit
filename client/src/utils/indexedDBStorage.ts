@@ -298,12 +298,9 @@ export class IndexedDBStorage {
     try {
       // Check if already initialized by looking for users
       const existingUsers = await this.getUsers();
-      if (existingUsers.length > 0) {
-        console.log('Mock data already exists, skipping initialization');
-        return;
-      }
+      // Always reinitialize to apply the new project-based data
+      console.log('Initializing with new project-based mock data');
 
-      console.log('Initializing with mock data');
       await this.createMockData();
     } catch (error) {
       console.error('Error initializing mock data:', error);
