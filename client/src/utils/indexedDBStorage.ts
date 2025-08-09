@@ -649,11 +649,16 @@ export class IndexedDBStorage {
       defaultSubcategoryId: user.defaultSubcategoryId ? user.defaultSubcategoryId.toString() : undefined
     }));
 
+    // Ensure credentials include the use case from the backup
+    const processedCredentials = {
+      ...backup.credentials,
+      useCase: backup.useCase || backup.credentials?.useCase || 'personal-team'
+    };
     await Promise.all([
       this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
       this.setExpenses(processedExpenses),
-      this.setCredentials(backup.credentials),
+      this.setCredentials(processedCredentials),
       this.setSettings(backup.settings)
     ]);
   }
