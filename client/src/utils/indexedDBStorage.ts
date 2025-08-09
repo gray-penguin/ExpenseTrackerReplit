@@ -212,14 +212,22 @@ export class IndexedDBStorage {
       return new Promise((resolve, reject) => {
         const request = store.get('credentials');
         request.onsuccess = () => {
-          resolve(request.result || {
+          const result = request.result;
+          console.log('IndexedDB getCredentials raw result:', result);
+          
+          const defaultCredentials = {
             username: 'admin',
             password: 'pass123',
             email: 'admin@example.com',
             securityQuestion: 'What is your favorite color?',
             securityAnswer: 'blue',
             useCase: 'personal-team'
-          });
+          };
+          
+          const credentials = result || defaultCredentials;
+          console.log('IndexedDB getCredentials returning:', credentials);
+          
+          resolve(credentials);
         };
         request.onerror = () => reject(request.error);
       });
@@ -238,14 +246,23 @@ export class IndexedDBStorage {
 
   async setCredentials(credentials: any): Promise<void> {
     try {
+      console.log('IndexedDB setCredentials called with:', credentials);
       const store = await this.getKeyValueStore('readwrite');
       await new Promise<void>((resolve, reject) => {
         const request = store.put(credentials, 'credentials');
-        request.onsuccess = () => resolve();
+        request.onsuccess = () => {
+          console.log('IndexedDB setCredentials success');
+          resolve();
+        };
         request.onerror = () => reject(request.error);
       });
+      
+      // Verify the data was saved correctly
+      const savedCredentials = await this.getCredentials();
+      console.log('IndexedDB setCredentials verification - saved data:', savedCredentials);
     } catch (error) {
       console.error('Error setting credentials in IndexedDB:', error);
+      throw error;
     }
   }
 

@@ -103,6 +103,11 @@ export function useAuth() {
     indexedDBStorage.setCredentials(updatedCredentials).then(() => {
       console.log('Auth: Credentials saved to IndexedDB successfully');
       
+      // Verify the save by reading back the data
+      indexedDBStorage.getCredentials().then(savedCreds => {
+        console.log('Auth: Verification - credentials read back from IndexedDB:', savedCreds);
+      });
+      
       // If use case changed, force a page reload to ensure all components update
       if (newCredentials.useCase && newCredentials.useCase !== credentials.useCase) {
         console.log('Auth: Use case changed, forcing page reload');
