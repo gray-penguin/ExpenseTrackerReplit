@@ -298,12 +298,9 @@ export class IndexedDBStorage {
     try {
       // Check if already initialized by looking for users
       const existingUsers = await this.getUsers();
-      if (existingUsers.length > 0) {
-        console.log('Mock data already exists, skipping initialization');
-        return;
-      }
+      // Always reinitialize to apply the new project-based data
+      console.log('Initializing with new project-based mock data');
 
-      console.log('Initializing with mock data');
       await this.createMockData();
     } catch (error) {
       console.error('Error initializing mock data:', error);
@@ -311,83 +308,216 @@ export class IndexedDBStorage {
   }
 
   private async createMockData(): Promise<void> {
+    // Set use case to project-based
+    await this.setCredentials({
+      username: 'admin',
+      password: 'pass123',
+      email: 'admin@example.com',
+      securityQuestion: 'What is your favorite color?',
+      securityAnswer: 'blue',
+      useCase: 'project-based'
+    });
+
+    // 3 Projects (replacing users)
     const mockUsers = [
       {
         id: '1',
-        name: 'Alex Chen',
-        username: 'alexc',
-        email: 'alex.chen@example.com',
-        avatar: 'AC',
-        color: 'bg-emerald-500',
+        name: 'Website Redesign',
+        username: 'web-redesign',
+        email: 'web-redesign@company.com',
+        avatar: 'WR',
+        color: 'bg-blue-500',
         defaultCategoryId: '1',
         defaultSubcategoryId: '1',
-        defaultStoreLocation: 'Downtown'
+        defaultStoreLocation: 'Remote'
       },
       {
         id: '2',
-        name: 'Sarah Johnson',
-        username: 'sarahj',
-        email: 'sarah.johnson@example.com',
-        avatar: 'SJ',
-        color: 'bg-blue-500',
+        name: 'Mobile App Development',
+        username: 'mobile-app',
+        email: 'mobile-app@company.com',
+        avatar: 'MA',
+        color: 'bg-purple-500',
         defaultCategoryId: '2',
-        defaultSubcategoryId: '5',
-        defaultStoreLocation: 'Uptown'
+        defaultSubcategoryId: '6',
+        defaultStoreLocation: 'Office'
+      },
+      {
+        id: '3',
+        name: 'Marketing Campaign Q1',
+        username: 'marketing-q1',
+        email: 'marketing-q1@company.com',
+        avatar: 'MQ',
+        color: 'bg-orange-500',
+        defaultCategoryId: '3',
+        defaultSubcategoryId: '11',
+        defaultStoreLocation: 'Various'
       }
     ];
 
+    // 3 Categories with 5 subcategories each
     const mockCategories = [
       {
         id: '1',
-        name: 'Groceries',
-        icon: 'ShoppingCart',
-        color: 'text-green-600',
+        name: 'Development & Technology',
+        icon: 'Code',
+        color: 'text-blue-600',
         subcategories: [
-          { id: '1', name: 'Fresh Produce', categoryId: '1' },
-          { id: '2', name: 'Meat & Dairy', categoryId: '1' },
-          { id: '3', name: 'Pantry Items', categoryId: '1' },
-          { id: '4', name: 'Snacks & Beverages', categoryId: '1' }
+          { id: '1', name: 'Software Licenses', categoryId: '1' },
+          { id: '2', name: 'Cloud Services', categoryId: '1' },
+          { id: '3', name: 'Development Tools', categoryId: '1' },
+          { id: '4', name: 'API Services', categoryId: '1' },
+          { id: '5', name: 'Hosting & Domains', categoryId: '1' }
         ]
       },
       {
         id: '2',
-        name: 'Utilities',
-        icon: 'Zap',
-        color: 'text-yellow-600',
+        name: 'Operations & Equipment',
+        icon: 'Settings',
+        color: 'text-green-600',
         subcategories: [
-          { id: '5', name: 'Electricity', categoryId: '2' },
-          { id: '6', name: 'Water & Sewer', categoryId: '2' },
-          { id: '7', name: 'Internet & Cable', categoryId: '2' },
-          { id: '8', name: 'Gas', categoryId: '2' }
+          { id: '6', name: 'Hardware & Equipment', categoryId: '2' },
+          { id: '7', name: 'Office Supplies', categoryId: '2' },
+          { id: '8', name: 'Communication Tools', categoryId: '2' },
+          { id: '9', name: 'Project Management', categoryId: '2' },
+          { id: '10', name: 'Security & Backup', categoryId: '2' }
         ]
       },
       {
         id: '3',
-        name: 'Entertainment',
-        icon: 'Music',
+        name: 'Marketing & Outreach',
+        icon: 'Megaphone',
         color: 'text-purple-600',
         subcategories: [
-          { id: '9', name: 'Movies & Shows', categoryId: '3' },
-          { id: '10', name: 'Gaming', categoryId: '3' },
-          { id: '11', name: 'Concerts & Events', categoryId: '3' },
-          { id: '12', name: 'Subscriptions', categoryId: '3' }
-        ]
-      },
-      {
-        id: '4',
-        name: 'Automobile',
-        icon: 'Car',
-        color: 'text-blue-600',
-        subcategories: [
-          { id: '13', name: 'Fuel', categoryId: '4' },
-          { id: '14', name: 'Maintenance', categoryId: '4' },
-          { id: '15', name: 'Insurance', categoryId: '4' },
-          { id: '16', name: 'Parking & Tolls', categoryId: '4' }
+          { id: '11', name: 'Advertising & Ads', categoryId: '3' },
+          { id: '12', name: 'Content Creation', categoryId: '3' },
+          { id: '13', name: 'Social Media Tools', categoryId: '3' },
+          { id: '14', name: 'Analytics & Tracking', categoryId: '3' },
+          { id: '15', name: 'Events & Conferences', categoryId: '3' }
         ]
       }
     ];
 
-    const mockExpenses = [
+    // Generate 500 expenses spread over 12 months starting a year ago
+    const mockExpenses: any[] = [];
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1);
+    
+    const expenseTemplates = [
+      // Development & Technology expenses
+      { categoryId: '1', subcategoryId: '1', descriptions: ['GitHub Pro subscription', 'JetBrains license', 'Adobe Creative Suite', 'Figma Pro plan'], amounts: [20, 199, 52.99, 15], stores: ['GitHub', 'JetBrains', 'Adobe', 'Figma'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '1', subcategoryId: '2', descriptions: ['AWS hosting costs', 'Google Cloud storage', 'Vercel Pro plan', 'MongoDB Atlas'], amounts: [89.50, 45.20, 20, 57.30], stores: ['Amazon Web Services', 'Google Cloud', 'Vercel', 'MongoDB'], locations: ['Cloud', 'Cloud', 'Cloud', 'Cloud'] },
+      { categoryId: '1', subcategoryId: '3', descriptions: ['VS Code extensions', 'Postman Pro', 'Docker Desktop', 'Slack workspace'], amounts: [15, 19, 5, 8.33], stores: ['Microsoft', 'Postman', 'Docker', 'Slack'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '1', subcategoryId: '4', descriptions: ['Stripe API fees', 'SendGrid email service', 'Twilio SMS credits', 'Google Maps API'], amounts: [25.40, 19.95, 30, 15.75], stores: ['Stripe', 'SendGrid', 'Twilio', 'Google'], locations: ['API', 'API', 'API', 'API'] },
+      { categoryId: '1', subcategoryId: '5', descriptions: ['Domain renewal', 'SSL certificate', 'CDN service', 'Backup storage'], amounts: [12.99, 89, 25, 9.99], stores: ['Namecheap', 'DigiCert', 'Cloudflare', 'Backblaze'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      
+      // Operations & Equipment expenses
+      { categoryId: '2', subcategoryId: '6', descriptions: ['MacBook Pro', 'External monitor', 'Wireless keyboard', 'USB-C hub'], amounts: [2499, 399, 129, 79.99], stores: ['Apple Store', 'Dell', 'Logitech', 'Anker'], locations: ['Store', 'Online', 'Best Buy', 'Amazon'] },
+      { categoryId: '2', subcategoryId: '7', descriptions: ['Printer paper', 'Sticky notes', 'Pens and markers', 'Notebooks'], amounts: [25.99, 8.50, 15.75, 22.40], stores: ['Staples', 'Office Depot', 'Target', 'Moleskine'], locations: ['Store', 'Store', 'Store', 'Online'] },
+      { categoryId: '2', subcategoryId: '8', descriptions: ['Zoom Pro subscription', 'Microsoft Teams', 'Slack premium', 'Discord Nitro'], amounts: [14.99, 12.50, 8.33, 9.99], stores: ['Zoom', 'Microsoft', 'Slack', 'Discord'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '2', subcategoryId: '9', descriptions: ['Asana premium', 'Trello Power-Ups', 'Notion Pro', 'Linear subscription'], amounts: [24.99, 10, 16, 20], stores: ['Asana', 'Trello', 'Notion', 'Linear'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '2', subcategoryId: '10', descriptions: ['1Password team', 'LastPass business', 'Backup software', 'VPN service'], amounts: [7.99, 6, 49.99, 11.95], stores: ['1Password', 'LastPass', 'Acronis', 'NordVPN'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      
+      // Marketing & Outreach expenses
+      { categoryId: '3', subcategoryId: '11', descriptions: ['Google Ads campaign', 'Facebook advertising', 'LinkedIn promoted posts', 'Twitter ads'], amounts: [250, 180, 95, 75], stores: ['Google Ads', 'Meta Business', 'LinkedIn', 'Twitter'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '3', subcategoryId: '12', descriptions: ['Stock photography', 'Video editing software', 'Graphic design tools', 'Content writing'], amounts: [29.99, 52.99, 19.99, 150], stores: ['Shutterstock', 'Adobe', 'Canva', 'Upwork'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '3', subcategoryId: '13', descriptions: ['Buffer Pro plan', 'Hootsuite subscription', 'Later premium', 'Sprout Social'], amounts: [15, 49, 25, 89], stores: ['Buffer', 'Hootsuite', 'Later', 'Sprout Social'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '3', subcategoryId: '14', descriptions: ['Google Analytics 360', 'Mixpanel subscription', 'Hotjar insights', 'Amplitude analytics'], amounts: [150, 89, 39, 61], stores: ['Google', 'Mixpanel', 'Hotjar', 'Amplitude'], locations: ['Online', 'Online', 'Online', 'Online'] },
+      { categoryId: '3', subcategoryId: '15', descriptions: ['Conference tickets', 'Trade show booth', 'Networking event', 'Workshop attendance'], amounts: [299, 1200, 85, 199], stores: ['TechCrunch Disrupt', 'CES Expo', 'Local Chamber', 'Design Workshop'], locations: ['San Francisco', 'Las Vegas', 'Downtown', 'Seattle'] }
+    ];
+    
+    let expenseId = 1;
+    
+    // Generate 500 expenses over 12 months
+    for (let month = 0; month < 12; month++) {
+      const monthDate = new Date(startDate);
+      monthDate.setMonth(startDate.getMonth() + month);
+      
+      // Generate 40-45 expenses per month (roughly 500 total)
+      const expensesThisMonth = Math.floor(Math.random() * 6) + 40; // 40-45 expenses
+      
+      for (let i = 0; i < expensesThisMonth && expenseId <= 500; i++) {
+        // Random day in the month
+        const day = Math.floor(Math.random() * 28) + 1; // 1-28 to avoid month-end issues
+        const expenseDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+        const dateString = expenseDate.toISOString().split('T')[0];
+        
+        // Random project (user)
+        const projectIndex = Math.floor(Math.random() * 3);
+        const userId = (projectIndex + 1).toString();
+        
+        // Random expense template
+        const templateIndex = Math.floor(Math.random() * expenseTemplates.length);
+        const template = expenseTemplates[templateIndex];
+        const itemIndex = Math.floor(Math.random() * template.descriptions.length);
+        
+        // Add some variation to amounts (±20%)
+        const baseAmount = template.amounts[itemIndex];
+        const variation = (Math.random() - 0.5) * 0.4; // -20% to +20%
+        const finalAmount = Math.round((baseAmount * (1 + variation)) * 100) / 100;
+        
+        const expense = {
+          id: expenseId.toString(),
+          userId,
+          categoryId: template.categoryId,
+          subcategoryId: template.subcategoryId,
+          amount: finalAmount,
+          description: template.descriptions[itemIndex],
+          notes: Math.random() > 0.7 ? `Project expense for ${mockUsers[projectIndex].name}` : undefined,
+          storeName: template.stores[itemIndex],
+          storeLocation: template.locations[itemIndex],
+          date: dateString,
+          createdAt: expenseDate.toISOString()
+        };
+        
+        mockExpenses.push(expense);
+        expenseId++;
+      }
+    }
+    
+    // Add a few more recent expenses to reach closer to 500
+    while (mockExpenses.length < 500) {
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - Math.floor(Math.random() * 30));
+      const dateString = recentDate.toISOString().split('T')[0];
+      
+      const projectIndex = Math.floor(Math.random() * 3);
+      const userId = (projectIndex + 1).toString();
+      const templateIndex = Math.floor(Math.random() * expenseTemplates.length);
+      const template = expenseTemplates[templateIndex];
+      const itemIndex = Math.floor(Math.random() * template.descriptions.length);
+      
+      const baseAmount = template.amounts[itemIndex];
+      const variation = (Math.random() - 0.5) * 0.4;
+      const finalAmount = Math.round((baseAmount * (1 + variation)) * 100) / 100;
+      
+      const expense = {
+        id: expenseId.toString(),
+        userId,
+        categoryId: template.categoryId,
+        subcategoryId: template.subcategoryId,
+        amount: finalAmount,
+        description: template.descriptions[itemIndex],
+        notes: Math.random() > 0.8 ? `Recent project expense for ${mockUsers[projectIndex].name}` : undefined,
+        storeName: template.stores[itemIndex],
+        storeLocation: template.locations[itemIndex],
+        date: dateString,
+        createdAt: recentDate.toISOString()
+      };
+      
+      mockExpenses.push(expense);
+      expenseId++;
+    }
+
+    console.log(`Generated ${mockExpenses.length} project expenses over 12 months`);
+
+    await Promise.all([
+      this.setUsers(mockUsers),
+      this.setCategories(mockCategories),
+      this.setExpenses(mockExpenses)
+    ]);
+  }
+
       {
         id: '1',
         userId: '1',
