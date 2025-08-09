@@ -96,6 +96,8 @@ export function useAuth() {
     const updatedCredentials = { ...credentials, ...newCredentials };
     console.log('Auth: updateCredentials called with:', newCredentials);
     console.log('Auth: Updated credentials will be:', updatedCredentials);
+    console.log('Auth: Current use case before update:', credentials.useCase);
+    console.log('Auth: New use case after update:', updatedCredentials.useCase);
     
     setCredentials(updatedCredentials);
     
@@ -106,11 +108,13 @@ export function useAuth() {
       // Verify the save by reading back the data
       indexedDBStorage.getCredentials().then(savedCreds => {
         console.log('Auth: Verification - credentials read back from IndexedDB:', savedCreds);
+        console.log('Auth: Verification - use case in saved credentials:', savedCreds.useCase);
       });
       
       // If use case changed, force a page reload to ensure all components update
       if (newCredentials.useCase && newCredentials.useCase !== credentials.useCase) {
         console.log('Auth: Use case changed, forcing page reload');
+        console.log('Auth: Use case changed from', credentials.useCase, 'to', newCredentials.useCase);
         setTimeout(() => {
           window.location.reload();
         }, 100);

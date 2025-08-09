@@ -316,6 +316,7 @@ export class IndexedDBStorage {
       // Check if already initialized by looking for users
       const existingUsers = await this.getUsers();
       const existingExpenses = await this.getExpenses();
+      const existingCredentials = await this.getCredentials();
       
       // Only initialize mock data if no existing data is found
       if (existingUsers.length === 0 && existingExpenses.length === 0) {
@@ -323,14 +324,15 @@ export class IndexedDBStorage {
         await this.createMockData();
       } else {
         console.log('Existing data found, preserving user data');
-        // Update use case to project-based if not already set, but preserve all other data
-        const credentials = await this.getCredentials();
-        if (credentials.useCase !== 'project-based') {
+        // Only set use case if it's completely missing, don't override existing user choices
+        if (!existingCredentials.useCase) {
+          console.log('No use case found, setting default to project-based');
           await this.setCredentials({
-            ...credentials,
+            ...existingCredentials,
             useCase: 'project-based'
           });
-          console.log('Updated use case to project-based while preserving existing data');
+        } else {
+          console.log('Preserving existing use case:', existingCredentials.useCase);
         }
       }
     } catch (error) {
@@ -609,6 +611,10 @@ export class IndexedDBStorage {
   async restoreFromBackup(backup: BackupData): Promise<void> {
     console.log('Restoring from backup, use case in backup:', backup.useCase, backup.credentials?.useCase);
     
+    // Extract use case from backup - check multiple possible locations
+    const backupUseCase = backup.useCase || backup.credentials?.useCase || 'personal-team';
+    console.log('Extracted use case from backup:', backupUseCase);
+    
     let nestedCategories;
     
     if (backup.subcategories && Array.isArray(backup.subcategories)) {
@@ -675,10 +681,10 @@ export class IndexedDBStorage {
       email: backup.credentials?.email || 'admin@example.com',
       securityQuestion: backup.credentials?.securityQuestion || 'What is your favorite color?',
       securityAnswer: backup.credentials?.securityAnswer || 'blue',
-      useCase: backup.useCase || backup.credentials?.useCase || 'personal-team'
+      useCase: backupUseCase
     };
     
-    console.log('Processed credentials with use case:', processedCredentials.useCase);
+    console.log('Processed credentials with use case:', processedCredentials);
     await Promise.all([
       this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
@@ -687,7 +693,11 @@ export class IndexedDBStorage {
       this.setSettings(backup.settings)
     ]);
     
-    console.log('Restore completed, use case should be:', processedCredentials.useCase);
+    console.log('Restore completed successfully');
+    
+    // Verify the use case was actually saved
+    const verifyCredentials = await this.getCredentials();
+    console.log('Post-restore verification - use case in DB:', verifyCredentials.useCase);
   }
 }
 
