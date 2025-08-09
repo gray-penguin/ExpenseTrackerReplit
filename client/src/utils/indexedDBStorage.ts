@@ -579,31 +579,39 @@ export class IndexedDBStorage {
     let nestedCategories;
     
     if (backup.subcategories && Array.isArray(backup.subcategories)) {
-      nestedCategories = backup.categories.map(category => ({
-        id: category.id.toString(),
-        name: category.name,
-        icon: category.icon,
-        color: category.color,
-        subcategories: backup.subcategories
-          .filter(sub => sub.categoryId === category.id)
-          .map(sub => ({
-            id: sub.id.toString(),
-            name: sub.name,
-            categoryId: category.id.toString()
-          }))
-      }));
+      nestedCategories = backup.categories.map(category => {
+        return {
+          id: category.id.toString(),
+          name: category.name,
+          icon: category.icon,
+          color: category.color,
+          subcategories: backup.subcategories
+            .filter(sub => sub.categoryId === category.id)
+            .map(sub => {
+              return {
+                id: sub.id.toString(),
+                name: sub.name,
+                categoryId: category.id.toString()
+              };
+            })
+        };
+      });
     } else {
-      nestedCategories = backup.categories.map(category => ({
-        id: category.id.toString(),
-        name: category.name,
-        icon: category.icon,
-        color: category.color,
-        subcategories: (category.subcategories || []).map((sub: any) => ({
-          id: sub.id.toString(),
-          name: sub.name,
-          categoryId: category.id.toString()
-        }))
-      }));
+      nestedCategories = backup.categories.map(category => {
+        return {
+          id: category.id.toString(),
+          name: category.name,
+          icon: category.icon,
+          color: category.color,
+          subcategories: (category.subcategories || []).map((sub: any) => {
+            return {
+              id: sub.id.toString(),
+              name: sub.name,
+              categoryId: category.id.toString()
+            };
+          })
+        };
+      });
     }
 
     const processedExpenses = backup.expenses.map((expense: any) => ({
