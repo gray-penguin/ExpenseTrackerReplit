@@ -86,7 +86,17 @@ export const BackupAndRestoreTab: React.FC<BackupAndRestoreTabProps> = ({ onData
       });
 
       if (result.success && onDataRestored) {
-        onDataRestored();
+        // Add a small delay to ensure IndexedDB operations complete
+        setTimeout(() => {
+          console.log('BackupAndRestoreTab: Calling onDataRestored after successful restore');
+          onDataRestored();
+        }, 500);
+      } else if (result.success) {
+        // If no callback provided, force a page reload to reflect changes
+        setTimeout(() => {
+          console.log('BackupAndRestoreTab: No callback provided, reloading page');
+          window.location.reload();
+        }, 1000);
       }
     } catch (error) {
       setRestoreMessage({

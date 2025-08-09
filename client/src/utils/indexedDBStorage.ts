@@ -590,6 +590,8 @@ export class IndexedDBStorage {
   }
 
   async restoreFromBackup(backup: BackupData): Promise<void> {
+    console.log('Restoring from backup, use case in backup:', backup.useCase, backup.credentials?.useCase);
+    
     let nestedCategories;
     
     if (backup.subcategories && Array.isArray(backup.subcategories)) {
@@ -651,9 +653,15 @@ export class IndexedDBStorage {
 
     // Ensure credentials include the use case from the backup
     const processedCredentials = {
-      ...backup.credentials,
+      username: backup.credentials?.username || 'admin',
+      password: backup.credentials?.password || 'pass123',
+      email: backup.credentials?.email || 'admin@example.com',
+      securityQuestion: backup.credentials?.securityQuestion || 'What is your favorite color?',
+      securityAnswer: backup.credentials?.securityAnswer || 'blue',
       useCase: backup.useCase || backup.credentials?.useCase || 'personal-team'
     };
+    
+    console.log('Processed credentials with use case:', processedCredentials.useCase);
     await Promise.all([
       this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
@@ -661,6 +669,8 @@ export class IndexedDBStorage {
       this.setCredentials(processedCredentials),
       this.setSettings(backup.settings)
     ]);
+    
+    console.log('Restore completed, use case should be:', processedCredentials.useCase);
   }
 }
 

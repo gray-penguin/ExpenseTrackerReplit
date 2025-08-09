@@ -34,7 +34,19 @@ export function useAuth() {
         
         console.log('Auth: Retrieved auth state and credentials', { authState, savedCredentials });
         setIsAuthenticated(authState);
-        setCredentials(savedCredentials);
+        
+        // Ensure we have all required credential fields
+        const completeCredentials = {
+          username: savedCredentials?.username || 'admin',
+          password: savedCredentials?.password || 'pass123',
+          email: savedCredentials?.email || 'admin@example.com',
+          securityQuestion: savedCredentials?.securityQuestion || 'What is your favorite color?',
+          securityAnswer: savedCredentials?.securityAnswer || 'blue',
+          useCase: savedCredentials?.useCase || 'personal-team'
+        };
+        
+        console.log('Auth: Setting complete credentials with use case:', completeCredentials.useCase);
+        setCredentials(completeCredentials);
       } catch (error) {
         console.error('Error initializing auth:', error);
         // Set fallback values
@@ -59,6 +71,7 @@ export function useAuth() {
   // Save credentials to IndexedDB when they change
   useEffect(() => {
     if (!isLoading) {
+      console.log('Auth: Saving credentials to IndexedDB:', credentials);
       indexedDBStorage.setCredentials(credentials).catch(error => {
         console.error('Error saving credentials:', error);
       });
