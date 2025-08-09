@@ -298,9 +298,12 @@ export class IndexedDBStorage {
     try {
       // Check if already initialized by looking for users
       const existingUsers = await this.getUsers();
-      // Always reinitialize to apply the new project-based data
-      console.log('Initializing with new project-based mock data');
+      if (existingUsers.length > 0) {
+        console.log('Mock data already exists, skipping initialization');
+        return;
+      }
 
+      console.log('Initializing with mock data');
       await this.createMockData();
     } catch (error) {
       console.error('Error initializing mock data:', error);
@@ -510,67 +513,6 @@ export class IndexedDBStorage {
     }
 
     console.log(`Generated ${mockExpenses.length} project expenses over 12 months`);
-
-    await Promise.all([
-      this.setUsers(mockUsers),
-      this.setCategories(mockCategories),
-      this.setExpenses(mockExpenses)
-    ]);
-  }
-
-      {
-        id: '1',
-        userId: '1',
-        categoryId: '1',
-        subcategoryId: '1',
-        amount: 89.45,
-        description: 'Weekly grocery shopping',
-        notes: 'Bought fresh vegetables and meat for the week',
-        storeName: 'Whole Foods Market',
-        storeLocation: 'Downtown',
-        date: '2025-01-18',
-        createdAt: '2025-01-18T10:30:00Z'
-      },
-      {
-        id: '2',
-        userId: '1',
-        categoryId: '4',
-        subcategoryId: '13',
-        amount: 45.00,
-        description: 'Gas for car',
-        notes: 'Filled up the tank',
-        storeName: 'Shell Station',
-        storeLocation: 'Main Street',
-        date: '2025-01-17',
-        createdAt: '2025-01-17T18:45:00Z'
-      },
-      {
-        id: '3',
-        userId: '2',
-        categoryId: '2',
-        subcategoryId: '5',
-        amount: 125.50,
-        description: 'Monthly electricity bill',
-        notes: 'Higher than usual due to winter heating',
-        storeName: 'City Electric',
-        storeLocation: '',
-        date: '2025-01-15',
-        createdAt: '2025-01-15T08:00:00Z'
-      },
-      {
-        id: '4',
-        userId: '2',
-        categoryId: '3',
-        subcategoryId: '12',
-        amount: 15.99,
-        description: 'Netflix subscription',
-        notes: 'Monthly streaming service',
-        storeName: 'Netflix',
-        storeLocation: 'Online',
-        date: '2025-01-14',
-        createdAt: '2025-01-14T20:00:00Z'
-      }
-    ];
 
     await Promise.all([
       this.setUsers(mockUsers),
