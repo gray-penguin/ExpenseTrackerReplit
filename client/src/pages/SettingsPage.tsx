@@ -15,6 +15,7 @@ export function SettingsPage() {
   };
 
   const handleUpdateUseCase = (useCase: string) => {
+    console.log('SettingsPage: handleUpdateUseCase called with:', useCase);
     updateCredentials({ useCase });
   };
 

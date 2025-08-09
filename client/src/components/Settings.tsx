@@ -124,13 +124,12 @@ export const Settings: React.FC<SettingsProps> = ({
   const selectedUseCase = useCases.find(uc => uc.id === currentUseCase) || useCases[0];
 
   const handleUseCaseChange = (useCaseId: string) => {
+    console.log('Settings: handleUseCaseChange called with:', useCaseId);
     if (onUpdateUseCase) {
+      console.log('Settings: Calling onUpdateUseCase with:', useCaseId);
       onUpdateUseCase(useCaseId);
-      // Force a re-render by updating the page title immediately
-      const newConfig = useCases.find(uc => uc.id === useCaseId);
-      if (newConfig) {
-        document.title = `Expense Tracker - ${newConfig.name}`;
-      }
+    } else {
+      console.log('Settings: onUpdateUseCase is not provided');
     }
   };
   const handleClearAllExpenses = () => {

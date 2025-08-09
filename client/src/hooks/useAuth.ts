@@ -93,14 +93,26 @@ export function useAuth() {
   };
 
   const updateCredentials = (newCredentials: Partial<AuthCredentials>) => {
-    setCredentials(prev => ({ ...prev, ...newCredentials }));
+    const updatedCredentials = { ...credentials, ...newCredentials };
+    console.log('Auth: updateCredentials called with:', newCredentials);
+    console.log('Auth: Updated credentials will be:', updatedCredentials);
     
-    // If use case is being updated, trigger a re-render by updating localStorage immediately
-    if (newCredentials.useCase) {
-      // Force immediate update to trigger component re-renders
-      const updatedCreds = { ...credentials, ...newCredentials };
-      setCredentials(updatedCreds);
-    }
+    setCredentials(updatedCredentials);
+    
+    // Immediately save to IndexedDB to ensure persistence
+    indexedDBStorage.setCredentials(updatedCredentials).then(() => {
+      console.log('Auth: Credentials saved to IndexedDB successfully');
+      
+      // If use case changed, force a page reload to ensure all components update
+      if (newCredentials.useCase && newCredentials.useCase !== credentials.useCase) {
+        console.log('Auth: Use case changed, forcing page reload');
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+    }).catch(error => {
+      console.error('Auth: Error saving credentials to IndexedDB:', error);
+    });
   };
 
   const verifySecurityAnswer = (answer: string): boolean => {
