@@ -298,10 +298,24 @@ export class IndexedDBStorage {
     try {
       // Check if already initialized by looking for users
       const existingUsers = await this.getUsers();
-      // Always reinitialize to apply the new project-based data
-      console.log('Initializing with new project-based mock data');
-
-      await this.createMockData();
+      const existingExpenses = await this.getExpenses();
+      
+      // Only initialize mock data if no existing data is found
+      if (existingUsers.length === 0 && existingExpenses.length === 0) {
+        console.log('No existing data found, initializing with project-based mock data');
+        await this.createMockData();
+      } else {
+        console.log('Existing data found, preserving user data');
+        // Update use case to project-based if not already set, but preserve all other data
+        const credentials = await this.getCredentials();
+        if (credentials.useCase !== 'project-based') {
+          await this.setCredentials({
+            ...credentials,
+            useCase: 'project-based'
+          });
+          console.log('Updated use case to project-based while preserving existing data');
+        }
+      }
     } catch (error) {
       console.error('Error initializing mock data:', error);
     }
