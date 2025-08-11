@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
-import { Calendar, Filter, TrendingUp, X, Eye, Users } from 'lucide-react';
+import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { Expense } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -188,6 +188,203 @@ export const ReportsPage: React.FC = () => {
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
   const selectedUser = users.find(u => u.id === selectedUserId);
 
+  // Print functionality
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to enable printing');
+      return;
+    }
+
+    const printContent = generatePrintContent();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
+  const generatePrintContent = (): string => {
+    const currentDate = new Date().toLocaleDateString();
+    const reportTitle = `Expense Report - ${selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name} - ${selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name}`;
+    const dateRangeText = startDate === endDate ? startDate : `${startDate} to ${endDate}`;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${reportTitle}</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              margin: 0;
+              padding: 20px;
+              color: #1f2937;
+              line-height: 1.5;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 20px;
+            }
+            .header h1 {
+              margin: 0 0 10px 0;
+              font-size: 24px;
+              font-weight: bold;
+            }
+            .header .subtitle {
+              color: #6b7280;
+              font-size: 14px;
+            }
+            .summary {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 20px;
+              margin-bottom: 30px;
+            }
+            .summary-card {
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              padding: 15px;
+              text-align: center;
+            }
+            .summary-card .value {
+              font-size: 20px;
+              font-weight: bold;
+              color: #1f2937;
+            }
+            .summary-card .label {
+              font-size: 12px;
+              color: #6b7280;
+              margin-top: 5px;
+            }
+            .report-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+              font-size: 12px;
+            }
+            .report-table th,
+            .report-table td {
+              border: 1px solid #e5e7eb;
+              padding: 8px;
+              text-align: left;
+            }
+            .report-table th {
+              background: #f3f4f6;
+              font-weight: 600;
+              text-align: center;
+            }
+            .report-table .subcategory-cell {
+              font-weight: 500;
+              background: #fafafa;
+            }
+            .report-table .amount-cell {
+              text-align: right;
+              font-weight: 500;
+            }
+            .report-table .total-row {
+              background: #dbeafe;
+              font-weight: bold;
+            }
+            .report-table .total-row td {
+              border-top: 2px solid #3b82f6;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 12px;
+              color: #6b7280;
+              border-top: 1px solid #e5e7eb;
+              padding-top: 20px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ExpenseTracker Report</h1>
+            <div class="subtitle">
+              ${reportTitle}<br>
+              Period: ${dateRangeText} • Generated: ${currentDate}
+            </div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-card">
+              <div class="value">${formatCurrency(grandTotal)}</div>
+              <div class="label">Total Expenses</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${subcategories.length}</div>
+              <div class="label">Subcategories</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${months.length}</div>
+              <div class="label">Months</div>
+            </div>
+            <div class="summary-card">
+              <div class="value">${selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name || 'N/A'}</div>
+              <div class="label">${useCaseConfig.userLabelSingular} Filter</div>
+            </div>
+          </div>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Subcategory</th>
+                ${months.map(month => `<th>${month.label}</th>`).join('')}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${subcategories.map(subcategory => {
+                const subcategoryTotal = subcategoryTotals[subcategory.id] || 0;
+                return `
+                  <tr>
+                    <td class="subcategory-cell">
+                      ${selectedCategoryId === 'all' ? 
+                        `<strong>${subcategory.categoryName}</strong><br><span style="color: #6b7280;">${subcategory.name}</span>` : 
+                        subcategory.name
+                      }
+                    </td>
+                    ${months.map(month => {
+                      const amount = reportData[subcategory.id]?.[month.key] || 0;
+                      return `<td class="amount-cell">${amount > 0 ? formatCurrency(amount) : '-'}</td>`;
+                    }).join('')}
+                    <td class="amount-cell" style="background: #f3f4f6; font-weight: bold;">
+                      ${subcategoryTotal > 0 ? formatCurrency(subcategoryTotal) : '-'}
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+              <tr class="total-row">
+                <td><strong>TOTAL</strong></td>
+                ${months.map(month => 
+                  `<td class="amount-cell">${formatCurrency(monthlyTotals[month.key] || 0)}</td>`
+                ).join('')}
+                <td class="amount-cell" style="background: #dbeafe;">${formatCurrency(grandTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Generated by ExpenseTracker • ${new Date().toLocaleString()}</p>
+            <p>This report contains ${filteredExpenses.length} expenses across ${subcategories.length} subcategories</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
   // Handle cell click to show expense details
   const handleCellClick = (subcategoryId: string, monthKey: string) => {
     const subcategory = subcategories.find(s => s.id === subcategoryId);
@@ -218,6 +415,16 @@ export const ReportsPage: React.FC = () => {
         <div className="flex items-center gap-2 mb-1">
           <TrendingUp className="w-6 h-6 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900">Expense Reports</h1>
+          <div className="ml-auto">
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+              title="Print current report"
+            >
+              <Printer className="w-4 h-4" />
+              Print Report
+            </button>
+          </div>
         </div>
         <p className="text-sm text-gray-600">Spreadsheet-style expense analysis by category and time period</p>
       </div>
