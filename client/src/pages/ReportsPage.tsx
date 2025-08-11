@@ -320,6 +320,10 @@ export const ReportsPage: React.FC = () => {
             @media print {
               body { margin: 0; }
               .no-print { display: none; }
+             @page {
+               size: landscape;
+               margin: 0.5in;
+             }
             }
           </style>
         </head>
