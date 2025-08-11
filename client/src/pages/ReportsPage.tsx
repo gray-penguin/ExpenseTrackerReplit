@@ -190,21 +190,35 @@ export const ReportsPage: React.FC = () => {
 
   // Print functionality
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow popups to enable printing');
-      return;
-    }
-
-    const printContent = generatePrintContent();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+    // Create a hidden iframe for printing to avoid popup blockers
+    const printFrame = document.createElement('iframe');
+    printFrame.style.position = 'absolute';
+    printFrame.style.top = '-1000px';
+    printFrame.style.left = '-1000px';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
     
-    // Wait for content to load, then print
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
-    };
+    document.body.appendChild(printFrame);
+    
+    const printContent = generatePrintContent();
+    const printDocument = printFrame.contentDocument || printFrame.contentWindow?.document;
+    
+    if (printDocument) {
+      printDocument.open();
+      printDocument.write(printContent);
+      printDocument.close();
+      
+      // Wait for content to load, then print
+      printFrame.onload = () => {
+        printFrame.contentWindow?.print();
+        
+        // Clean up after printing
+        setTimeout(() => {
+          document.body.removeChild(printFrame);
+        }, 1000);
+      };
+    }
   };
 
   const generatePrintContent = (): string => {
