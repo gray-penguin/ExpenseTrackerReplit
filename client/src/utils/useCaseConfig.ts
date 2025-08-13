@@ -40,8 +40,8 @@ export const useCaseConfigs: Record<string, UseCaseConfig> = {
   },
   'personal-team': {
     id: 'personal-team',
-    name: 'Personal Team Expenses',
-    description: 'Track expenses for team members, employees, or family members',
+    name: 'Team Expenses',
+    description: 'Track expenses for team members or employees',
     userLabel: 'Team Members',
     userLabelSingular: 'Team Member',
     expenseContext: 'Track who spent what and where',

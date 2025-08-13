@@ -66,8 +66,8 @@ export const Settings: React.FC<SettingsProps> = ({
       icon: Users,
       color: 'emerald',
       examples: [
-        'Company tracking employee expenses',
-        'Family budget management',
+        'Employee expense tracking',
+        'Company team expenses',
         'Small business team expenses',
         'Sales team expense tracking'
       ],
