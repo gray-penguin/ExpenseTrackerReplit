@@ -117,6 +117,11 @@ export function useAuth() {
         setIsAuthenticated(false);
       }
     }
+    
+    // Force browser refresh to ensure all components reflect the new auth state
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const logout = () => {
