@@ -57,11 +57,6 @@ export const Settings: React.FC<SettingsProps> = ({
         console.error('Error loading installation info:', error);
       }
     };
-    
-    loadInstallationInfo();
-  }, []);
-      }
-    };
 
     if (activeTab === 'general') {
       loadInstallationInfo();
@@ -79,7 +74,11 @@ export const Settings: React.FC<SettingsProps> = ({
       alert('Failed to copy to clipboard');
     }
   };
+
+  const handleToggleAuth = (newEnabled: boolean) => {
     onUpdateAuthSettings({ enabled: newEnabled });
+  };
+
   const handleResetInstallationCode = async () => {
     if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
       try {
@@ -93,12 +92,9 @@ export const Settings: React.FC<SettingsProps> = ({
     }
   };
 
-  const [installationInfo, setInstallationInfo] = useState<{
-    code: string;
-    generatedAt: string;
-    deviceInfo: any;
-  } | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  const { getFontSizeClasses } = useFontSizeContext();
 
   // Use case definitions
   const useCases = [
