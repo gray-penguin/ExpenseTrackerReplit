@@ -1047,13 +1047,6 @@ export const Settings: React.FC<SettingsProps> = ({
                         Current categories: <span className="font-semibold">{categories?.length || 0}</span>
                       </div>
                       <button
-                        onClick={() => setShowClearCategoriesConfirmation(true)}
-                        disabled={(categories?.length || 0) === 0}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Clear All Categories
-                      </button>
                     </div>
                   </div>
                 </div>
