@@ -33,7 +33,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'use-cases' | 'backup' | 'excel' | 'data' | 'about'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'auth' | 'use-cases' | 'backup' | 'excel' | 'data' | 'about'>('general');
   const [credentialsForm, setCredentialsForm] = useState({
     username: currentCredentials?.username || '',
     password: currentCredentials?.password || '',
@@ -254,6 +254,19 @@ export const Settings: React.FC<SettingsProps> = ({
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('auth')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'auth'
+                ? 'border-emerald-500 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Authentication
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('use-cases')}
             className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'use-cases'
@@ -323,6 +336,96 @@ export const Settings: React.FC<SettingsProps> = ({
 
       {/* Tab Content */}
       {activeTab === 'general' && (
+        <div className="space-y-8">
+          {/* Time & Locale Settings */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <Clock className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Time & Region
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  Your current time and locale settings
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Current Time
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {formatDateTime(new Date().toISOString())}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Timezone
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {getCurrentUserTimezone()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-slate-600" />
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
+                        Language & Region
+                      </div>
+                      <div className={getFontSizeClasses("text-slate-500")}>
+                        {getCurrentUserLocale()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-blue-600 text-xs font-bold">i</span>
+                </div>
+                <div>
+                  <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
+                    Automatic Detection
+                  </h4>
+                  <p className={getFontSizeClasses("text-blue-800 mt-1")}>
+                    Time and date formats are automatically detected from your browser settings. 
+                    All timestamps and relative times are displayed in your local timezone.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      )}
+
+      {activeTab === 'auth' && (
         <div className="space-y-8">
           {/* Authentication Settings */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
@@ -514,92 +617,6 @@ export const Settings: React.FC<SettingsProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Time & Locale Settings */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <Clock className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
-                  Time & Region
-                </h3>
-                <p className={getFontSizeClasses("text-slate-500")}>
-                  Your current time and locale settings
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-4 border border-slate-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-slate-600" />
-                    <div>
-                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
-                        Current Time
-                      </div>
-                      <div className={getFontSizeClasses("text-slate-500")}>
-                        {formatDateTime(new Date().toISOString())}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-slate-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-slate-600" />
-                    <div>
-                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
-                        Timezone
-                      </div>
-                      <div className={getFontSizeClasses("text-slate-500")}>
-                        {getCurrentUserTimezone()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-slate-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-slate-600" />
-                    <div>
-                      <div className={getFontSizeClasses("font-medium text-slate-900")}>
-                        Language & Region
-                      </div>
-                      <div className={getFontSizeClasses("text-slate-500")}>
-                        {getCurrentUserLocale()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                  <span className="text-blue-600 text-xs font-bold">i</span>
-                </div>
-                <div>
-                  <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
-                    Automatic Detection
-                  </h4>
-                  <p className={getFontSizeClasses("text-blue-800 mt-1")}>
-                    Time and date formats are automatically detected from your browser settings. 
-                    All timestamps and relative times are displayed in your local timezone.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
         </div>
       )}
 
