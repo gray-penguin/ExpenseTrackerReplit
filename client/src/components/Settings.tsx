@@ -1054,6 +1054,7 @@ export const Settings: React.FC<SettingsProps> = ({
                         Clear All Categories
                       </button>
                     </div>
+                    </div>
                   </div>
                 </div>
               </div>
