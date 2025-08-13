@@ -1,5 +1,7 @@
 export class InstallationCodeManager {
   private static readonly STORAGE_KEY = 'expense-tracker-installation-code';
+  private static readonly PERMANENT_DB_NAME = 'ExpenseTrackerPermanent';
+  private static readonly PERMANENT_DB_VERSION = 1;
   private static readonly APP_PREFIX = 'ET';
 
   /**
@@ -53,17 +55,24 @@ export class InstallationCodeManager {
   }
 
   /**
-   * Get stored installation code from IndexedDB
+   * Get stored installation code from permanent IndexedDB
    */
   private static async getStoredCode(): Promise<string | null> {
     return new Promise((resolve) => {
-      const request = indexedDB.open('ExpenseTrackerDB', 4);
+      const request = indexedDB.open(this.PERMANENT_DB_NAME, this.PERMANENT_DB_VERSION);
+      
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains('permanent')) {
+          db.createObjectStore('permanent');
+        }
+      };
       
       request.onsuccess = () => {
         const db = request.result;
         try {
-          const transaction = db.transaction(['keyValue'], 'readonly');
-          const store = transaction.objectStore('keyValue');
+          const transaction = db.transaction(['permanent'], 'readonly');
+          const store = transaction.objectStore('permanent');
           const getRequest = store.get(this.STORAGE_KEY);
           
           getRequest.onsuccess = () => {
@@ -71,34 +80,41 @@ export class InstallationCodeManager {
           };
           
           getRequest.onerror = () => {
-            console.warn('Error reading installation code from IndexedDB');
+            console.warn('Error reading installation code from permanent IndexedDB');
             resolve(null);
           };
         } catch (error) {
-          console.warn('Error accessing IndexedDB for installation code');
+          console.warn('Error accessing permanent IndexedDB for installation code');
           resolve(null);
         }
       };
       
       request.onerror = () => {
-        console.warn('Error opening IndexedDB for installation code');
+        console.warn('Error opening permanent IndexedDB for installation code');
         resolve(null);
       };
     });
   }
 
   /**
-   * Store installation code in IndexedDB
+   * Store installation code in permanent IndexedDB
    */
   private static async storeCode(code: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('ExpenseTrackerDB', 4);
+      const request = indexedDB.open(this.PERMANENT_DB_NAME, this.PERMANENT_DB_VERSION);
+      
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains('permanent')) {
+          db.createObjectStore('permanent');
+        }
+      };
       
       request.onsuccess = () => {
         const db = request.result;
         try {
-          const transaction = db.transaction(['keyValue'], 'readwrite');
-          const store = transaction.objectStore('keyValue');
+          const transaction = db.transaction(['permanent'], 'readwrite');
+          const store = transaction.objectStore('permanent');
           const putRequest = store.put(code, this.STORAGE_KEY);
           
           putRequest.onsuccess = () => {
@@ -109,17 +125,17 @@ export class InstallationCodeManager {
           };
           
           putRequest.onerror = () => {
-            console.warn('Error storing installation code in IndexedDB');
+            console.warn('Error storing installation code in permanent IndexedDB');
             reject(putRequest.error);
           };
         } catch (error) {
-          console.warn('Error accessing IndexedDB for storing installation code');
+          console.warn('Error accessing permanent IndexedDB for storing installation code');
           reject(error);
         }
       };
       
       request.onerror = () => {
-        console.warn('Error opening IndexedDB for storing installation code');
+        console.warn('Error opening permanent IndexedDB for storing installation code');
         reject(request.error);
       };
     });
