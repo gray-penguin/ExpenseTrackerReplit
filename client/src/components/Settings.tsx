@@ -44,6 +44,13 @@ export const Settings: React.FC<SettingsProps> = ({
     confirmPassword: ''
   });
   const [credentialsError, setCredentialsError] = useState('');
+  const [installationInfo, setInstallationInfo] = useState<{
+    code: string;
+    generatedAt: string;
+    deviceInfo: any;
+  } | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+
   // Load installation info on component mount
   useEffect(() => {
     const loadInstallationInfo = async () => {
@@ -84,13 +91,6 @@ export const Settings: React.FC<SettingsProps> = ({
       }
     }
   };
-
-  const [installationInfo, setInstallationInfo] = useState<{
-    code: string;
-    generatedAt: string;
-    deviceInfo: any;
-  } | null>(null);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   // Use case definitions
   const useCases = [
@@ -438,6 +438,13 @@ export const Settings: React.FC<SettingsProps> = ({
                         {copySuccess ? 'Copied!' : 'Copy'}
                       </button>
                       <button
+                        onClick={handleResetInstallationCode}
+                        className="flex items-center gap-2 px-3 py-1 text-sm rounded-lg transition-colors bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200"
+                        title="Generate new installation code"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset
+                      </button>
                     </div>
                   </div>
                   
