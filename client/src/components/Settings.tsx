@@ -18,7 +18,7 @@ interface SettingsProps {
   onUpdateUseCase?: (useCase: string) => void;
   currentUseCase?: string;
   authSettings: any;
-  onUpdateAuthSettings: (settings: Partial<any>) => void;
+  onUpdateAuthSettings: (settings: any) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
@@ -30,10 +30,10 @@ export const Settings: React.FC<SettingsProps> = ({
   onUpdateCredentials,
   currentCredentials,
   onUpdateUseCase,
- currentUseCase = 'family-expenses',
+  currentUseCase = 'family-expenses'
+}) => {
   authSettings,
   onUpdateAuthSettings
-}) => {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
@@ -45,8 +45,6 @@ export const Settings: React.FC<SettingsProps> = ({
     confirmPassword: ''
   });
   const [credentialsError, setCredentialsError] = useState('');
-  const [installationInfo, setInstallationInfo] = useState<any>(null);
-
   // Load installation info on component mount
   useEffect(() => {
     const loadInstallationInfo = async () => {
@@ -57,13 +55,7 @@ export const Settings: React.FC<SettingsProps> = ({
         console.error('Error loading installation info:', error);
       }
     };
-    
-    if (activeTab === 'general') {
-      loadInstallationInfo();
-    }
-  }, [activeTab]);
 
-  useEffect(() => {
     if (activeTab === 'general') {
       loadInstallationInfo();
     }
@@ -80,11 +72,7 @@ export const Settings: React.FC<SettingsProps> = ({
       alert('Failed to copy to clipboard');
     }
   };
-
-  const handleToggleAuth = (newEnabled: boolean) => {
     onUpdateAuthSettings({ enabled: newEnabled });
-  };
-
   const handleResetInstallationCode = async () => {
     if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
       try {
@@ -98,9 +86,12 @@ export const Settings: React.FC<SettingsProps> = ({
     }
   };
 
+  const [installationInfo, setInstallationInfo] = useState<{
+    code: string;
+    generatedAt: string;
+    deviceInfo: any;
+  } | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
-
-  const { getFontSizeClasses } = useFontSizeContext();
 
   // Use case definitions
   const useCases = [
