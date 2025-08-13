@@ -83,23 +83,27 @@ export function Navbar() {
               Backup
             </button>
             
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
-              title="Sign out of the application"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
+            {/* Logout Button - only show when authentication is enabled */}
+            {credentials.authEnabled && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
+                title="Sign out of the application"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            )}
           </div>
           
-          {/* Backup Warning Text - positioned below backup button */}
-          <div className="absolute top-full right-4 mt-1">
-            <div className="text-red-600 text-xs font-medium">
-              Please backup your data before exiting!
+          {/* Backup Warning Text - positioned below backup button, only show when auth is enabled */}
+          {credentials.authEnabled && (
+            <div className="absolute top-full right-4 mt-1">
+              <div className="text-red-600 text-xs font-medium">
+                Please backup your data before exiting!
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile menu button - TODO: implement mobile navigation */}
           <div className="md:hidden">
