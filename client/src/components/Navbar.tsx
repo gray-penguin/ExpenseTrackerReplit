@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export function Navbar() {
   const [location] = useLocation();
-  const { credentials, logout } = useAuth();
+  const { credentials, logout, authSettings } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
@@ -19,6 +19,11 @@ export function Navbar() {
   };
 
   const handleLogout = () => {
+    // Don't show logout confirmation if auth is disabled
+    if (!authSettings.enabled) {
+      return;
+    }
+    
     if (confirm('Are you sure you want to sign out?\n\nReminder: Make sure to backup your data before signing out to avoid losing any information. You can use the red Backup button below.\n\nYou will need to sign in again to access your data.')) {
       logout();
     }
@@ -84,14 +89,16 @@ export function Navbar() {
             </button>
             
             {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
-              title="Sign out of the application"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
+            {authSettings.enabled && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
+                title="Sign out of the application"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            )}
           </div>
           
           {/* Backup Warning Text - positioned below backup button */}
