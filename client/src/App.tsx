@@ -16,8 +16,7 @@ function App() {
   const { 
     isAuthenticated, 
     isLoading: authLoading,
-    credentials,
-    authSettings,
+    credentials, 
     login, 
     sendPasswordResetEmail, 
     verifySecurityAnswer, 
@@ -38,7 +37,7 @@ function App() {
   }
   
   // Show login page if not authenticated
-  if (!isAuthenticated && authSettings.enabled) {
+  if (!isAuthenticated) {
     return (
       <FontSizeProvider>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

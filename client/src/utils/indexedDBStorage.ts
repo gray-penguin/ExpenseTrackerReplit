@@ -302,38 +302,6 @@ export class IndexedDBStorage {
     }
   }
 
-  async getAuthSettings(): Promise<any> {
-    try {
-      const store = await this.getKeyValueStore();
-      return new Promise((resolve, reject) => {
-        const request = store.get('authSettings');
-        request.onsuccess = () => {
-          resolve(request.result || {
-            enabled: true
-          });
-        };
-        request.onerror = () => reject(request.error);
-      });
-    } catch (error) {
-      console.error('Error getting auth settings from IndexedDB:', error);
-      return {
-        enabled: true
-      };
-    }
-  }
-
-  async setAuthSettings(authSettings: any): Promise<void> {
-    try {
-      const store = await this.getKeyValueStore('readwrite');
-      await new Promise<void>((resolve, reject) => {
-        const request = store.put(authSettings, 'authSettings');
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    } catch (error) {
-      console.error('Error setting auth settings in IndexedDB:', error);
-    }
-  }
   async getAuthState(): Promise<boolean> {
     const settings = await this.getSettings();
     return settings.auth === 'true';

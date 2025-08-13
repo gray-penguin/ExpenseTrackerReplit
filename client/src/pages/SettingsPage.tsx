@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 
 export function SettingsPage() {
   const { expenses, categories, clearAllExpenses, setCategories, setExpenses } = useExpenseData();
-  const { credentials, updateCredentials, logout, authSettings, updateAuthSettings } = useAuth();
+  const { credentials, updateCredentials, logout } = useAuth();
 
   const handleClearAllCategories = () => {
     // Clear both categories and expenses since expenses depend on categories
@@ -47,8 +47,6 @@ export function SettingsPage() {
         currentCredentials={credentials}
         onUpdateUseCase={handleUpdateUseCase}
         currentUseCase={credentials.useCase}
-        authSettings={authSettings}
-        onUpdateAuthSettings={updateAuthSettings}
       />
     </div>
   );

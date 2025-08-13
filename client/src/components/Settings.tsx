@@ -17,8 +17,6 @@ interface SettingsProps {
   currentCredentials?: { username: string; password: string; email: string };
   onUpdateUseCase?: (useCase: string) => void;
   currentUseCase?: string;
-  authSettings: any;
-  onUpdateAuthSettings: (settings: any) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
@@ -32,8 +30,7 @@ export const Settings: React.FC<SettingsProps> = ({
   onUpdateUseCase,
   currentUseCase = 'family-expenses'
 }) => {
-  authSettings,
-  onUpdateAuthSettings
+  const { getFontSizeClasses } = useFontSizeContext();
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
@@ -72,7 +69,7 @@ export const Settings: React.FC<SettingsProps> = ({
       alert('Failed to copy to clipboard');
     }
   };
-    onUpdateAuthSettings({ enabled: newEnabled });
+
   const handleResetInstallationCode = async () => {
     if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
       try {
