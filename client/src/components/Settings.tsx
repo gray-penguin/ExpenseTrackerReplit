@@ -484,7 +484,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 {onLogout && (
                   <button
                     onClick={() => {
-                      if (confirm('Are you sure you want to sign out? You will need to sign in again to access your data.')) {
+                      if (confirm('Are you sure you want to sign out?\n\nReminder: Make sure to backup your data before signing out to avoid losing any information. You can use the red Backup button in the top navigation or go to the Backup & Restore tab.\n\nYou will need to sign in again to access your data.')) {
                         onLogout();
                       }
                     }}
