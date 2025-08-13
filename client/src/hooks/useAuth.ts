@@ -8,6 +8,7 @@ interface AuthCredentials {
   securityQuestion: string;
   securityAnswer: string;
   useCase: string;
+  authEnabled: boolean;
 }
 
 const DEFAULT_CREDENTIALS: AuthCredentials = {
@@ -16,7 +17,8 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
   email: 'admin@example.com',
   securityQuestion: 'What is your favorite color?',
   securityAnswer: 'blue',
-  useCase: 'family-expenses'
+  useCase: 'family-expenses',
+  authEnabled: true
 };
 
 export function useAuth() {
@@ -42,7 +44,8 @@ export function useAuth() {
           email: savedCredentials?.email || 'admin@example.com',
           securityQuestion: savedCredentials?.securityQuestion || 'What is your favorite color?',
           securityAnswer: savedCredentials?.securityAnswer || 'blue',
-          useCase: savedCredentials?.useCase || 'personal-team'
+          useCase: savedCredentials?.useCase || 'personal-team',
+          authEnabled: savedCredentials?.authEnabled !== undefined ? savedCredentials.authEnabled : true
         };
         
         console.log('Auth: Setting complete credentials with use case:', completeCredentials.useCase);
@@ -57,7 +60,8 @@ export function useAuth() {
           email: 'admin@example.com',
           securityQuestion: 'What is your favorite color?',
           securityAnswer: 'blue',
-          useCase: 'family-expenses'
+          useCase: 'family-expenses',
+          authEnabled: true
         });
       } finally {
         console.log('Auth: Initialization complete, setting loading to false');
@@ -79,12 +83,40 @@ export function useAuth() {
   }, [credentials, isLoading]);
 
   const login = (username: string, password: string): boolean => {
+    // If auth is disabled, always allow login
+    if (!credentials.authEnabled) {
+      indexedDBStorage.setAuthState(true);
+      setIsAuthenticated(true);
+      return true;
+    }
+    
     if (username === credentials.username && password === credentials.password) {
       indexedDBStorage.setAuthState(true);
       setIsAuthenticated(true);
       return true;
     }
     return false;
+  };
+
+  const toggleAuth = (enabled: boolean) => {
+    const updatedCredentials = { ...credentials, authEnabled: enabled };
+    setCredentials(updatedCredentials);
+    
+    // If disabling auth and user is not authenticated, auto-authenticate
+    if (!enabled && !isAuthenticated) {
+      indexedDBStorage.setAuthState(true);
+      setIsAuthenticated(true);
+    }
+    
+    // If enabling auth and user was auto-authenticated, log them out
+    if (enabled && isAuthenticated) {
+      // Only log out if they haven't manually logged in
+      const wasAutoAuthenticated = !credentials.authEnabled;
+      if (wasAutoAuthenticated) {
+        indexedDBStorage.setAuthState(false);
+        setIsAuthenticated(false);
+      }
+    }
   };
 
   const logout = () => {
@@ -159,6 +191,7 @@ export function useAuth() {
     login,
     logout,
     updateCredentials,
+    toggleAuth,
     verifySecurityAnswer,
     resetPassword,
     sendPasswordResetEmail
