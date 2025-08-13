@@ -1046,14 +1046,14 @@ export const Settings: React.FC<SettingsProps> = ({
                       <div className={getFontSizeClasses("text-sm text-red-600 mb-4")}>
                         Current categories: <span className="font-semibold">{categories?.length || 0}</span>
                       </div>
-                    </div>
-                        disabled={categories?.length === 0}
+                      <button
+                        onClick={() => setShowClearCategoriesConfirmation(true)}
+                        disabled={(categories?.length || 0) === 0}
                         className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-4 h-4" />
                         Clear All Categories
                       </button>
-                    </div>
                     </div>
                   </div>
                 </div>
