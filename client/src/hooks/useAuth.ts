@@ -88,8 +88,18 @@ export function useAuth() {
   };
 
   const logout = () => {
-    indexedDBStorage.setAuthState(false);
-    setIsAuthenticated(false);
+    try {
+      indexedDBStorage.setAuthState(false);
+      setIsAuthenticated(false);
+      // Force a page reload to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Force reload even if there's an error
+      window.location.reload();
+    }
   };
 
   const updateCredentials = (newCredentials: Partial<AuthCredentials>) => {

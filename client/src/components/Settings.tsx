@@ -483,7 +483,11 @@ export const Settings: React.FC<SettingsProps> = ({
                 </button>
                 {onLogout && (
                   <button
-                    onClick={onLogout}
+                    onClick={() => {
+                      if (confirm('Are you sure you want to sign out? You will need to sign in again to access your data.')) {
+                        onLogout();
+                      }
+                    }}
                     className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
