@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
