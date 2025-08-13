@@ -16,7 +16,7 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
   email: 'admin@example.com',
   securityQuestion: 'What is your favorite color?',
   securityAnswer: 'blue',
-  useCase: 'personal-team'
+  useCase: 'family-expenses'
 };
 
 export function useAuth() {
@@ -57,7 +57,7 @@ export function useAuth() {
           email: 'admin@example.com',
           securityQuestion: 'What is your favorite color?',
           securityAnswer: 'blue',
-          useCase: 'personal-team'
+          useCase: 'family-expenses'
         });
       } finally {
         console.log('Auth: Initialization complete, setting loading to false');

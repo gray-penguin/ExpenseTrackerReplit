@@ -19,6 +19,25 @@ export interface UseCaseConfig {
 }
 
 export const useCaseConfigs: Record<string, UseCaseConfig> = {
+  'family-expenses': {
+    id: 'family-expenses',
+    name: 'Family Expenses',
+    description: 'Track household expenses for family members with shared budgets and responsibilities',
+    userLabel: 'Family Members',
+    userLabelSingular: 'Family Member',
+    expenseContext: 'Track who spent what on family needs and activities',
+    dashboardTitle: 'Family Expense Dashboard',
+    terminology: {
+      user: 'family member',
+      users: 'family members',
+      userManagement: 'Family Member Management',
+      addUser: 'Add Family Member',
+      editUser: 'Edit Family Member',
+      selectUser: 'Select Family Member',
+      allUsers: 'All Family Members',
+      userFilter: 'Filter by family member'
+    }
+  },
   'personal-team': {
     id: 'personal-team',
     name: 'Personal Team Expenses',
@@ -117,7 +136,7 @@ export const useCaseConfigs: Record<string, UseCaseConfig> = {
 };
 
 export function getUseCaseConfig(useCaseId: string): UseCaseConfig {
-  return useCaseConfigs[useCaseId] || useCaseConfigs['personal-team'];
+  return useCaseConfigs[useCaseId] || useCaseConfigs['family-expenses'];
 }
 
 export function getUseCaseTerminology(useCaseId: string) {

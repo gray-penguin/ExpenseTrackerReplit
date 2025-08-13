@@ -27,7 +27,7 @@ export const Settings: React.FC<SettingsProps> = ({
   onUpdateCredentials,
   currentCredentials,
   onUpdateUseCase,
-  currentUseCase = 'personal-team'
+  currentUseCase = 'family-expenses'
 }) => {
   const { getFontSizeClasses } = useFontSizeContext();
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
@@ -44,6 +44,21 @@ export const Settings: React.FC<SettingsProps> = ({
 
   // Use case definitions
   const useCases = [
+    {
+      id: 'family-expenses',
+      name: 'Family Expenses',
+      description: 'Track household expenses for family members with shared budgets and responsibilities',
+      icon: Users,
+      color: 'emerald',
+      examples: [
+        'Household budget management',
+        'Family member expense tracking',
+        'Shared family expenses',
+        'Kids allowance and spending'
+      ],
+      userLabel: 'Family Members',
+      expenseContext: 'Track who spent what on family needs and activities'
+    },
     {
       id: 'personal-team',
       name: 'Personal Team Expenses',

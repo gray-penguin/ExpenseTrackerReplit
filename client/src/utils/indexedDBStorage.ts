@@ -239,7 +239,7 @@ export class IndexedDBStorage {
         email: 'admin@example.com',
         securityQuestion: 'What is your favorite color?',
         securityAnswer: 'blue',
-        useCase: 'personal-team'
+        useCase: 'family-expenses'
       };
     }
   }
@@ -348,7 +348,7 @@ export class IndexedDBStorage {
       email: 'admin@example.com',
       securityQuestion: 'What is your favorite color?',
       securityAnswer: 'blue',
-      useCase: 'personal-team'
+      useCase: 'family-expenses'
     });
 
     // Jones family members
