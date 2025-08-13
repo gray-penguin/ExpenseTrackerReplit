@@ -438,13 +438,6 @@ export const Settings: React.FC<SettingsProps> = ({
                         {copySuccess ? 'Copied!' : 'Copy'}
                       </button>
                       <button
-                        onClick={handleResetInstallationCode}
-                        className="flex items-center gap-2 px-3 py-1 text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
-                        title="Generate new installation code"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                        Reset
-                      </button>
                     </div>
                   </div>
                   
