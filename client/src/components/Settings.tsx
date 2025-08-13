@@ -70,6 +70,19 @@ export const Settings: React.FC<SettingsProps> = ({
     }
   };
 
+  const handleResetInstallationCode = async () => {
+    if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
+      try {
+        const newCode = await InstallationCodeManager.resetInstallationCode();
+        const newInfo = await InstallationCodeManager.getInstallationInfo();
+        setInstallationInfo(newInfo);
+      } catch (error) {
+        console.error('Error resetting installation code:', error);
+        alert('Failed to generate new installation code');
+      }
+    }
+  };
+
   const [installationInfo, setInstallationInfo] = useState<{
     code: string;
     generatedAt: string;
@@ -413,6 +426,14 @@ export const Settings: React.FC<SettingsProps> = ({
                         <Copy className="w-3 h-3" />
                         {copySuccess ? 'Copied!' : 'Copy'}
                       </button>
+                      <button
+                        onClick={handleResetInstallationCode}
+                        className="flex items-center gap-2 px-3 py-1 text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
+                        title="Generate new installation code"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset
+                      </button>
                     </div>
                   </div>
                   
@@ -460,9 +481,9 @@ export const Settings: React.FC<SettingsProps> = ({
                         About Installation Codes
                       </h4>
                       <p className={getFontSizeClasses("text-blue-800 mt-1")}>
-                        Installation codes uniquely identify your PWA installation for support purposes. 
-                        They are stored in IndexedDB for maximum persistence across browser restarts, 
-                        cache clears, and browser updates. The code is automatically included in backup files.
+                        This unique code identifies your specific PWA installation. It's useful for support, 
+                        analytics, and distinguishing between multiple installations. The code is stored locally 
+                        and included in backup files for restoration.
                       </p>
                     </div>
                   </div>
