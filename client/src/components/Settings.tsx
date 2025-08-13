@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
-import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet, Copy, RotateCcw, Smartphone } from 'lucide-react';
 import { FileText } from 'lucide-react';
 import { ExcelConversionTab } from './ExcelConversionTab.tsx';
+import { InstallationCodeManager } from '../utils/installationCode';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -41,6 +42,53 @@ export const Settings: React.FC<SettingsProps> = ({
     confirmPassword: ''
   });
   const [credentialsError, setCredentialsError] = useState('');
+  // Load installation info on component mount
+  useEffect(() => {
+    const loadInstallationInfo = async () => {
+      try {
+        const info = await InstallationCodeManager.getInstallationInfo();
+        setInstallationInfo(info);
+      } catch (error) {
+        console.error('Error loading installation info:', error);
+      }
+    };
+
+    if (activeTab === 'general') {
+      loadInstallationInfo();
+    }
+  }, [activeTab]);
+
+  const handleCopyInstallationCode = async () => {
+    if (!installationInfo) return;
+    
+    const success = await InstallationCodeManager.copyToClipboard(installationInfo.code);
+    if (success) {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } else {
+      alert('Failed to copy to clipboard');
+    }
+  };
+
+  const handleResetInstallationCode = async () => {
+    if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
+      try {
+        const newCode = await InstallationCodeManager.resetInstallationCode();
+        const newInfo = await InstallationCodeManager.getInstallationInfo();
+        setInstallationInfo(newInfo);
+      } catch (error) {
+        console.error('Error resetting installation code:', error);
+        alert('Failed to generate new installation code');
+      }
+    }
+  };
+
+  const [installationInfo, setInstallationInfo] = useState<{
+    code: string;
+    generatedAt: string;
+    deviceInfo: any;
+  } | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Use case definitions
   const useCases = [
@@ -337,6 +385,77 @@ export const Settings: React.FC<SettingsProps> = ({
       {/* Tab Content */}
       {activeTab === 'general' && (
         <div className="space-y-8">
+          {/* Installation Code */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
+                  Installation Code
+                </h3>
+                <p className={getFontSizeClasses("text-slate-500")}>
+                  Unique identifier for this PWA installation
+                </p>
+              </div>
+            </div>
+
+            {installationInfo ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className={getFontSizeClasses("font-medium text-purple-900")}>
+                        Your Installation Code
+                      </div>
+                      <div className={getFontSizeClasses("text-purple-700 text-sm")}>
+                        Generated: {new Date(installationInfo.generatedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleCopyInstallationCode}
+                        className={`flex items-center gap-2 px-3 py-1 text-sm rounded-lg transition-colors ${
+                          copySuccess 
+                            ? 'bg-green-100 text-green-700 border border-green-200' 
+                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200'
+                        }`}
+                        title="Copy installation code"
+                      >
+                        <Copy className="w-3 h-3" />
+                        {copySuccess ? 'Copied!' : 'Copy'}
+                      </button>
+                      <button
+                        onClick={handleResetInstallationCode}
+                        className="flex items-center gap-2 px-3 py-1 text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
+                        title="Generate new installation code"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="font-mono text-lg font-bold text-purple-900 bg-white px-4 py-3 rounded border border-purple-300 text-center tracking-wider">
+                    {installationInfo.code}
+                  </div>
+                </div>
+
+                {/* Device Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 border border-slate-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Globe className="w-4 h-4 text-slate-600" />
+                      <span className={getFontSizeClasses("font-medium text-slate-900")}>Device Info</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-slate-600">
+                      <div><strong>Platform:</strong> {installationInfo.deviceInfo.platform}</div>
+                      <div><strong>Language:</strong> {installationInfo.deviceInfo.language}</div>
+                      <div><strong>Timezone:</strong> {installationInfo.deviceInfo.timezone}</div>
+                      <div><strong>Screen:</strong> {installationInfo.deviceInfo.screenResolution}</div>
+                    </div>
+                  </div>
           {/* Time & Locale Settings */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -421,6 +540,45 @@ export const Settings: React.FC<SettingsProps> = ({
             </div>
           </div>
 
+                  <div className="p-3 border border-slate-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Smartphone className="w-4 h-4 text-slate-600" />
+                      <span className={getFontSizeClasses("font-medium text-slate-900")}>Installation</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-slate-600">
+                      <div><strong>App:</strong> ExpenseTracker PWA</div>
+                      <div><strong>Version:</strong> 1.0.0</div>
+                      <div><strong>Type:</strong> Progressive Web App</div>
+                      <div><strong>Storage:</strong> IndexedDB Local</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                      <span className="text-blue-600 text-xs font-bold">i</span>
+                    </div>
+                    <div>
+                      <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
+                        About Installation Codes
+                      </h4>
+                      <p className={getFontSizeClasses("text-blue-800 mt-1")}>
+                        This unique code identifies your specific PWA installation. It's useful for support, 
+                        analytics, and distinguishing between multiple installations. The code is stored locally 
+                        and included in backup files for restoration.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <span className="ml-3 text-slate-600">Loading installation code...</span>
+              </div>
+            )}
+          </div>
 
         </div>
       )}

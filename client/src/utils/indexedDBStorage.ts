@@ -1,4 +1,5 @@
 import { User, Category, Expense } from '../types';
+import { InstallationCodeManager } from './installationCode';
 
 export interface BackupData {
   version: string;
@@ -628,12 +629,13 @@ export class IndexedDBStorage {
   async createFullBackup(): Promise<BackupData> {
     console.log('IndexedDBStorage.createFullBackup called');
     try {
-      const [users, categories, expenses, credentials, settings] = await Promise.all([
+      const [users, categories, expenses, credentials, settings, installationInfo] = await Promise.all([
         this.getUsers(),
         this.getCategories(),
         this.getExpenses(),
         this.getCredentials(),
-        this.getSettings()
+        this.getSettings(),
+        InstallationCodeManager.getInstallationInfo()
       ]);
 
       console.log('Retrieved data for backup:', { 
@@ -665,6 +667,7 @@ export class IndexedDBStorage {
       const backupData = {
         version: '1.0.0',
         timestamp: new Date().toISOString(),
+        installationCode: installationInfo.code,
         users,
         categories: flatCategories,
         subcategories: flatSubcategories,
