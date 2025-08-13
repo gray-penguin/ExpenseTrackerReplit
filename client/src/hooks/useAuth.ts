@@ -10,6 +10,10 @@ interface AuthCredentials {
   useCase: string;
 }
 
+interface AuthSettings {
+  enabled: boolean;
+}
+
 const DEFAULT_CREDENTIALS: AuthCredentials = {
   username: 'admin',
   password: 'pass123',
@@ -19,21 +23,35 @@ const DEFAULT_CREDENTIALS: AuthCredentials = {
   useCase: 'family-expenses'
 };
 
+const DEFAULT_AUTH_SETTINGS: AuthSettings = {
+  enabled: true
+};
+
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
+  const [authSettings, setAuthSettings] = useState<AuthSettings>(DEFAULT_AUTH_SETTINGS);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const [authState, savedCredentials] = await Promise.all([
+        const [authState, savedCredentials, savedAuthSettings] = await Promise.all([
           indexedDBStorage.getAuthState(),
           indexedDBStorage.getCredentials(),
+          indexedDBStorage.getAuthSettings(),
         ]);
         
-        console.log('Auth: Retrieved auth state and credentials', { authState, savedCredentials });
-        setIsAuthenticated(authState);
+        console.log('Auth: Retrieved auth state, credentials, and settings', { authState, savedCredentials, savedAuthSettings });
+        
+        // If authentication is disabled, always set as authenticated
+        if (!savedAuthSettings.enabled) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(authState);
+        }
+        
+        setAuthSettings(savedAuthSettings);
         
         // Ensure we have all required credential fields
         const completeCredentials = {
@@ -50,7 +68,8 @@ export function useAuth() {
       } catch (error) {
         console.error('Error initializing auth:', error);
         // Set fallback values
-        setIsAuthenticated(false);
+        setIsAuthenticated(true); // Default to authenticated if auth is disabled
+        setAuthSettings(DEFAULT_AUTH_SETTINGS);
         setCredentials({
           username: 'admin',
           password: 'pass123',
@@ -78,7 +97,22 @@ export function useAuth() {
     }
   }, [credentials, isLoading]);
 
+  // Save auth settings to IndexedDB when they change
+  useEffect(() => {
+    if (!isLoading) {
+      console.log('Auth: Saving auth settings to IndexedDB:', authSettings);
+      indexedDBStorage.setAuthSettings(authSettings).catch(error => {
+        console.error('Error saving auth settings:', error);
+      });
+    }
+  }, [authSettings, isLoading]);
   const login = (username: string, password: string): boolean => {
+    // If authentication is disabled, always allow login
+    if (!authSettings.enabled) {
+      setIsAuthenticated(true);
+      return true;
+    }
+    
     if (username === credentials.username && password === credentials.password) {
       indexedDBStorage.setAuthState(true);
       setIsAuthenticated(true);
@@ -88,6 +122,11 @@ export function useAuth() {
   };
 
   const logout = () => {
+    // If authentication is disabled, don't allow logout
+    if (!authSettings.enabled) {
+      return;
+    }
+    
     try {
       indexedDBStorage.setAuthState(false);
       setIsAuthenticated(false);
@@ -102,6 +141,25 @@ export function useAuth() {
     }
   };
 
+  const updateAuthSettings = (newSettings: Partial<AuthSettings>) => {
+    const updatedSettings = { ...authSettings, ...newSettings };
+    console.log('Auth: updateAuthSettings called with:', newSettings);
+    console.log('Auth: Updated auth settings will be:', updatedSettings);
+    
+    setAuthSettings(updatedSettings);
+    
+    // If authentication is being disabled, automatically authenticate the user
+    if (newSettings.enabled === false) {
+      setIsAuthenticated(true);
+      indexedDBStorage.setAuthState(true);
+    }
+    
+    // If authentication is being enabled and user is not authenticated, log them out
+    if (newSettings.enabled === true && !isAuthenticated) {
+      setIsAuthenticated(false);
+      indexedDBStorage.setAuthState(false);
+    }
+  };
   const updateCredentials = (newCredentials: Partial<AuthCredentials>) => {
     const updatedCredentials = { ...credentials, ...newCredentials };
     console.log('Auth: updateCredentials called with:', newCredentials);
@@ -156,9 +214,11 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     credentials,
+    authSettings,
     login,
     logout,
     updateCredentials,
+    updateAuthSettings,
     verifySecurityAnswer,
     resetPassword,
     sendPasswordResetEmail
