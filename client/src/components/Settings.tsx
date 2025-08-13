@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
-import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet, Copy, RotateCcw, Smartphone } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet, Copy, RotateCcw, Smartphone, ToggleLeft, ToggleRight } from 'lucide-react';
 import { FileText } from 'lucide-react';
 import { ExcelConversionTab } from './ExcelConversionTab.tsx';
 import { InstallationCodeManager } from '../utils/installationCode';
@@ -16,6 +16,7 @@ interface SettingsProps {
   onUpdateCredentials?: (credentials: { username?: string; password?: string; email?: string }) => void;
   currentCredentials?: { username: string; password: string; email: string };
   onUpdateUseCase?: (useCase: string) => void;
+  onToggleAuth?: (enabled: boolean) => void;
   currentUseCase?: string;
 }
 
@@ -28,6 +29,7 @@ export const Settings: React.FC<SettingsProps> = ({
   onUpdateCredentials,
   currentCredentials,
   onUpdateUseCase,
+  onToggleAuth,
   currentUseCase = 'family-expenses'
 }) => {
   const { getFontSizeClasses } = useFontSizeContext();
@@ -585,193 +587,214 @@ export const Settings: React.FC<SettingsProps> = ({
       )}
 
       {activeTab === 'auth' && (
-        <div className="space-y-8">
-          {/* Authentication Settings */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-blue-600" />
+        <div className="space-y-6">
+          {/* Authentication Toggle */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Login Protection</h3>
+                  <p className="text-slate-500">Control whether users need to log in to access the app</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onToggleAuth && onToggleAuth(!currentCredentials?.authEnabled)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  currentCredentials?.authEnabled
+                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                }`}
+              >
+                {currentCredentials?.authEnabled ? (
+                  <>
+                    <ToggleRight className="w-5 h-5" />
+                    Enabled
+                  </>
+                ) : (
+                  <>
+                    <ToggleLeft className="w-5 h-5" />
+                    Disabled
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className={`p-4 rounded-lg border ${
+              currentCredentials?.authEnabled
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-amber-50 border-amber-200'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
+                  currentCredentials?.authEnabled
+                    ? 'bg-emerald-100'
+                    : 'bg-amber-100'
+                }`}>
+                  <span className={`text-xs font-bold ${
+                    currentCredentials?.authEnabled
+                      ? 'text-emerald-600'
+                      : 'text-amber-600'
+                  }`}>
+                    {currentCredentials?.authEnabled ? '🔒' : '🔓'}
+                  </span>
+                </div>
+                <div>
+                  <h4 className={`font-medium mb-1 ${
+                    currentCredentials?.authEnabled
+                      ? 'text-emerald-900'
+                      : 'text-amber-900'
+                  }`}>
+                    {currentCredentials?.authEnabled ? 'Login Required' : 'Open Access'}
+                  </h4>
+                  <p className={`text-sm ${
+                    currentCredentials?.authEnabled
+                      ? 'text-emerald-800'
+                      : 'text-amber-800'
+                  }`}>
+                    {currentCredentials?.authEnabled
+                      ? 'Users must enter valid credentials to access the expense tracker. This provides security for your financial data.'
+                      : 'Anyone can access the expense tracker without logging in. This is convenient for personal use or trusted environments.'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Login Credentials (only show when auth is enabled) */}
+          {currentCredentials?.authEnabled && (
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Login Credentials</h3>
+                  <p className="text-slate-500">Manage the username and password for accessing the app</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                  <input
+                    type="text"
+                    value={currentCredentials?.username || ''}
+                    onChange={(e) => onUpdateCredentials && onUpdateCredentials({ username: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                  <input
+                    type="password"
+                    value={currentCredentials?.password || ''}
+                    onChange={(e) => onUpdateCredentials && onUpdateCredentials({ password: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={currentCredentials?.email || ''}
+                    onChange={(e) => onUpdateCredentials && onUpdateCredentials({ email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter email"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Security Question</label>
+                  <input
+                    type="text"
+                    value={currentCredentials?.securityQuestion || ''}
+                    onChange={(e) => onUpdateCredentials && onUpdateCredentials({ securityQuestion: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter security question"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Security Answer</label>
+                <input
+                  type="text"
+                  value={currentCredentials?.securityAnswer || ''}
+                  onChange={(e) => onUpdateCredentials && onUpdateCredentials({ securityAnswer: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter security answer"
+                />
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <strong>Note:</strong> Changes to login credentials take effect immediately. 
+                    Make sure to remember your new credentials before logging out.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Security Information */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                <Info className="w-5 h-5 text-slate-600" />
               </div>
               <div>
-                <h3 className={getFontSizeClasses("text-lg font-semibold text-slate-900")}>
-                  Authentication & Security
-                </h3>
-                <p className={getFontSizeClasses("text-slate-500")}>
-                  Manage login credentials and account settings
-                </p>
+                <h3 className="text-lg font-semibold text-slate-900">Security Information</h3>
+                <p className="text-slate-500">Understanding authentication options</p>
               </div>
             </div>
 
-            {/* Current Credentials Display */}
-            <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-              <h4 className={getFontSizeClasses("font-medium text-slate-900 mb-3")}>
-                Current Account Information
-              </h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <User className="w-4 h-4 text-slate-600" />
-                  <span className={getFontSizeClasses("text-slate-700")}>
-                    Username: <span className="font-mono bg-white px-2 py-1 rounded border">
-                      {currentCredentials?.username || 'admin'}
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-slate-600" />
-                  <span className={getFontSizeClasses("text-slate-700")}>
-                    Email: <span className="font-mono bg-white px-2 py-1 rounded border">
-                      {currentCredentials?.email || 'admin@example.com'}
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Lock className="w-4 h-4 text-slate-600" />
-                  <span className={getFontSizeClasses("text-slate-700")}>
-                    Password: <span className="font-mono bg-white px-2 py-1 rounded border">
-                      {currentCredentials?.password || 'pass123'}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Credentials Form */}
-            {showCredentialsForm ? (
-              <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
-                      Username *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={credentialsForm.username}
-                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, username: e.target.value }))}
-                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter username"
-                        required
-                      />
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="w-4 h-4 text-emerald-600" />
+                    <span className="font-medium text-emerald-900">Authentication Enabled</span>
                   </div>
-
-                  <div>
-                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
-                      Email Address *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={credentialsForm.email}
-                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter email address"
-                        required
-                      />
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
-                      New Password *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={credentialsForm.password}
-                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, password: e.target.value }))}
-                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter new password"
-                        required
-                      />
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={getFontSizeClasses("block text-sm font-medium text-slate-700 mb-2")}>
-                      Confirm Password *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={credentialsForm.confirmPassword}
-                        onChange={(e) => setCredentialsForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        className="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Confirm new password"
-                        required
-                      />
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {credentialsError && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertTriangle className="w-4 h-4 text-red-600" />
-                    <span className={getFontSizeClasses("text-red-700 text-sm")}>{credentialsError}</span>
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    Update Account
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetCredentialsForm}
-                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowCredentialsForm(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Lock className="w-4 h-4" />
-                  Update Account
-                </button>
-                {onLogout && (
-                  <button
-                    onClick={() => {
-                      if (confirm('Are you sure you want to sign out?\n\nReminder: Make sure to backup your data before signing out to avoid losing any information. You can use the red Backup button in the top navigation or go to the Backup & Restore tab.\n\nYou will need to sign in again to access your data.')) {
-                        onLogout();
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Security Notice */}
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
-                <div>
-                  <h4 className={getFontSizeClasses("font-medium text-amber-900")}>
-                    Security Information
-                  </h4>
-                  <ul className={getFontSizeClasses("text-amber-800 mt-1 space-y-1")}>
-                    <li>• Your email is used for account identification</li>
-                    <li>• Changing credentials will require you to sign in again</li>
-                    <li>• Keep your login information secure and private</li>
+                  <ul className="text-sm text-emerald-800 space-y-1">
+                    <li>• Requires login to access the app</li>
+                    <li>• Protects your financial data</li>
+                    <li>• Includes password reset functionality</li>
+                    <li>• Recommended for shared devices</li>
                   </ul>
+                </div>
+
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe className="w-4 h-4 text-amber-600" />
+                    <span className="font-medium text-amber-900">Authentication Disabled</span>
+                  </div>
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    <li>• Direct access to the app</li>
+                    <li>• No login screen or passwords</li>
+                    <li>• Faster access for personal use</li>
+                    <li>• Best for private/trusted devices</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-slate-600 mt-0.5" />
+                  <div className="text-sm text-slate-700">
+                    <strong>Data Security:</strong> Regardless of authentication settings, all your expense data 
+                    is stored locally on your device using IndexedDB. No data is sent to external servers, 
+                    ensuring complete privacy and offline functionality.
+                  </div>
                 </div>
               </div>
             </div>

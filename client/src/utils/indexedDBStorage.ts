@@ -330,10 +330,18 @@ export class IndexedDBStorage {
           console.log('No use case found, setting default to personal-team');
           await this.setCredentials({
             ...existingCredentials,
-            useCase: 'personal-team'
+            useCase: 'personal-team',
+            authEnabled: existingCredentials.authEnabled !== undefined ? existingCredentials.authEnabled : true
           });
         } else {
           console.log('Preserving existing use case:', existingCredentials.useCase);
+          // Ensure authEnabled is set if missing
+          if (existingCredentials.authEnabled === undefined) {
+            await this.setCredentials({
+              ...existingCredentials,
+              authEnabled: true
+            });
+          }
         }
       }
     } catch (error) {
@@ -349,7 +357,8 @@ export class IndexedDBStorage {
       email: 'admin@example.com',
       securityQuestion: 'What is your favorite color?',
       securityAnswer: 'blue',
-      useCase: 'family-expenses'
+      useCase: 'family-expenses',
+      authEnabled: true
     });
 
     // Jones family members
