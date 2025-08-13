@@ -284,6 +284,15 @@ export const Settings: React.FC<SettingsProps> = ({
     window.location.reload();
   };
 
+  const copyInstallationCode = async (code: string) => {
+    const success = await InstallationCodeManager.copyToClipboard(code);
+    if (success) {
+      alert('Installation code copied to clipboard!');
+    } else {
+      alert('Failed to copy installation code');
+    }
+  };
+
   return (
     <div className="space-y-8">
 
