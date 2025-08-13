@@ -61,7 +61,7 @@ export const Settings: React.FC<SettingsProps> = ({
     if (activeTab === 'general') {
       loadInstallationInfo();
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     if (activeTab === 'general') {
