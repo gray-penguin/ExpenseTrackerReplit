@@ -18,6 +18,8 @@ interface SettingsProps {
   onUpdateUseCase?: (useCase: string) => void;
   currentUseCase?: string;
   authSettings: any;
+  onUpdateAuthSettings: (settings: Partial<any>) => void;
+  authSettings: any;
   onUpdateAuthSettings: (settings: any) => void;
 }
 
@@ -31,6 +33,8 @@ export const Settings: React.FC<SettingsProps> = ({
   currentCredentials,
   onUpdateUseCase,
   currentUseCase = 'family-expenses'
+  authSettings,
+  onUpdateAuthSettings
 }) => {
   authSettings,
   onUpdateAuthSettings
