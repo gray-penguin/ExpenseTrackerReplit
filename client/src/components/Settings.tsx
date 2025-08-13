@@ -61,8 +61,8 @@ export const Settings: React.FC<SettingsProps> = ({
     },
     {
       id: 'personal-team',
-      name: 'Personal Team Expenses',
-      description: 'Track expenses for team members, employees, or family members',
+      name: 'Team Expenses',
+      description: 'Track expenses for team members or employees',
       icon: Users,
       color: 'emerald',
       examples: [
