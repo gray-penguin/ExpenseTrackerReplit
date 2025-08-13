@@ -32,7 +32,6 @@ export const Settings: React.FC<SettingsProps> = ({
   onUpdateCredentials,
   currentCredentials,
  currentUseCase = 'family-expenses',
-  currentUseCase = 'family-expenses'
   authSettings,
   onUpdateAuthSettings
 }) => {
