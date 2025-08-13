@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'wouter';
 import { Home, List, Tag, Users, Settings, Download, TrendingUp } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { FileBackupManager } from '../utils/fileBackup';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
 import { useAuth } from '../hooks/useAuth';
 
 export function Navbar() {
   const [location] = useLocation();
-  const { credentials } = useAuth();
+  const { credentials, logout } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
   const handleQuickBackup = () => {
@@ -15,6 +16,12 @@ export function Navbar() {
       console.error('Backup failed:', error);
       alert('Backup failed. Please try again.');
     });
+  };
+
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to sign out?\n\nReminder: Make sure to backup your data before signing out to avoid losing any information. You can use the red Backup button below.\n\nYou will need to sign in again to access your data.')) {
+      logout();
+    }
   };
 
   const navigation = [
@@ -74,6 +81,16 @@ export function Navbar() {
             >
               <Download className="w-4 h-4" />
               Backup
+            </button>
+            
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm"
+              title="Sign out of the application"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
             </button>
           </div>
           
