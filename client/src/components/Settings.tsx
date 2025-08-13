@@ -55,9 +55,6 @@ export const Settings: React.FC<SettingsProps> = ({
         setInstallationInfo(info);
       } catch (error) {
         console.error('Error loading installation info:', error);
-      }
-    };
-
     if (activeTab === 'general') {
       loadInstallationInfo();
     }
