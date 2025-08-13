@@ -61,6 +61,12 @@ export const Settings: React.FC<SettingsProps> = ({
     if (activeTab === 'general') {
       loadInstallationInfo();
     }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'general') {
+      loadInstallationInfo();
+    }
   }, [activeTab]);
 
   const handleCopyInstallationCode = async () => {
