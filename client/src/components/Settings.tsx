@@ -70,19 +70,6 @@ export const Settings: React.FC<SettingsProps> = ({
     }
   };
 
-  const handleResetInstallationCode = async () => {
-    if (confirm('Are you sure you want to generate a new installation code? This will replace your current code.')) {
-      try {
-        const newCode = await InstallationCodeManager.resetInstallationCode();
-        const newInfo = await InstallationCodeManager.getInstallationInfo();
-        setInstallationInfo(newInfo);
-      } catch (error) {
-        console.error('Error resetting installation code:', error);
-        alert('Failed to generate new installation code');
-      }
-    }
-  };
-
   const [installationInfo, setInstallationInfo] = useState<{
     code: string;
     generatedAt: string;
@@ -426,14 +413,6 @@ export const Settings: React.FC<SettingsProps> = ({
                         <Copy className="w-3 h-3" />
                         {copySuccess ? 'Copied!' : 'Copy'}
                       </button>
-                      <button
-                        onClick={handleResetInstallationCode}
-                        className="flex items-center gap-2 px-3 py-1 text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
-                        title="Generate new installation code"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                        Reset
-                      </button>
                     </div>
                   </div>
                   
@@ -456,6 +435,47 @@ export const Settings: React.FC<SettingsProps> = ({
                       <div><strong>Screen:</strong> {installationInfo.deviceInfo.screenResolution}</div>
                     </div>
                   </div>
+
+                  <div className="p-3 border border-slate-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Smartphone className="w-4 h-4 text-slate-600" />
+                      <span className={getFontSizeClasses("font-medium text-slate-900")}>Installation</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-slate-600">
+                      <div><strong>App:</strong> ExpenseTracker PWA</div>
+                      <div><strong>Version:</strong> 1.0.0</div>
+                      <div><strong>Type:</strong> Progressive Web App</div>
+                      <div><strong>Storage:</strong> IndexedDB Local</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                      <span className="text-blue-600 text-xs font-bold">i</span>
+                    </div>
+                    <div>
+                      <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
+                        About Installation Codes
+                      </h4>
+                      <p className={getFontSizeClasses("text-blue-800 mt-1")}>
+                        Installation codes uniquely identify your PWA installation for support purposes. 
+                        They are stored in IndexedDB for maximum persistence across browser restarts, 
+                        cache clears, and browser updates. The code is automatically included in backup files.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <span className="ml-3 text-slate-600">Loading installation code...</span>
+              </div>
+            )}
+          </div>
+
           {/* Time & Locale Settings */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -538,46 +558,6 @@ export const Settings: React.FC<SettingsProps> = ({
                 </div>
               </div>
             </div>
-          </div>
-
-                  <div className="p-3 border border-slate-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Smartphone className="w-4 h-4 text-slate-600" />
-                      <span className={getFontSizeClasses("font-medium text-slate-900")}>Installation</span>
-                    </div>
-                    <div className="space-y-1 text-xs text-slate-600">
-                      <div><strong>App:</strong> ExpenseTracker PWA</div>
-                      <div><strong>Version:</strong> 1.0.0</div>
-                      <div><strong>Type:</strong> Progressive Web App</div>
-                      <div><strong>Storage:</strong> IndexedDB Local</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
-                      <span className="text-blue-600 text-xs font-bold">i</span>
-                    </div>
-                    <div>
-                      <h4 className={getFontSizeClasses("font-medium text-blue-900")}>
-                        About Installation Codes
-                      </h4>
-                      <p className={getFontSizeClasses("text-blue-800 mt-1")}>
-                        This unique code identifies your specific PWA installation. It's useful for support, 
-                        analytics, and distinguishing between multiple installations. The code is stored locally 
-                        and included in backup files for restoration.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-                <span className="ml-3 text-slate-600">Loading installation code...</span>
-              </div>
-            )}
           </div>
 
         </div>
