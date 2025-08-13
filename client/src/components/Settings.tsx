@@ -19,8 +19,6 @@ interface SettingsProps {
   currentUseCase?: string;
   authSettings: any;
   onUpdateAuthSettings: (settings: Partial<any>) => void;
-  authSettings: any;
-  onUpdateAuthSettings: (settings: any) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
@@ -31,12 +29,11 @@ export const Settings: React.FC<SettingsProps> = ({
   onLogout,
   onUpdateCredentials,
   currentCredentials,
+  onUpdateUseCase,
  currentUseCase = 'family-expenses',
   authSettings,
   onUpdateAuthSettings
 }) => {
-  authSettings,
-  onUpdateAuthSettings
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [showClearCategoriesConfirmation, setShowClearCategoriesConfirmation] = useState(false);
   const [showCredentialsForm, setShowCredentialsForm] = useState(false);
@@ -48,6 +45,8 @@ export const Settings: React.FC<SettingsProps> = ({
     confirmPassword: ''
   });
   const [credentialsError, setCredentialsError] = useState('');
+  const [installationInfo, setInstallationInfo] = useState<any>(null);
+
   // Load installation info on component mount
   useEffect(() => {
     const loadInstallationInfo = async () => {
@@ -56,6 +55,11 @@ export const Settings: React.FC<SettingsProps> = ({
         setInstallationInfo(info);
       } catch (error) {
         console.error('Error loading installation info:', error);
+      }
+    };
+    
+    loadInstallationInfo();
+  }, []);
       }
     };
 
