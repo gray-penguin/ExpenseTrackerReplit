@@ -33,8 +33,8 @@ export class InstallationCodeManager {
    */
   static async getInstallationCode(): Promise<string> {
     try {
-      // Check if code already exists
-      const existingCode = localStorage.getItem(this.STORAGE_KEY);
+      // Check if code already exists in IndexedDB
+      const existingCode = await this.getStoredCode();
       if (existingCode) {
         return existingCode;
       }
@@ -42,14 +42,87 @@ export class InstallationCodeManager {
       // Generate new code
       const newCode = await this.generateInstallationCode();
       
-      // Store the code
-      localStorage.setItem(this.STORAGE_KEY, newCode);
+      // Store the code in IndexedDB
+      await this.storeCode(newCode);
       
       return newCode;
     } catch (error) {
       console.error('Error getting installation code:', error);
       return this.generateFallbackCode();
     }
+  }
+
+  /**
+   * Get stored installation code from IndexedDB
+   */
+  private static async getStoredCode(): Promise<string | null> {
+    return new Promise((resolve) => {
+      const request = indexedDB.open('ExpenseTrackerDB', 4);
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        try {
+          const transaction = db.transaction(['keyValue'], 'readonly');
+          const store = transaction.objectStore('keyValue');
+          const getRequest = store.get(this.STORAGE_KEY);
+          
+          getRequest.onsuccess = () => {
+            resolve(getRequest.result || null);
+          };
+          
+          getRequest.onerror = () => {
+            console.warn('Error reading installation code from IndexedDB');
+            resolve(null);
+          };
+        } catch (error) {
+          console.warn('Error accessing IndexedDB for installation code');
+          resolve(null);
+        }
+      };
+      
+      request.onerror = () => {
+        console.warn('Error opening IndexedDB for installation code');
+        resolve(null);
+      };
+    });
+  }
+
+  /**
+   * Store installation code in IndexedDB
+   */
+  private static async storeCode(code: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('ExpenseTrackerDB', 4);
+      
+      request.onsuccess = () => {
+        const db = request.result;
+        try {
+          const transaction = db.transaction(['keyValue'], 'readwrite');
+          const store = transaction.objectStore('keyValue');
+          const putRequest = store.put(code, this.STORAGE_KEY);
+          
+          putRequest.onsuccess = () => {
+            // Also store timestamp
+            const timestampRequest = store.put(new Date().toISOString(), `${this.STORAGE_KEY}-timestamp`);
+            timestampRequest.onsuccess = () => resolve();
+            timestampRequest.onerror = () => resolve(); // Don't fail if timestamp storage fails
+          };
+          
+          putRequest.onerror = () => {
+            console.warn('Error storing installation code in IndexedDB');
+            reject(putRequest.error);
+          };
+        } catch (error) {
+          console.warn('Error accessing IndexedDB for storing installation code');
+          reject(error);
+        }
+      };
+      
+      request.onerror = () => {
+        console.warn('Error opening IndexedDB for storing installation code');
+        reject(request.error);
+      };
+    });
   }
 
   /**
@@ -196,17 +269,5 @@ export class InstallationCodeManager {
       console.error('Failed to copy to clipboard:', error);
       return false;
     }
-  }
-
-  /**
-   * Reset installation code (generate new one)
-   */
-  static async resetInstallationCode(): Promise<string> {
-    // Remove existing code and timestamp
-    localStorage.removeItem(this.STORAGE_KEY);
-    localStorage.removeItem(`${this.STORAGE_KEY}-timestamp`);
-    
-    // Generate new code
-    return await this.getInstallationCode();
   }
 }
