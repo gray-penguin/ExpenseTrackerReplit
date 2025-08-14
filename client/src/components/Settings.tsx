@@ -8,6 +8,7 @@ import { ExcelConversionTab } from './ExcelConversionTab.tsx';
 import { InstallationCodeManager } from '../utils/installationCode';
 import { VersionDisplay, APP_VERSION } from './VersionDisplay';
 import { APP_VERSION as VERSION_CONSTANT, formatVersion } from '../utils/version';
+import { usePWADetection } from '../hooks/usePWADetection';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -46,6 +47,7 @@ export const Settings: React.FC<SettingsProps> = ({
     confirmPassword: ''
   });
   const [credentialsError, setCredentialsError] = useState('');
+  const pwaStatus = usePWADetection();
   // Load installation info on component mount
   useEffect(() => {
     const loadInstallationInfo = async () => {
@@ -467,14 +469,48 @@ export const Settings: React.FC<SettingsProps> = ({
                       <Smartphone className="w-4 h-4 text-slate-600" />
                       <span className={getFontSizeClasses("font-medium text-slate-900")}>Installation</span>
                     </div>
-                    <div className="space-y-1 text-xs text-slate-600">
-                      <div><strong>App:</strong> ExpenseTracker PWA</div>
-                      <div><strong>Version:</strong> {formatVersion(VERSION_CONSTANT)}</div>
-                      <div><strong>Type:</strong> Progressive Web App</div>
-                      <div><strong>Storage:</strong> IndexedDB Local</div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Version:</span>
+                        <span className="font-mono text-sm text-slate-900">{formatVersion(VERSION_CONSTANT)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Installation Status:</span>
+                        <span className={`font-medium text-sm ${pwaStatus.getStatusColor()}`}>
+                          {pwaStatus.getStatusText()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Display Mode:</span>
+                        <span className="font-mono text-sm text-slate-900">
+                          {pwaStatus.getDisplayModeText()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Generated:</span>
+                        <span className="font-mono text-sm text-slate-900">
+                          {new Date(installationInfo.generatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
+                  
+                  {/* PWA Install Button */}
+                  {pwaStatus.isInstallable && !pwaStatus.isInstalled && (
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                      <button
+                        onClick={pwaStatus.triggerInstall}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        <Download className="w-4 h-4" />
+                        Install as App
+                      </button>
+                      <p className="text-xs text-slate-500 mt-2 text-center">
+                        Install for offline access and better performance
+                      </p>
+                    </div>
+                  )}
 
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-3">
