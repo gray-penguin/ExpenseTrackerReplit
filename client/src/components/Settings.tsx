@@ -7,7 +7,7 @@ import { FileText } from 'lucide-react';
 import { ExcelConversionTab } from './ExcelConversionTab.tsx';
 import { InstallationCodeManager } from '../utils/installationCode';
 import { VersionDisplay, APP_VERSION } from './VersionDisplay';
-import { APP_VERSION as VERSION_CONSTANT } from '../utils/version';
+import { APP_VERSION as VERSION_CONSTANT, formatVersion } from '../utils/version';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -469,7 +469,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                     <div className="space-y-1 text-xs text-slate-600">
                       <div><strong>App:</strong> ExpenseTracker PWA</div>
-                      <div><strong>Version:</strong> 1.0.0</div>
+                      <div><strong>Version:</strong> {formatVersion(VERSION_CONSTANT)}</div>
                       <div><strong>Type:</strong> Progressive Web App</div>
                       <div><strong>Storage:</strong> IndexedDB Local</div>
                     </div>
