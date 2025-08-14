@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useFontSizeContext } from '../components/FontSizeProvider';
 import { BackupAndRestoreTab } from './BackupAndRestoreTab';
 import { getCurrentUserTimezone, getCurrentUserLocale, formatDateTime } from '../utils/formatters';
-import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet, Copy, RotateCcw, Smartphone, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Settings as SettingsIcon, Trash2, AlertTriangle, Database, Shield, Lock, User, Save, LogOut, Mail, HardDrive, Clock, Globe, Info, Users, BarChart3, Download, Briefcase, Building, Target, Layers, FileSpreadsheet, Copy, RotateCcw, Smartphone, ToggleLeft, ToggleRight, Tag } from 'lucide-react';
 import { FileText } from 'lucide-react';
 import { ExcelConversionTab } from './ExcelConversionTab.tsx';
 import { InstallationCodeManager } from '../utils/installationCode';
+import { VersionDisplay, APP_VERSION } from './VersionDisplay';
+import { APP_VERSION as VERSION_CONSTANT } from '../utils/version';
 
 interface SettingsProps {
   onClearAllExpenses?: () => void;
@@ -1176,111 +1178,145 @@ export const Settings: React.FC<SettingsProps> = ({
 
       {activeTab === 'about' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  A comprehensive expense tracking Progressive Web Application that helps you log, categorize, and analyze your spending. Being a PWA allows you to install this application on your device and use it completely offline. No internet needed after installation!
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <Users className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+          <div className="space-y-6">
+            {/* About This App */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <Info className="w-5 h-5 text-blue-600" />
+                  </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Configurable Use Cases</h4>
-                    <p className="text-gray-600 text-xs">Adapt the interface for different scenarios: team expenses, project tracking, department budgets, client accounts, or location-based tracking.</p>
+                    <h3 className="text-lg font-semibold text-slate-900">About This App</h3>
+                    <p className="text-slate-500">ExpenseTracker overview and technical details</p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <BarChart3 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Advanced Analytics</h4>
-                    <p className="text-gray-600 text-xs">Comprehensive reporting with spreadsheet-style analytics and trends</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Local Storage</h4>
-                    <p className="text-gray-600 text-xs">Data stored locally using IndexedDB for complete privacy and offline functionality.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Download className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Backup & Restore</h4>
-                    <p className="text-gray-600 text-xs">Complete JSON backup/restore system for all your data including expenses, categories, and users</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-gray-900 text-sm">Excel Import & Conversion</h4>
-                    <p className="text-gray-600 text-xs">Direct Excel file import with automatic parsing and JSON conversion for seamless data migration</p>
-                  </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-blue-600">v{VERSION_CONSTANT}</div>
+                  <div className="text-xs text-slate-500">Current Version</div>
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Technical Architecture</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Frontend:</span>
-                    <span className="font-medium text-gray-900">React + TypeScript + Tailwind CSS</span>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">What is Expense Tracker?</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    A comprehensive expense tracking Progressive Web Application that helps you log, categorize, and analyze your spending. Being a PWA allows you to install this application on your device and use it completely offline. No internet needed after installation!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm">Configurable Use Cases</h4>
+                      <p className="text-gray-600 text-xs">Adapt the interface for different scenarios: team expenses, project tracking, department budgets, client accounts, or location-based tracking.</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Architecture:</span>
-                    <span className="font-medium text-gray-900">Single Page Application (SPA)</span>
+
+                  <div className="flex items-start gap-3">
+                    <BarChart3 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm">Advanced Analytics</h4>
+                      <p className="text-gray-600 text-xs">Comprehensive reporting with spreadsheet-style analytics and trends</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Router:</span>
-                    <span className="font-medium text-gray-900">Wouter (lightweight routing)</span>
+
+                  <div className="flex items-start gap-3">
+                    <Database className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm">Local Storage</h4>
+                      <p className="text-gray-600 text-xs">Data stored locally using IndexedDB for complete privacy and offline functionality.</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">State:</span>
-                    <span className="font-medium text-gray-900">React Hooks + IndexedDB</span>
+
+                  <div className="flex items-start gap-3">
+                    <Download className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm">Backup & Restore</h4>
+                      <p className="text-gray-600 text-xs">Complete JSON backup/restore system for all your data including expenses, categories, and users</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Storage:</span>
-                    <span className="font-medium text-gray-900">IndexedDB (Local Device)</span>
+
+                  <div className="flex items-start gap-3">
+                    <FileSpreadsheet className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-sm">Excel Import & Conversion</h4>
+                      <p className="text-gray-600 text-xs">Direct Excel file import with automatic parsing and JSON conversion for seamless data migration</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">Technical Architecture</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Frontend:</span>
+                      <span className="font-medium text-gray-900">React + TypeScript + Tailwind CSS</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Architecture:</span>
+                      <span className="font-medium text-gray-900">Single Page Application (SPA)</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Router:</span>
+                      <span className="font-medium text-gray-900">Wouter (lightweight routing)</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">State:</span>
+                      <span className="font-medium text-gray-900">React Hooks + IndexedDB</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Storage:</span>
+                      <span className="font-medium text-gray-900">IndexedDB (Local Device)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">Key Features</h3>
+                  <ul className="text-gray-600 text-sm space-y-1">
+                    <li>• Dashboard with real-time statistics and spending trends</li>
+                    <li>• Hierarchical category system with subcategories</li>
+                    <li>• Bulk expense entry with intelligent form suggestions</li>
+                    <li>• Advanced filtering by user, date range, and categories</li>
+                    <li>• Comprehensive reports with spreadsheet-style analytics</li>
+                    <li>• User authentication with password reset functionality</li>
+                    <li>• Configurable use cases for different tracking scenarios</li>
+                    <li>• Complete JSON backup and restore system</li>
+                    <li>• Excel to JSON conversion with automatic data validation and conversion</li>
+                    <li>• Progressive Web App with offline functionality</li>
+                  </ul>
+                </div>
+
+                <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-emerald-900 text-sm">Privacy & Security</h4>
+                      <p className="text-emerald-700 text-xs leading-relaxed">
+                        All data is stored locally in your browser using IndexedDB. No information is sent to external servers, 
+                        ensuring complete privacy and control over your financial data. Works completely offline after initial load.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Key Features</h3>
-                <ul className="text-gray-600 text-sm space-y-1">
-                  <li>• Dashboard with real-time statistics and spending trends</li>
-                  <li>• Hierarchical category system with subcategories</li>
-                  <li>• Bulk expense entry with intelligent form suggestions</li>
-                  <li>• Advanced filtering by user, date range, and categories</li>
-                  <li>• Comprehensive reports with spreadsheet-style analytics</li>
-                  <li>• User authentication with password reset functionality</li>
-                  <li>• Configurable use cases for different tracking scenarios</li>
-                  <li>• Complete JSON backup and restore system</li>
-                  <li>• Excel to JSON conversion with automatic data validation and conversion</li>
-                  <li>• Progressive Web App with offline functionality</li>
-                </ul>
-              </div>
-
-              <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-emerald-900 text-sm">Privacy & Security</h4>
-                    <p className="text-emerald-700 text-xs leading-relaxed">
-                      All data is stored locally in your browser using IndexedDB. No information is sent to external servers, 
-                      ensuring complete privacy and control over your financial data. Works completely offline after initial load.
-                    </p>
-                  </div>
+            {/* Version Information */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <Tag className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Version Information</h3>
+                  <p className="text-slate-500">Current version and recent updates</p>
                 </div>
               </div>
+              
+              <VersionDisplay showHistory={true} />
             </div>
           </div>
         </div>
