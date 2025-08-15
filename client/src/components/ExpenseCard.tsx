@@ -48,27 +48,33 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
                   {user.avatar}
                 </div>
               </div>
-              <div className="text-sm text-slate-600 mb-2">
-                {category.name} • {subcategoryName}
-              </div>
               
-              {/* Store Information */}
-              {(expense.storeName || expense.storeLocation) && (
-                <div className="flex items-center gap-3 text-xs text-slate-500 mb-2">
-                  {expense.storeName && (
+              {/* Consolidated info line */}
+              <div className="flex items-center gap-2 text-xs text-slate-500 mb-2 flex-wrap">
+                <span className="text-slate-600 font-medium">{category.name}</span>
+                <span>•</span>
+                <span>{subcategoryName}</span>
+                {expense.storeName && (
+                  <>
+                    <span>•</span>
                     <div className="flex items-center gap-1">
                       <Store className="w-3 h-3" />
                       <span className="truncate">{expense.storeName}</span>
                     </div>
-                  )}
-                  {expense.storeLocation && (
+                  </>
+                )}
+                {expense.storeLocation && (
+                  <>
+                    <span>•</span>
                     <div className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       <span className="truncate">{expense.storeLocation}</span>
                     </div>
-                  )}
-                </div>
-              )}
+                  </>
+                )}
+                <span>•</span>
+                <span>{formatDate(expense.date)}</span>
+              </div>
 
               {/* Notes and Attachments Toggle Button */}
               {hasNotesOrAttachments && (
@@ -149,10 +155,6 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
                   )}
                 </div>
               )}
-              
-              <div className="text-xs text-slate-500">
-                <div>{formatDate(expense.date)}</div>
-              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
