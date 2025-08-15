@@ -152,7 +152,6 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
               
               <div className="text-xs text-slate-500">
                 <div>{formatDate(expense.date)}</div>
-                <div className="text-slate-400">Created {formatDateTimeRelative(expense.createdAt)}</div>
               </div>
             </div>
           </div>
