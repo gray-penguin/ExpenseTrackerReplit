@@ -481,11 +481,11 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
           </div>
 
           <div className="relative">
-            <Users className="absolute left-3 top-1/4 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <select
               value={filterUserId}
               onChange={(e) => setFilterUserId(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+              className="w-full pl-5 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
             >
               <option value="">All {useCaseConfig.terminology.users}</option>
               {users.map(user => (
