@@ -481,7 +481,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
           </div>
 
           <div className="relative">
-            <Users className="absolute left-3 top-1/2 -translate-y-1/4 w-5 h-5 text-slate-400" />
+            <Users className="absolute left-3 top-1/4 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <select
               value={filterUserId}
               onChange={(e) => setFilterUserId(e.target.value)}
