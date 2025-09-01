@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { indexedDBStorage } from '../utils/indexedDBStorage';
+import { defaultCredentials } from '../data/defaultCredentials';
 
-interface AuthCredentials {
+export interface AuthCredentials {
   username: string;
   password: string;
   email: string;
@@ -11,20 +12,10 @@ interface AuthCredentials {
   authEnabled: boolean;
 }
 
-const DEFAULT_CREDENTIALS: AuthCredentials = {
-  username: 'admin',
-  password: 'pass123',
-  email: 'admin@example.com',
-  securityQuestion: 'What is your favorite color?',
-  securityAnswer: 'blue',
-  useCase: 'family-expenses',
-  authEnabled: true
-};
-
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [credentials, setCredentials] = useState<AuthCredentials>(DEFAULT_CREDENTIALS);
+  const [credentials, setCredentials] = useState<AuthCredentials>(defaultCredentials);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -39,12 +30,12 @@ export function useAuth() {
         
         // Ensure we have all required credential fields
         const completeCredentials = {
-          username: savedCredentials?.username || 'admin',
-          password: savedCredentials?.password || 'pass123',
-          email: savedCredentials?.email || 'admin@example.com',
-          securityQuestion: savedCredentials?.securityQuestion || 'What is your favorite color?',
-          securityAnswer: savedCredentials?.securityAnswer || 'blue',
-          useCase: savedCredentials?.useCase || 'personal-team',
+          username: savedCredentials?.username || defaultCredentials.username,
+          password: savedCredentials?.password || defaultCredentials.password,
+          email: savedCredentials?.email || defaultCredentials.email,
+          securityQuestion: savedCredentials?.securityQuestion || defaultCredentials.securityQuestion,
+          securityAnswer: savedCredentials?.securityAnswer || defaultCredentials.securityAnswer,
+          useCase: savedCredentials?.useCase || defaultCredentials.useCase,
           authEnabled: savedCredentials?.authEnabled !== undefined ? savedCredentials.authEnabled : true
         };
         
@@ -54,15 +45,7 @@ export function useAuth() {
         console.error('Error initializing auth:', error);
         // Set fallback values
         setIsAuthenticated(false);
-        setCredentials({
-          username: 'admin',
-          password: 'pass123',
-          email: 'admin@example.com',
-          securityQuestion: 'What is your favorite color?',
-          securityAnswer: 'blue',
-          useCase: 'family-expenses',
-          authEnabled: true
-        });
+        setCredentials(defaultCredentials);
       } finally {
         console.log('Auth: Initialization complete, setting loading to false');
         setIsLoading(false);
