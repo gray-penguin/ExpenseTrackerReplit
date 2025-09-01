@@ -70,6 +70,49 @@ export function ExpensesList() {
     }
     setShowExpenseForm(false);
     setEditingExpense(undefined);
+    
+    // Check if we should return to reports page
+    handleReturnNavigation();
+  };
+
+  const handleReturnNavigation = () => {
+    const params = new URLSearchParams(search);
+    const returnTo = params.get('returnTo');
+    
+    if (returnTo === 'reports') {
+      // Get stored reports state
+      const storedState = sessionStorage.getItem('expense-tracker-return-state');
+      if (storedState) {
+        try {
+          const reportsState = JSON.parse(storedState);
+          // Clean up stored state
+          sessionStorage.removeItem('expense-tracker-return-state');
+          
+          // Navigate back to reports with filters
+          const reportsParams = new URLSearchParams();
+          if (reportsState.selectedUserId !== 'all') {
+            reportsParams.set('userId', reportsState.selectedUserId);
+          }
+          if (reportsState.selectedCategoryId !== 'all') {
+            reportsParams.set('categoryId', reportsState.selectedCategoryId);
+          }
+          if (reportsState.startDate) {
+            reportsParams.set('startDate', reportsState.startDate);
+          }
+          if (reportsState.endDate) {
+            reportsParams.set('endDate', reportsState.endDate);
+          }
+          
+          const reportsUrl = reportsParams.toString() ? `/reports?${reportsParams.toString()}` : '/reports';
+          setLocation(reportsUrl);
+        } catch (error) {
+          console.error('Error parsing stored reports state:', error);
+          setLocation('/reports');
+        }
+      } else {
+        setLocation('/reports');
+      }
+    }
   };
 
   const handleEditExpense = (expense: Expense) => {
@@ -115,6 +158,12 @@ export function ExpensesList() {
           onClose={() => {
             setShowExpenseForm(false);
             setEditingExpense(undefined);
+            
+            // Check if we should return to reports page on cancel
+            const params = new URLSearchParams(search);
+            if (params.get('returnTo') === 'reports') {
+              handleReturnNavigation();
+            }
           }}
           onDelete={editingExpense ? handleDeleteExpense : undefined}
         />

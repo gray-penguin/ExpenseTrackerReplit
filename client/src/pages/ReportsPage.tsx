@@ -13,7 +13,9 @@ export const ReportsPage: React.FC = () => {
   const { expenses, categories, users } = useExpenseData();
   const { credentials } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const search = new URLSearchParams(window.location.search);
+  
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
@@ -28,6 +30,19 @@ export const ReportsPage: React.FC = () => {
     monthLabel: string;
     expenses: Expense[];
   } | null>(null);
+
+  // Restore filters from URL parameters on page load
+  useEffect(() => {
+    const userId = search.get('userId');
+    const categoryId = search.get('categoryId');
+    const startDateParam = search.get('startDate');
+    const endDateParam = search.get('endDate');
+    
+    if (userId) setSelectedUserId(userId);
+    if (categoryId) setSelectedCategoryId(categoryId);
+    if (startDateParam) setStartDate(startDateParam);
+    if (endDateParam) setEndDate(endDateParam);
+  }, []);
 
   // Get available date range from expenses
   const dateRange = useMemo(() => {
@@ -433,9 +448,18 @@ export const ReportsPage: React.FC = () => {
     // Close the modal first
     setSelectedCell(null);
     
-    // Navigate to expenses page with the expense ID as a query parameter
-    // The expenses page will detect this and open the edit form
-    setLocation(`/expenses?edit=${expense.id}`);
+    // Store current reports page state in sessionStorage for return navigation
+    const reportsState = {
+      selectedUserId,
+      selectedCategoryId,
+      startDate,
+      endDate,
+      returnTo: 'reports'
+    };
+    sessionStorage.setItem('expense-tracker-return-state', JSON.stringify(reportsState));
+    
+    // Navigate to expenses page with the expense ID and return flag
+    setLocation(`/expenses?edit=${expense.id}&returnTo=reports`);
   };
 
   return (
