@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
 import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer } from 'lucide-react';
