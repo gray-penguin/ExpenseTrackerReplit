@@ -243,7 +243,7 @@ export function ExpenseForm({
   // Auto-fill functionality
   const handleUserChange = (userId: string) => {
     const user = users.find(u => u.id.toString() === userId);
-    if (user) {
+    if (user && !expense) { // Only apply defaults when adding new expense, not editing
       setFormData(prev => ({
         ...prev,
         userId,
