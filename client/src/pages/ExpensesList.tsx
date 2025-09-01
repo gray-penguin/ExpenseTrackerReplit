@@ -5,7 +5,7 @@ import { ExpenseForm } from '../components/ExpenseForm';
 import { UserSelector } from '../components/UserSelector';
 import { ExpensesList as ExpensesListComponent } from '../components/ExpensesList';
 import { useExpenseData } from '../hooks/useExpenseData';
-import { useLocation, useSearch, useRoute } from 'wouter';
+import { useLocation, useSearch } from 'wouter';
 
 export function ExpensesList() {
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -13,18 +13,19 @@ export function ExpensesList() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [initialCategoryId, setInitialCategoryId] = useState<string>('');
   const [initialSubcategoryId, setInitialSubcategoryId] = useState<string>('');
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const search = useSearch();
-  const [match, params] = useRoute('/expenses');
   const { users, categories, expenses, addExpense, addBulkExpenses, updateExpense, deleteExpense } = useExpenseData();
 
   // Parse URL params for filtering using wouter's useSearch hook
   useEffect(() => {
+    console.log('ExpensesList useEffect triggered with search:', search);
     const params = new URLSearchParams(search);
     const categoryId = params.get('categoryId');
     const subcategoryId = params.get('subcategoryId');
+    const editExpenseId = params.get('edit');
     
-    console.log('ExpensesList page parsing URL params:', { categoryId, subcategoryId });
+    console.log('ExpensesList page parsing URL params:', { categoryId, subcategoryId, editExpenseId });
     
     if (categoryId) {
       setInitialCategoryId(categoryId);
@@ -36,22 +37,30 @@ export function ExpensesList() {
     }
     
     // Check for edit parameter to open edit form
-    const editExpenseId = params.get('edit');
     if (editExpenseId) {
+      console.log('Found edit parameter:', editExpenseId);
       const expenseToEdit = expenses.find(exp => exp.id === editExpenseId);
+      console.log('Found expense to edit:', expenseToEdit);
       if (expenseToEdit) {
         setEditingExpense(expenseToEdit);
         setShowExpenseForm(true);
+        console.log('Opening edit form for expense:', expenseToEdit.id);
         
         // Clear the edit parameter from URL after opening the form
         const newParams = new URLSearchParams(search);
         newParams.delete('edit');
         const newSearch = newParams.toString();
         const newUrl = newSearch ? `/expenses?${newSearch}` : '/expenses';
-        window.history.replaceState({}, '', newUrl);
+        console.log('Clearing edit parameter, new URL:', newUrl);
+        // Use setTimeout to ensure state updates complete first
+        setTimeout(() => {
+          window.history.replaceState({}, '', newUrl);
+        }, 100);
+      } else {
+        console.log('Expense not found for ID:', editExpenseId);
       }
     }
-  }, [location, search]);
+  }, [location, search, expenses]);
 
   const handleAddExpense = (expenseData: Omit<Expense, 'id' | 'createdAt'>) => {
     if (editingExpense) {
@@ -97,27 +106,18 @@ export function ExpensesList() {
 
       {/* Expense Form Modal */}
       {showExpenseForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-              </h2>
-              <ExpenseForm
-                users={users}
-                categories={categories}
-                expenses={expenses}
-                expense={editingExpense}
-                onSubmit={handleAddExpense}
-                onClose={() => {
-                  setShowExpenseForm(false);
-                  setEditingExpense(undefined);
-                }}
-                onDelete={editingExpense ? handleDeleteExpense : undefined}
-              />
-            </div>
-          </div>
-        </div>
+        <ExpenseForm
+          users={users}
+          categories={categories}
+          expenses={expenses}
+          expense={editingExpense}
+          onSubmit={handleAddExpense}
+          onClose={() => {
+            setShowExpenseForm(false);
+            setEditingExpense(undefined);
+          }}
+          onDelete={editingExpense ? handleDeleteExpense : undefined}
+        />
       )}
     </div>
   );
