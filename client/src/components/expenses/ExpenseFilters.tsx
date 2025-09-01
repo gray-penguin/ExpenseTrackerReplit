@@ -71,8 +71,8 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
   const hasActiveFilters = searchTerm || selectedCategory || selectedSubcategory || filterUserId || locationFilter || dateRangePreset !== 'all';
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-1">
+    <div className="bg-white rounded-xl border border-slate-200 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <div className="relative xl:col-span-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
@@ -80,16 +80,16 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             placeholder="Search expenses, stores..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
 
         <div className="relative">
-          <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-200" />
+          <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <select
             value={filterUserId}
             onChange={(e) => onUserFilterChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
           >
             <option value="">All {useCaseConfig.terminology.users}</option>
             {users.map(user => (
@@ -99,11 +99,11 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
         </div>
 
         <div className="relative">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
           >
             <option value="">All categories</option>
             {categories.sort((a, b) => a.name.localeCompare(b.name)).map(category => (
@@ -113,11 +113,11 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
         </div>
 
         <div className="relative">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <select
             value={selectedSubcategory}
             onChange={(e) => onSubcategoryChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
             disabled={!selectedCategory}
           >
             <option value="">
@@ -130,7 +130,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
         </div>
 
         <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <div className="relative">
             <input
               type="text"
@@ -138,7 +138,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
               value={locationFilter}
               onChange={(e) => onLocationFilterChange(e.target.value)}
               onFocus={() => onShowLocationSuggestions(true)}
-              className="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full pl-10 pr-10 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
             {uniqueLocations.length > 0 && (
               <button
@@ -146,7 +146,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
                 onClick={() => onShowLocationSuggestions(!showLocationSuggestions)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded transition-colors"
               >
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showLocationSuggestions ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showLocationSuggestions ? 'rotate-180' : ''}`} />
               </button>
             )}
           </div>
@@ -197,11 +197,11 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
         </div>
 
         <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <select
             value={dateRangePreset}
             onChange={(e) => onDateRangePresetChange(e.target.value as DateRangePreset)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
           >
             <option value="all">All dates</option>
             <option value="today">Today</option>
@@ -218,31 +218,31 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
 
       {/* Custom Date Range Inputs */}
       {dateRangePreset === 'custom' && (
-        <div className="mt-4 pt-4 border-t border-slate-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-3 pt-3 border-t border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Start Date</label>
               <div className="relative">
                 <input
                   type="date"
                   value={customDateRange.startDate}
                   onChange={(e) => onCustomDateRangeChange({ ...customDateRange, startDate: e.target.value })}
-                  className="w-full px-4 py-3 pl-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 pl-10 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
-                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">End Date</label>
               <div className="relative">
                 <input
                   type="date"
                   value={customDateRange.endDate}
                   onChange={(e) => onCustomDateRangeChange({ ...customDateRange, endDate: e.target.value })}
                   min={customDateRange.startDate}
-                  className="w-full px-4 py-3 pl-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 pl-10 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
-                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               </div>
             </div>
           </div>
@@ -251,12 +251,12 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="mt-4 pt-4 border-t border-slate-200">
+        <div className="mt-3 pt-3 border-t border-slate-200">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-700">Active filters:</span>
+            <span className="text-xs font-medium text-slate-700">Active filters:</span>
             
             {searchTerm && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs">
                 Search: "{searchTerm}"
                 <button
                   onClick={() => onSearchChange('')}
@@ -268,7 +268,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             )}
 
             {filterUserId && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
                 <div className={`w-4 h-4 rounded-full ${users.find(u => u.id === filterUserId)?.color} flex items-center justify-center text-white text-xs font-medium mr-1`}>
                   {users.find(u => u.id === filterUserId)?.avatar}
                 </div>
@@ -283,7 +283,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             )}
             
             {selectedCategory && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                 Category: {categories.find(c => c.id === selectedCategory)?.name}
                 <button
                   onClick={() => onCategoryChange('')}
@@ -295,7 +295,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             )}
             
             {selectedSubcategory && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
                 Subcategory: {availableSubcategories.find(s => s.id === selectedSubcategory)?.name}
                 <button
                   onClick={() => onSubcategoryChange('')}
@@ -307,7 +307,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             )}
 
             {locationFilter && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">
                 <MapPin className="w-3 h-3" />
                 Location: "{locationFilter}"
                 <button
@@ -320,7 +320,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             )}
 
             {dateRangePreset !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs">
                 <Calendar className="w-3 h-3" />
                 {dateRangePreset === 'custom' ? 'Custom range' : 
                  dateRangePreset.charAt(0).toUpperCase() + dateRangePreset.slice(1).replace(/([A-Z])/g, ' $1')}
@@ -335,7 +335,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             
             <button
               onClick={onClearAllFilters}
-              className="text-sm text-slate-500 hover:text-slate-700 underline"
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
             >
               Clear all
             </button>
