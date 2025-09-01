@@ -2,15 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
 import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { Expense } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
+import { useLocation } from 'wouter';
 
 export const ReportsPage: React.FC = () => {
   const { expenses, categories, users } = useExpenseData();
   const { credentials } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
+  const [, setLocation] = useLocation();
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
@@ -426,6 +429,15 @@ export const ReportsPage: React.FC = () => {
     });
   };
 
+  const handleEditExpense = (expense: Expense) => {
+    // Close the modal first
+    setSelectedCell(null);
+    
+    // Navigate to expenses page with the expense ID as a query parameter
+    // The expenses page will detect this and open the edit form
+    setLocation(`/expenses?edit=${expense.id}`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
@@ -699,7 +711,7 @@ export const ReportsPage: React.FC = () => {
                   .map((expense, index) => (
                     <div
                       key={expense.id || index}
-                      className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                      className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow group"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -727,6 +739,15 @@ export const ReportsPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right">
+                          <div className="flex items-center gap-2 mb-2">
+                            <button
+                              onClick={() => handleEditExpense(expense)}
+                              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition-all duration-200"
+                              title="Edit this expense"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                          </div>
                           <div className="text-lg font-bold text-gray-900">
                             {formatCurrency(expense.amount)}
                           </div>

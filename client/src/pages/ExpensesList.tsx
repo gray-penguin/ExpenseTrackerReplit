@@ -5,7 +5,7 @@ import { ExpenseForm } from '../components/ExpenseForm';
 import { UserSelector } from '../components/UserSelector';
 import { ExpensesList as ExpensesListComponent } from '../components/ExpensesList';
 import { useExpenseData } from '../hooks/useExpenseData';
-import { useLocation, useSearch } from 'wouter';
+import { useLocation, useSearch, useRoute } from 'wouter';
 
 export function ExpensesList() {
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -15,6 +15,7 @@ export function ExpensesList() {
   const [initialSubcategoryId, setInitialSubcategoryId] = useState<string>('');
   const [location] = useLocation();
   const search = useSearch();
+  const [match, params] = useRoute('/expenses');
   const { users, categories, expenses, addExpense, addBulkExpenses, updateExpense, deleteExpense } = useExpenseData();
 
   // Parse URL params for filtering using wouter's useSearch hook
@@ -32,6 +33,23 @@ export function ExpensesList() {
     if (subcategoryId) {
       setInitialSubcategoryId(subcategoryId);
       console.log('Setting initial subcategory ID:', subcategoryId);
+    }
+    
+    // Check for edit parameter to open edit form
+    const editExpenseId = params.get('edit');
+    if (editExpenseId) {
+      const expenseToEdit = expenses.find(exp => exp.id === editExpenseId);
+      if (expenseToEdit) {
+        setEditingExpense(expenseToEdit);
+        setShowExpenseForm(true);
+        
+        // Clear the edit parameter from URL after opening the form
+        const newParams = new URLSearchParams(search);
+        newParams.delete('edit');
+        const newSearch = newParams.toString();
+        const newUrl = newSearch ? `/expenses?${newSearch}` : '/expenses';
+        window.history.replaceState({}, '', newUrl);
+      }
     }
   }, [location, search]);
 
