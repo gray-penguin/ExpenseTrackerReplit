@@ -21,7 +21,7 @@ export interface BackupData {
 
 export class IndexedDBStorage {
   private static readonly DB_NAME = 'ExpenseTrackerDB';
-  private static readonly DB_VERSION = 4;
+  private static readonly DB_VERSION = 5;
   private static readonly STORES = {
     users: 'users',
     categories: 'categories',
