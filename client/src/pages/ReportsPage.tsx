@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
-import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer, Save, FolderOpen, Star, Trash2, Edit3 } from 'lucide-react';
+import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer, Save, FolderOpen, Star, Trash2, Edit3, CalendarDays } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { Expense, SavedReport } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
 import { useLocation } from 'wouter';
+
+type DatePreset = 'custom' | 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear' | 'last30Days' | 'last90Days';
 
 export const ReportsPage: React.FC = () => {
   const { expenses, categories, users, savedReports, addSavedReport, updateSavedReport, deleteSavedReport } = useExpenseData();
@@ -20,6 +22,7 @@ export const ReportsPage: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 7)); // Current month
+  const [datePreset, setDatePreset] = useState<DatePreset>('custom');
   
   // Saved reports state
   const [showSaveReportModal, setShowSaveReportModal] = useState(false);
@@ -36,6 +39,125 @@ export const ReportsPage: React.FC = () => {
     monthLabel: string;
     expenses: Expense[];
   } | null>(null);
+
+  // Date preset options
+  const datePresetOptions: { value: DatePreset; label: string }[] = [
+    { value: 'custom', label: 'Custom Range' },
+    { value: 'today', label: 'Today' },
+    { value: 'yesterday', label: 'Yesterday' },
+    { value: 'thisWeek', label: 'This Week' },
+    { value: 'lastWeek', label: 'Last Week' },
+    { value: 'thisMonth', label: 'This Month' },
+    { value: 'lastMonth', label: 'Last Month' },
+    { value: 'thisYear', label: 'This Year' },
+    { value: 'lastYear', label: 'Last Year' },
+    { value: 'last30Days', label: 'Last 30 Days' },
+    { value: 'last90Days', label: 'Last 90 Days' }
+  ];
+
+  // Function to apply date preset
+  const applyDatePreset = (preset: DatePreset) => {
+    const today = new Date();
+    const formatDate = (date: Date) => date.toISOString().slice(0, 10); // YYYY-MM-DD
+    const formatMonth = (date: Date) => date.toISOString().slice(0, 7); // YYYY-MM
+
+    switch (preset) {
+      case 'today':
+        const todayStr = formatDate(today);
+        setStartDate(todayStr.slice(0, 7)); // Convert to month format
+        setEndDate(todayStr.slice(0, 7));
+        break;
+
+      case 'yesterday':
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = formatDate(yesterday);
+        setStartDate(yesterdayStr.slice(0, 7));
+        setEndDate(yesterdayStr.slice(0, 7));
+        break;
+
+      case 'thisWeek':
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+        setStartDate(formatMonth(startOfWeek));
+        setEndDate(formatMonth(endOfWeek));
+        break;
+
+      case 'lastWeek':
+        const lastWeekStart = new Date(today);
+        lastWeekStart.setDate(today.getDate() - today.getDay() - 7);
+        const lastWeekEnd = new Date(lastWeekStart);
+        lastWeekEnd.setDate(lastWeekStart.getDate() + 6);
+        setStartDate(formatMonth(lastWeekStart));
+        setEndDate(formatMonth(lastWeekEnd));
+        break;
+
+      case 'thisMonth':
+        const thisMonth = formatMonth(today);
+        setStartDate(thisMonth);
+        setEndDate(thisMonth);
+        break;
+
+      case 'lastMonth':
+        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastMonthStr = formatMonth(lastMonth);
+        setStartDate(lastMonthStr);
+        setEndDate(lastMonthStr);
+        break;
+
+      case 'thisYear':
+        const thisYear = today.getFullYear();
+        setStartDate(`${thisYear}-01`);
+        setEndDate(`${thisYear}-12`);
+        break;
+
+      case 'lastYear':
+        const lastYear = today.getFullYear() - 1;
+        setStartDate(`${lastYear}-01`);
+        setEndDate(`${lastYear}-12`);
+        break;
+
+      case 'last30Days':
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        setStartDate(formatMonth(thirtyDaysAgo));
+        setEndDate(formatMonth(today));
+        break;
+
+      case 'last90Days':
+        const ninetyDaysAgo = new Date(today);
+        ninetyDaysAgo.setDate(today.getDate() - 90);
+        setStartDate(formatMonth(ninetyDaysAgo));
+        setEndDate(formatMonth(today));
+        break;
+
+      case 'custom':
+      default:
+        // Don't change dates for custom
+        break;
+    }
+  };
+
+  // Handle date preset change
+  const handleDatePresetChange = (preset: DatePreset) => {
+    setDatePreset(preset);
+    if (preset !== 'custom') {
+      applyDatePreset(preset);
+    }
+  };
+
+  // Update preset to 'custom' when dates are manually changed
+  const handleStartDateChange = (date: string) => {
+    setStartDate(date);
+    setDatePreset('custom');
+  };
+
+  const handleEndDateChange = (date: string) => {
+    setEndDate(date);
+    setDatePreset('custom');
+  };
 
   // Restore filters from URL parameters on page load
   useEffect(() => {
@@ -481,7 +603,8 @@ export const ReportsPage: React.FC = () => {
         selectedUserId,
         selectedCategoryId,
         startDate,
-        endDate
+        endDate,
+        datePreset
       }
     };
 
@@ -496,6 +619,7 @@ export const ReportsPage: React.FC = () => {
     setSelectedCategoryId(report.filters.selectedCategoryId);
     setStartDate(report.filters.startDate);
     setEndDate(report.filters.endDate);
+    setDatePreset(report.filters.datePreset || 'custom');
     
     // Update last used timestamp
     updateSavedReport(report.id, { lastUsed: new Date().toISOString() });
@@ -596,6 +720,25 @@ export const ReportsPage: React.FC = () => {
 
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4 text-gray-500" />
+            <label htmlFor="date-preset" className="text-xs font-medium text-gray-700">
+              Period:
+            </label>
+            <select
+              id="date-preset"
+              value={datePreset}
+              onChange={(e) => handleDatePresetChange(e.target.value as DatePreset)}
+              className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {datePresetOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <CalendarDays className="w-4 h-4 text-gray-500" />
             <label htmlFor="start-date" className="text-xs font-medium text-gray-700">
               From:
             </label>
@@ -605,13 +748,13 @@ export const ReportsPage: React.FC = () => {
               value={startDate}
               min={dateRange.minDate}
               max={dateRange.maxDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => handleStartDateChange(e.target.value)}
               className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4 text-gray-500" />
+            <CalendarDays className="w-4 h-4 text-gray-500" />
             <label htmlFor="end-date" className="text-xs font-medium text-gray-700">
               To:
             </label>
@@ -621,7 +764,7 @@ export const ReportsPage: React.FC = () => {
               value={endDate}
               min={startDate}
               max={dateRange.maxDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => handleEndDateChange(e.target.value)}
               className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
