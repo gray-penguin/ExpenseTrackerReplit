@@ -1,16 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { formatCurrency } from '../utils/formatters';
-import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer } from 'lucide-react';
+import { Calendar, Filter, TrendingUp, X, Eye, Users, Printer, Save, FolderOpen, Star, Trash2, Edit3 } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { Expense } from '../types';
+import { Expense, SavedReport } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
 import { useLocation } from 'wouter';
 
 export const ReportsPage: React.FC = () => {
-  const { expenses, categories, users } = useExpenseData();
+  const { expenses, categories, users, savedReports, addSavedReport, updateSavedReport, deleteSavedReport } = useExpenseData();
   const { credentials } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
   const [location, setLocation] = useLocation();
@@ -20,6 +20,12 @@ export const ReportsPage: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 7)); // Current month
+  
+  // Saved reports state
+  const [showSaveReportModal, setShowSaveReportModal] = useState(false);
+  const [showLoadReportModal, setShowLoadReportModal] = useState(false);
+  const [reportName, setReportName] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
   
   // Modal state for expense details
   const [selectedCell, setSelectedCell] = useState<{
@@ -462,6 +468,46 @@ export const ReportsPage: React.FC = () => {
     setLocation(`/expenses?edit=${expense.id}&returnTo=reports`);
   };
 
+  const handleSaveReport = () => {
+    if (!reportName.trim()) {
+      alert('Please enter a report name');
+      return;
+    }
+
+    const newReport: Omit<SavedReport, 'id' | 'createdAt' | 'lastUsed'> = {
+      name: reportName.trim(),
+      description: reportDescription.trim() || undefined,
+      filters: {
+        selectedUserId,
+        selectedCategoryId,
+        startDate,
+        endDate
+      }
+    };
+
+    addSavedReport(newReport);
+    setShowSaveReportModal(false);
+    setReportName('');
+    setReportDescription('');
+  };
+
+  const handleLoadReport = (report: SavedReport) => {
+    setSelectedUserId(report.filters.selectedUserId);
+    setSelectedCategoryId(report.filters.selectedCategoryId);
+    setStartDate(report.filters.startDate);
+    setEndDate(report.filters.endDate);
+    
+    // Update last used timestamp
+    updateSavedReport(report.id, { lastUsed: new Date().toISOString() });
+    setShowLoadReportModal(false);
+  };
+
+  const handleDeleteReport = (reportId: string) => {
+    if (confirm('Are you sure you want to delete this saved report?')) {
+      deleteSavedReport(reportId);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
@@ -469,7 +515,25 @@ export const ReportsPage: React.FC = () => {
         <div className="flex items-center gap-2 mb-1">
           <TrendingUp className="w-6 h-6 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900">Expense Reports</h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            {savedReports.length > 0 && (
+              <button
+                onClick={() => setShowLoadReportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm"
+                title="Load saved report"
+              >
+                <FolderOpen className="w-4 h-4" />
+                Load Report
+              </button>
+            )}
+            <button
+              onClick={() => setShowSaveReportModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+              title="Save current report filters"
+            >
+              <Save className="w-4 h-4" />
+              Save Report
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
@@ -792,6 +856,174 @@ export const ReportsPage: React.FC = () => {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Report Modal */}
+      {showSaveReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div className="flex items-center gap-2">
+                <Save className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Save Report</h3>
+              </div>
+              <button
+                onClick={() => setShowSaveReportModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Report Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={reportName}
+                  onChange={(e) => setReportName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="e.g., Monthly Team Expenses"
+                  maxLength={50}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="Brief description of this report..."
+                  rows={3}
+                  maxLength={200}
+                />
+              </div>
+              
+              {/* Current Filters Preview */}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Current Filters:</h4>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div>• {useCaseConfig.userLabelSingular}: {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name}</div>
+                  <div>• Category: {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name}</div>
+                  <div>• Period: {startDate === endDate ? startDate : `${startDate} to ${endDate}`}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={() => setShowSaveReportModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveReport}
+                disabled={!reportName.trim()}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Load Report Modal */}
+      {showLoadReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div className="flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Load Saved Report</h3>
+              </div>
+              <button
+                onClick={() => setShowLoadReportModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)]">
+              {savedReports.length === 0 ? (
+                <div className="text-center py-8">
+                  <FolderOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">No Saved Reports</h4>
+                  <p className="text-gray-500">Save your first report to see it here</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedReports
+                    .sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
+                    .map(report => {
+                      const reportUser = report.filters.selectedUserId === 'all' ? null : users.find(u => u.id === report.filters.selectedUserId);
+                      const reportCategory = report.filters.selectedCategoryId === 'all' ? null : categories.find(c => c.id === report.filters.selectedCategoryId);
+                      
+                      return (
+                        <div
+                          key={report.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow group"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Star className="w-4 h-4 text-yellow-500" />
+                                <h4 className="font-medium text-gray-900 truncate">{report.name}</h4>
+                              </div>
+                              
+                              {report.description && (
+                                <p className="text-sm text-gray-600 mb-2">{report.description}</p>
+                              )}
+                              
+                              <div className="text-xs text-gray-500 space-y-1">
+                                <div>• {useCaseConfig.userLabelSingular}: {reportUser?.name || useCaseConfig.terminology.allUsers}</div>
+                                <div>• Category: {reportCategory?.name || 'All Categories'}</div>
+                                <div>• Period: {report.filters.startDate === report.filters.endDate ? report.filters.startDate : `${report.filters.startDate} to ${report.filters.endDate}`}</div>
+                                <div>• Last used: {new Date(report.lastUsed).toLocaleDateString()}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                              <button
+                                onClick={() => handleLoadReport(report)}
+                                className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                title="Load this report"
+                              >
+                                <FolderOpen className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReport(report.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete this report"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowLoadReportModal(false)}
+                className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

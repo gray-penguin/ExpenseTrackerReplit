@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useIndexedDBStorage } from './useIndexedDBStorage';
 import { indexedDBStorage } from '../utils/indexedDBStorage';
-import { User, Category, Expense } from '../types';
+import { User, Category, Expense, SavedReport } from '../types';
 
 export function useExpenseData() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -27,6 +27,13 @@ export function useExpenseData() {
     () => indexedDBStorage.getExpenses(),
     (expenses) => indexedDBStorage.setExpenses(expenses)
   );
+  
+  const [savedReports, setSavedReports, { isLoading: savedReportsLoading }] = useIndexedDBStorage<SavedReport[]>(
+    'savedReports',
+    [],
+    () => indexedDBStorage.getSavedReports(),
+    (reports) => indexedDBStorage.setSavedReports(reports)
+  );
 
   // Initialize IndexedDB and mock data
   useEffect(() => {
@@ -46,7 +53,7 @@ export function useExpenseData() {
     initializeOnce();
   }, [isInitialized]);
 
-  const isLoading = usersLoading || categoriesLoading || expensesLoading || !isInitialized;
+  const isLoading = usersLoading || categoriesLoading || expensesLoading || savedReportsLoading || !isInitialized;
 
   const addExpense = (expense: Omit<Expense, 'id' | 'createdAt'>) => {
     const newExpense: Expense = {
@@ -149,10 +156,31 @@ export function useExpenseData() {
     setExpenses([]);
   };
 
+  const addSavedReport = (report: Omit<SavedReport, 'id' | 'createdAt' | 'lastUsed'>) => {
+    const newReport: SavedReport = {
+      ...report,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      lastUsed: new Date().toISOString()
+    };
+    setSavedReports(prev => [...prev, newReport]);
+    return newReport;
+  };
+
+  const updateSavedReport = (id: string, updates: Partial<SavedReport>) => {
+    setSavedReports(prev => prev.map(report => 
+      report.id === id ? { ...report, ...updates, lastUsed: new Date().toISOString() } : report
+    ));
+  };
+
+  const deleteSavedReport = (id: string) => {
+    setSavedReports(prev => prev.filter(report => report.id !== id));
+  };
   return {
     users,
     categories,
     expenses,
+    savedReports,
     isLoading,
     addExpense,
     addBulkExpenses,
@@ -168,6 +196,9 @@ export function useExpenseData() {
     importUsers,
     importCategories,
     clearAllExpenses,
+    addSavedReport,
+    updateSavedReport,
+    deleteSavedReport,
     setUsers,
     setCategories,
     setExpenses

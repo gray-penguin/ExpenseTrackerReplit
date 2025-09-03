@@ -1,4 +1,5 @@
 import { User, Category, Expense } from '../types';
+import { SavedReport } from '../types';
 import { InstallationCodeManager } from './installationCode';
 import { mockUsers } from '../data/mockUsers';
 import { mockCategories } from '../data/mockCategories';
@@ -12,6 +13,7 @@ export interface BackupData {
   categories: any[];
   subcategories?: any[];
   expenses: any[];
+  savedReports?: any[];
   credentials: any;
   settings: any;
   useCase?: string;
@@ -24,6 +26,7 @@ export class IndexedDBStorage {
     users: 'users',
     categories: 'categories',
     expenses: 'expenses',
+    savedReports: 'savedReports',
     credentials: 'credentials',
     settings: 'settings'
   };
@@ -211,6 +214,44 @@ export class IndexedDBStorage {
     }
   }
 
+  async getSavedReports(): Promise<SavedReport[]> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.savedReports);
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    } catch (error) {
+      console.error('Error getting saved reports from IndexedDB:', error);
+      return [];
+    }
+  }
+
+  async setSavedReports(reports: SavedReport[]): Promise<void> {
+    try {
+      const store = await this.getStore(IndexedDBStorage.STORES.savedReports, 'readwrite');
+      
+      // Clear existing reports
+      await new Promise<void>((resolve, reject) => {
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => resolve();
+        clearRequest.onerror = () => reject(clearRequest.error);
+      });
+
+      // Add new reports
+      for (const report of reports) {
+        await new Promise<void>((resolve, reject) => {
+          const request = store.add(report);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      }
+    } catch (error) {
+      console.error('Error setting saved reports in IndexedDB:', error);
+    }
+  }
+
   async getCredentials(): Promise<any> {
     try {
       const store = await this.getKeyValueStore();
@@ -391,10 +432,11 @@ export class IndexedDBStorage {
   async createFullBackup(): Promise<BackupData> {
     console.log('IndexedDBStorage.createFullBackup called');
     try {
-      const [users, categories, expenses, credentials, settings, installationInfo] = await Promise.all([
+      const [users, categories, expenses, savedReports, credentials, settings, installationInfo] = await Promise.all([
         this.getUsers(),
         this.getCategories(),
         this.getExpenses(),
+        this.getSavedReports(),
         this.getCredentials(),
         this.getSettings(),
         InstallationCodeManager.getInstallationInfo()
@@ -404,6 +446,7 @@ export class IndexedDBStorage {
         usersCount: users.length, 
         categoriesCount: categories.length, 
         expensesCount: expenses.length,
+        savedReportsCount: savedReports.length,
         credentials: !!credentials,
         settings: !!settings
       });
@@ -434,6 +477,7 @@ export class IndexedDBStorage {
         categories: flatCategories,
         subcategories: flatSubcategories,
         expenses,
+        savedReports,
         credentials,
         settings,
         useCase: credentials.useCase || 'personal-team'
@@ -492,6 +536,14 @@ export class IndexedDBStorage {
       });
     }
 
+    // Handle saved reports if they exist in the backup
+    const processedSavedReports = backup.savedReports ? backup.savedReports.map((report: any) => ({
+      ...report,
+      id: report.id?.toString() || '',
+      createdAt: report.createdAt || new Date().toISOString(),
+      lastUsed: report.lastUsed || report.createdAt || new Date().toISOString()
+    })) : [];
+
     const processedExpenses = backup.expenses.map((expense: any) => ({
       ...expense,
       id: expense.id?.toString() || '',
@@ -528,6 +580,7 @@ export class IndexedDBStorage {
       this.setUsers(processedUsers),
       this.setCategories(nestedCategories),
       this.setExpenses(processedExpenses),
+      this.setSavedReports(processedSavedReports),
       this.setCredentials(processedCredentials),
       this.setSettings(backup.settings)
     ]);

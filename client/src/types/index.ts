@@ -60,3 +60,17 @@ export interface SpendingSummary {
     amount: number;
   }>;
 }
+
+export interface SavedReport {
+  id: string;
+  name: string;
+  description?: string;
+  filters: {
+    selectedUserId: string;
+    selectedCategoryId: string;
+    startDate: string;
+    endDate: string;
+  };
+  createdAt: string;
+  lastUsed: string;
+}
