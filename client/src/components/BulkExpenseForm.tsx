@@ -393,7 +393,7 @@ export const BulkExpenseForm: React.FC<BulkExpenseFormProps> = ({
                       className="w-full px-4 py-3 pl-12 border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
                     >
                       <option value="">No default</option>
-                      {users.map(user => (
+                      {users.filter(user => user.isActive).map(user => (
                         <option key={user.id} value={user.id}>{user.name}</option>
                       ))}
                     </select>
