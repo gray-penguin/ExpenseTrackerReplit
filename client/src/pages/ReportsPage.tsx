@@ -18,6 +18,12 @@ export const ReportsPage: React.FC = () => {
   const [location, setLocation] = useLocation();
   const search = new URLSearchParams(window.location.search);
   
+  // Filter to only show active users and their expenses
+  const activeUsers = users.filter(user => user.isActive);
+  const activeUserExpenses = expenses.filter(expense => 
+    activeUsers.some(user => user.id === expense.userId)
+  );
+
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>(new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 7)); // Start of current year
@@ -221,7 +227,7 @@ export const ReportsPage: React.FC = () => {
 
   // Filter expenses by selected category and date range
   const filteredExpenses = useMemo(() => {
-    const result = expenses.filter(expense => {
+    const result = activeUserExpenses.filter(expense => {
       const expenseDate = expense.date.slice(0, 7); // YYYY-MM format
       const userMatch = selectedUserId === 'all' || expense.userId === selectedUserId;
       const categoryMatch = selectedCategoryId === 'all' || expense.categoryId === selectedCategoryId;
@@ -232,7 +238,7 @@ export const ReportsPage: React.FC = () => {
     });
     
     return result;
-  }, [expenses, selectedUserId, selectedCategoryId, startDate, endDate]);
+  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate]);</parameter>
 
   // Get subcategories for the selected category
   const subcategories = useMemo(() => {
@@ -332,7 +338,7 @@ export const ReportsPage: React.FC = () => {
 
 
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
-  const selectedUser = users.find(u => u.id === selectedUserId);
+  const selectedUser = activeUsers.find(u => u.id === selectedUserId);</parameter>
 
   // Print functionality
   const handlePrint = () => {
@@ -686,7 +692,7 @@ export const ReportsPage: React.FC = () => {
               className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{useCaseConfig.terminology.allUsers}</option>
-              {users
+              {activeUsers
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map(user => (
                   <option key={user.id} value={user.id}>
@@ -1109,7 +1115,7 @@ export const ReportsPage: React.FC = () => {
                   {savedReports
                     .sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
                     .map(report => {
-                      const reportUser = report.filters.selectedUserId === 'all' ? null : users.find(u => u.id === report.filters.selectedUserId);
+                      const reportUser = report.filters.selectedUserId === 'all' ? null : activeUsers.find(u => u.id === report.filters.selectedUserId);
                       const reportCategory = report.filters.selectedCategoryId === 'all' ? null : categories.find(c => c.id === report.filters.selectedCategoryId);
                       
                       return (
