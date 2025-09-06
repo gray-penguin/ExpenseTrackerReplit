@@ -985,7 +985,7 @@ export const ReportsPage: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                        <span>👤 {activeUsers.find(u => u.id === expense.userId)?.name || 'Unknown User'}</span>
+                  ))}
               </div>
             </div>
 
