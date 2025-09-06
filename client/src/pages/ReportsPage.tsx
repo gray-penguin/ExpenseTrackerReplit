@@ -338,7 +338,7 @@ export const ReportsPage: React.FC = () => {
 
 
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
-  const selectedUser = activeUsers.find(u => u.id === selectedUserId);</parameter>
+  const selectedUser = activeUsers.find(u => u.id === selectedUserId);
 
   // Print functionality
   const handlePrint = () => {
