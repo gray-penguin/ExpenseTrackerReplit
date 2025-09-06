@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Category } from '../../types';
 import { UseCaseConfig } from '../../utils/useCaseConfig';
-import { Save, X, User as UserIcon, Star, Tag, MapPin, AtSign, Mail } from 'lucide-react';
+import { Save, X, User as UserIcon, Star, Tag, MapPin, AtSign, Mail, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface UserFormProps {
   userForm: {
@@ -10,6 +10,7 @@ interface UserFormProps {
     email: string;
     avatar: string;
     color: string;
+    isActive: boolean;
     defaultCategoryId: string;
     defaultSubcategoryId: string;
     defaultStoreLocation: string;
@@ -103,7 +104,7 @@ export const UserForm: React.FC<UserFormProps> = ({
             <UserIcon className="w-4 h-4" />
             Basic Information
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Full Name *</label>
               <div className="relative">
@@ -116,6 +117,30 @@ export const UserForm: React.FC<UserFormProps> = ({
                   required
                 />
                 <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+              <div className="flex items-center gap-2 h-10">
+                <button
+                  type="button"
+                  onClick={() => onUserFormChange({ isActive: !userForm.isActive })}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                    userForm.isActive
+                      ? 'bg-green-50 border-green-200 text-green-700'
+                      : 'bg-red-50 border-red-200 text-red-700'
+                  }`}
+                >
+                  {userForm.isActive ? (
+                    <ToggleRight className="w-4 h-4" />
+                  ) : (
+                    <ToggleLeft className="w-4 h-4" />
+                  )}
+                  <span className="text-sm font-medium">
+                    {userForm.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </button>
               </div>
             </div>
 

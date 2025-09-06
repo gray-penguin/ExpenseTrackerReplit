@@ -17,6 +17,12 @@ export function ExpensesList() {
   const search = useSearch();
   const { users, categories, expenses, addExpense, addBulkExpenses, updateExpense, deleteExpense } = useExpenseData();
 
+  // Filter to only show active users and their expenses
+  const activeUsers = users.filter(user => user.isActive);
+  const activeUserExpenses = expenses.filter(expense => 
+    activeUsers.some(user => user.id === expense.userId)
+  );
+
   // Parse URL params for filtering using wouter's useSearch hook
   useEffect(() => {
     console.log('ExpensesList useEffect triggered with search:', search);
@@ -134,8 +140,8 @@ export function ExpensesList() {
     <div className="space-y-6">
       {/* Expenses List Component */}
       <ExpensesListComponent
-        expenses={expenses}
-        users={users}
+        expenses={activeUserExpenses}
+        users={activeUsers}
         categories={categories}
         selectedUser={selectedUser}
         onEditExpense={handleEditExpense}
@@ -150,9 +156,9 @@ export function ExpensesList() {
       {/* Expense Form Modal */}
       {showExpenseForm && (
         <ExpenseForm
-          users={users}
+          users={activeUsers}
           categories={categories}
-          expenses={expenses}
+          expenses={activeUserExpenses}
           expense={editingExpense}
           onSubmit={handleAddExpense}
           onClose={() => {

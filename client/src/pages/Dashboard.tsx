@@ -14,6 +14,12 @@ export function Dashboard() {
   const { credentials } = useAuth();
   const useCaseConfig = getUseCaseConfig(credentials.useCase);
 
+  // Filter to only show active users and their expenses
+  const activeUsers = users.filter(user => user.isActive);
+  const activeUserExpenses = expenses.filter(expense => 
+    activeUsers.some(user => user.id === expense.userId)
+  );
+
   const handleNavigateToExpenses = (categoryId: string, subcategoryId: string) => {
     setLocation(`/expenses?categoryId=${categoryId}&subcategoryId=${subcategoryId}`);
   };
@@ -27,7 +33,7 @@ export function Dashboard() {
           <p className="text-gray-600">Overview of your expenses and spending patterns</p>
         </div>
         <UserSelector
-          users={users}
+          users={activeUsers}
           selectedUser={selectedUser}
           onUserSelect={setSelectedUser}
         />
@@ -35,8 +41,8 @@ export function Dashboard() {
 
       {/* Dashboard Component */}
       <DashboardComponent
-        expenses={expenses}
-        users={users}
+        expenses={activeUserExpenses}
+        users={activeUsers}
         categories={categories}
         selectedUser={selectedUser}
         onNavigateToExpenses={handleNavigateToExpenses}

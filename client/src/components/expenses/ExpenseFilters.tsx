@@ -92,7 +92,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
             className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
           >
             <option value="">All {useCaseConfig.terminology.users}</option>
-            {users.map(user => (
+            {users.filter(user => user.isActive).map(user => (
               <option key={user.id} value={user.id}>{user.name}</option>
             ))}
           </select>

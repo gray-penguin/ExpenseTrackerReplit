@@ -401,7 +401,8 @@ export class IndexedDBStorage {
     // Create users with IDs
     const usersWithIds = mockUsers.map((user, index) => ({
       ...user,
-      id: (index + 1).toString()
+      id: (index + 1).toString(),
+      isActive: true
     }));
 
     // Create categories with IDs

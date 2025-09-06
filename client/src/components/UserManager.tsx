@@ -93,6 +93,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
     email: '',
     avatar: '',
     color: 'bg-blue-500',
+    isActive: true,
     defaultCategoryId: '',
     defaultSubcategoryId: '',
     defaultStoreLocation: ''
@@ -105,6 +106,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
       email: '',
       avatar: '', 
       color: 'bg-blue-500',
+      isActive: true,
       defaultCategoryId: '',
       defaultSubcategoryId: '',
       defaultStoreLocation: ''
@@ -138,6 +140,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
       email: userForm.email.trim(),
       avatar: userForm.avatar || generateInitials(userForm.name.trim()),
       color: userForm.color,
+      isActive: userForm.isActive,
       defaultCategoryId: userForm.defaultCategoryId || undefined,
       defaultSubcategoryId: userForm.defaultSubcategoryId || undefined,
       defaultStoreLocation: userForm.defaultStoreLocation || undefined
@@ -171,6 +174,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
       email: user.email,
       avatar: user.avatar,
       color: user.color,
+      isActive: user.isActive,
       defaultCategoryId: user.defaultCategoryId || '',
       defaultSubcategoryId: user.defaultSubcategoryId || '',
       defaultStoreLocation: user.defaultStoreLocation || ''
@@ -201,6 +205,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
             email: userForm.email.trim(),
             avatar: userForm.avatar || generateInitials(userForm.name.trim()),
             color: userForm.color,
+            isActive: userForm.isActive,
             defaultCategoryId: userForm.defaultCategoryId || undefined,
             defaultSubcategoryId: userForm.defaultSubcategoryId || undefined,
             defaultStoreLocation: userForm.defaultStoreLocation || undefined

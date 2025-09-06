@@ -26,7 +26,7 @@ export const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({
   const filteredTotal = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   // Calculate user totals for filtered expenses
-  const userTotals = users.map(user => {
+  const userTotals = users.filter(user => user.isActive).map(user => {
     const userExpenses = filteredExpenses.filter(expense => expense.userId === user.id);
     const total = userExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     const count = userExpenses.length;

@@ -8,6 +8,7 @@ export const mockUsers: Omit<User, 'id'>[] = [
     email: 'david.jones@family.com',
     avatar: 'DJ',
     color: 'bg-emerald-500',
+    isActive: true,
     defaultCategoryId: '1',
     defaultSubcategoryId: '1',
     defaultStoreLocation: 'Neighborhood'
@@ -18,6 +19,7 @@ export const mockUsers: Omit<User, 'id'>[] = [
     email: 'lisa.jones@family.com',
     avatar: 'LJ',
     color: 'bg-blue-500',
+    isActive: true,
     defaultCategoryId: '2',
     defaultSubcategoryId: '6',
     defaultStoreLocation: 'Local Stores'
@@ -28,6 +30,7 @@ export const mockUsers: Omit<User, 'id'>[] = [
     email: 'emma.jones@family.com',
     avatar: 'EJ',
     color: 'bg-purple-500',
+    isActive: true,
     defaultCategoryId: '3',
     defaultSubcategoryId: '11',
     defaultStoreLocation: 'School Area'
@@ -38,6 +41,7 @@ export const mockUsers: Omit<User, 'id'>[] = [
     email: 'michael.jones@family.com',
     avatar: 'MJ',
     color: 'bg-orange-500',
+    isActive: true,
     defaultCategoryId: '3',
     defaultSubcategoryId: '12',
     defaultStoreLocation: 'Local'

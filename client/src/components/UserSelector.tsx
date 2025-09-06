@@ -75,7 +75,7 @@ export function UserSelector({
                 </div>
               </button>
             )}
-            {users.map((user) => (
+            {users.filter(user => user.isActive).map((user) => (
               <button
                 key={user.id}
                 onClick={() => {

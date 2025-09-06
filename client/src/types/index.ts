@@ -5,6 +5,7 @@ export interface User {
   email: string;
   avatar: string;
   color: string;
+  isActive: boolean;
   defaultCategoryId?: string;
   defaultSubcategoryId?: string;
   defaultStoreLocation?: string;

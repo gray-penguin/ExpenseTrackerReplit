@@ -17,9 +17,16 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ expenses, selectedUser }
     return `${year}-${month}-${day}`;
   };
 
+  // Filter out expenses from inactive users
+  const activeUserExpenses = expenses.filter(expense => {
+    // For now, we'll assume all users in expenses are active since we don't have user data here
+    // This will be properly filtered at the page level
+    return true;
+  });
+
   const filteredExpenses = selectedUser 
-    ? expenses.filter(expense => expense.userId === selectedUser.id)
-    : expenses;
+    ? activeUserExpenses.filter(expense => expense.userId === selectedUser.id)
+    : activeUserExpenses;
 
   // Calculate date range for filtered expenses
   const getDateRange = () => {

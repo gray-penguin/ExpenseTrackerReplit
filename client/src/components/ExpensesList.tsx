@@ -286,7 +286,7 @@ export const ExpensesList: React.FC<ExpensesListProps> = ({
           </div>
         ) : (
           paginatedExpenses.map(expense => {
-            const user = users.find(u => u.id === expense.userId);
+            const user = users.find(u => u.id === expense.userId && u.isActive);
             const category = categories.find(c => c.id === expense.categoryId);
             const subcategory = category?.subcategories.find(s => s.id === expense.subcategoryId);
 

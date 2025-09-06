@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Category } from '../../types';
-import { Edit2, Trash2, Star, AtSign, Mail } from 'lucide-react';
+import { Edit2, Trash2, Star, AtSign, Mail, CheckCircle, XCircle } from 'lucide-react';
 
 interface UserCardProps {
   user: User;
@@ -21,14 +21,39 @@ export const UserCard: React.FC<UserCardProps> = ({
   const defaultSubcategory = defaultCategory?.subcategories.find(s => s.id === user.defaultSubcategoryId);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-all duration-200 group">
+    <div className={`bg-white rounded-2xl border p-6 hover:shadow-md transition-all duration-200 group ${
+      user.isActive 
+        ? 'border-slate-200' 
+        : 'border-red-200 bg-red-50/30'
+    }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-full ${user.color} flex items-center justify-center text-white text-lg font-semibold`}>
+          <div className={`w-12 h-12 rounded-full ${user.color} flex items-center justify-center text-white text-lg font-semibold relative`}>
             {user.avatar}
+            {!user.isActive && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <XCircle className="w-3 h-3 text-white" />
+              </div>
+            )}
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900">{user.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className={`font-semibold ${user.isActive ? 'text-slate-900' : 'text-slate-600'}`}>
+                {user.name}
+              </h3>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                user.isActive 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {user.isActive ? (
+                  <CheckCircle className="w-3 h-3" />
+                ) : (
+                  <XCircle className="w-3 h-3" />
+                )}
+                {user.isActive ? 'Active' : 'Inactive'}
+              </div>
+            </div>
             <div className="text-sm text-slate-500 space-y-1">
               <div className="flex items-center gap-1">
                 <AtSign className="w-3 h-3" />
