@@ -238,7 +238,7 @@ export const ReportsPage: React.FC = () => {
     });
     
     return result;
-  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate]);</parameter>
+  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate]);
 
   // Get subcategories for the selected category
   const subcategories = useMemo(() => {
