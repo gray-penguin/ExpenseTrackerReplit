@@ -808,7 +808,7 @@ export const ReportsPage: React.FC = () => {
       {/* Report Summary */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Report Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="text-center">
             <div className="text-lg font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
             <div className="text-xs text-gray-600">Total Expenses</div>
@@ -821,42 +821,52 @@ export const ReportsPage: React.FC = () => {
             <div className="text-lg font-bold text-purple-600">{months.length}</div>
             <div className="text-xs text-gray-600">Months</div>
           </div>
-        </div>
-        
-        {/* User Spending Breakdown */}
-        {selectedUserId === 'all' && userTotals.length > 1 && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Spending by {useCaseConfig.userLabelSingular}</h4>
-            <div className="space-y-2">
-              {userTotals.map(({ user, total }) => (
-                <div key={user.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
-                      {user.avatar}
-                    </div>
-                    <span className="text-sm text-gray-900">{user.name}</span>
-                  </div>
-                  <div className="text-sm font-medium text-gray-900">
-                    {formatCurrency(total)}
-                  </div>
+          
+          {/* User Spending Breakdown */}
+          <div className="text-center">
+            {selectedUserId === 'all' && userTotals.length > 1 ? (
+              <div>
+                <div className="text-lg font-bold text-purple-600 mb-2">
+                  Spending by {useCaseConfig.userLabelSingular}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Single User Display */}
-        {selectedUserId !== 'all' && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Current Filter</h4>
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded-full ${selectedUser?.color} flex items-center justify-center text-white text-xs font-medium`}>
-                {selectedUser?.avatar}
+                <div className="space-y-2">
+                  {userTotals.slice(0, 3).map(({ user, total }) => (
+                    <div key={user.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-semibold`}>
+                          {user.avatar}
+                        </div>
+                        <span className="text-slate-700">{user.name}</span>
+                      </div>
+                      <span className="font-semibold text-slate-900">{formatCurrency(total)}</span>
+                    </div>
+                  ))}
+                  {userTotals.length > 3 && (
+                    <div className="text-xs text-slate-500">
+                      +{userTotals.length - 3} more
+                    </div>
+                  )}
+                </div>
               </div>
-              <span className="text-sm text-gray-900">{selectedUser?.name}</span>
-            </div>
+            ) : selectedUserId !== 'all' ? (
+              <div>
+                <div className="text-lg font-bold text-purple-600 mb-2">Current Filter</div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className={`w-6 h-6 rounded-full ${selectedUser?.color} flex items-center justify-center text-white text-xs font-semibold`}>
+                    {selectedUser?.avatar}
+                  </div>
+                  <span className="text-sm text-slate-700">{selectedUser?.name}</span>
+                </div>
+                <div className="text-sm text-slate-500 mt-1">{useCaseConfig.userLabelSingular} Filter</div>
+              </div>
+            ) : (
+              <div>
+                <div className="text-lg font-bold text-slate-400 mb-2">No Users</div>
+                <div className="text-sm text-slate-500">No active users found</div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Spreadsheet Report */}
