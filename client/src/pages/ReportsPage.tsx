@@ -101,21 +101,21 @@ export function ReportsPage() {
   const generateMonthRange = (start: string, end: string): string[] => {
     if (!start || !end) return [];
     
-    // Parse dates - start and end are already in YYYY-MM-DD format
-    const [startYear, startMonth] = start.split('-').map(Number);
-    const [endYear, endMonth] = end.split('-').map(Number);
-    
-    // Convert to comparable values (year * 12 + month)
-    const startValue = startYear * 12 + (startMonth - 1); // -1 because months are 0-indexed
-    const endValue = endYear * 12 + (endMonth - 1);
+    // Parse start and end dates
+    const startDate = new Date(start);
+    const endDate = new Date(end);
     
     const months: string[] = [];
+    const current = new Date(startDate);
     
-    // Generate all months from start to end (inclusive)
-    for (let value = startValue; value <= endValue; value++) {
-      const year = Math.floor(value / 12);
-      const month = value % 12;
-      months.push(`${year}-${String(month + 1).padStart(2, '0')}`); // +1 because we need 1-indexed months
+    // Generate months from start to end (inclusive)
+    while (current <= endDate) {
+      const year = current.getFullYear();
+      const month = current.getMonth() + 1; // getMonth() is 0-indexed, so add 1
+      months.push(`${year}-${String(month).padStart(2, '0')}`);
+      
+      // Move to next month
+      current.setMonth(current.getMonth() + 1);
     }
     
     return months;
