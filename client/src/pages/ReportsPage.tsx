@@ -68,6 +68,7 @@ export function ReportsPage() {
   const [endDate, setEndDate] = useState(() => {
     return new Date().toISOString().slice(0, 7);
   });
+  const [periodPreset, setPeriodPreset] = useState<'custom' | 'thisMonth' | 'lastMonth' | 'last3Months' | 'last6Months' | 'thisYear' | 'lastYear'>('last12Months');
 
   // Saved reports state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -94,6 +95,63 @@ export function ReportsPage() {
     if (urlStartDate) setStartDate(urlStartDate);
     if (urlEndDate) setEndDate(urlEndDate);
   }, [search]);
+
+  // Handle period preset changes
+  const handlePeriodPresetChange = (preset: typeof periodPreset) => {
+    setPeriodPreset(preset);
+    
+    const today = new Date();
+    let newStartDate = '';
+    let newEndDate = '';
+    
+    switch (preset) {
+      case 'thisMonth':
+        newStartDate = today.toISOString().slice(0, 7);
+        newEndDate = today.toISOString().slice(0, 7);
+        break;
+      case 'lastMonth':
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        newStartDate = lastMonth.toISOString().slice(0, 7);
+        newEndDate = lastMonth.toISOString().slice(0, 7);
+        break;
+      case 'last3Months':
+        const threeMonthsAgo = new Date(today);
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 2);
+        newStartDate = threeMonthsAgo.toISOString().slice(0, 7);
+        newEndDate = today.toISOString().slice(0, 7);
+        break;
+      case 'last6Months':
+        const sixMonthsAgo = new Date(today);
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        newStartDate = sixMonthsAgo.toISOString().slice(0, 7);
+        newEndDate = today.toISOString().slice(0, 7);
+        break;
+      case 'thisYear':
+        newStartDate = today.getFullYear() + '-01';
+        newEndDate = today.toISOString().slice(0, 7);
+        break;
+      case 'lastYear':
+        const lastYear = today.getFullYear() - 1;
+        newStartDate = lastYear + '-01';
+        newEndDate = lastYear + '-12';
+        break;
+      case 'custom':
+        // Don't change dates for custom
+        return;
+    }
+    
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+  };
+
+  // Update period preset when dates change manually
+  React.useEffect(() => {
+    // Only update if not already custom to avoid infinite loops
+    if (periodPreset !== 'custom') {
+      setPeriodPreset('custom');
+    }
+  }, [startDate, endDate]);
 
   // Generate report data
   const reportData = useMemo(() => {
@@ -514,11 +572,17 @@ export function ReportsPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">Period</label>
             <div className="relative">
               <select
-                value="custom"
+                value={periodPreset}
+                onChange={(e) => handlePeriodPresetChange(e.target.value as typeof periodPreset)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
-                disabled
               >
                 <option value="custom">Custom Range</option>
+                <option value="thisMonth">This Month</option>
+                <option value="lastMonth">Last Month</option>
+                <option value="last3Months">Last 3 Months</option>
+                <option value="last6Months">Last 6 Months</option>
+                <option value="thisYear">This Year</option>
+                <option value="lastYear">Last Year</option>
               </select>
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             </div>
