@@ -114,9 +114,9 @@ export function ReportsPage() {
         newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'lastMonth':
-        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        newStartDate = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
-        newEndDate = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+        const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        newStartDate = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'last3Months':
         const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
@@ -136,6 +136,7 @@ export function ReportsPage() {
       case 'thisYear':
         newStartDate = `${today.getFullYear()}-01`;
         newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        break;
       case 'lastYear':
         newStartDate = `${today.getFullYear() - 1}-01`;
         newEndDate = `${today.getFullYear() - 1}-12`;
