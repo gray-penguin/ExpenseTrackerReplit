@@ -1,5 +1,16 @@
-export const APP_VERSION = '2.0.0';
+export const APP_VERSION = '2.0.1';
 export const VERSION_HISTORY = [
+  {
+    version: '2.0.1',
+    date: '2025-01-30',
+    changes: [
+      'Fixed Reports page cell click functionality to show expense details modal',
+      'Restored popup window for viewing expenses when clicking on report totals',
+      'Fixed missing X icon import causing modal close button errors',
+      'Enhanced expense details modal with user avatars and formatted data',
+      'Improved modal styling and responsive design for better user experience'
+    ]
+  },
   {
     version: '2.0.0',
     date: '2025-01-30',
