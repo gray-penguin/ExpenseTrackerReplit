@@ -228,19 +228,6 @@ export const AboutTab: React.FC = () => {
       {/* Migration History */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <h4 className="font-medium text-slate-900 mb-4">Migration History</h4>
-        
-        <div className="space-y-3">
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-              <span className="font-medium text-emerald-900">Bolt to Replit Migration</span>
-              <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-1 rounded">Completed</span>
-            </div>
-            <p className="text-sm text-emerald-800">
-              Successfully migrated from Bolt platform to Replit's full-stack template while 
-              preserving all functionality and user data.
-            </p>
-          </div>
           
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 mb-1">
