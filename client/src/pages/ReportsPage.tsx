@@ -242,6 +242,7 @@ export function ReportsPage() {
     }).filter(row => row.total > 0).sort((a, b) => b.total - a.total);
 
     return result;
+  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate, categories]);
 
   // Generate months array for headers
   const months = useMemo(() => {
@@ -279,6 +280,7 @@ export function ReportsPage() {
       
       return { month, total };
     });
+  }, [months, reportData]);
 
   // Calculate grand total
   const grandTotal = useMemo(() => {
