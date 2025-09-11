@@ -229,18 +229,18 @@ export const AboutTab: React.FC = () => {
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <h4 className="font-medium text-slate-900 mb-4">Migration History</h4>
           
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-              <span className="font-medium text-blue-900">Browser State Implementation</span>
-              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">Active</span>
-            </div>
-            <p className="text-sm text-blue-800">
-              Implemented sophisticated browser state management using IndexedDB for 
-              complete offline functionality and data persistence.
-            </p>
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+            <span className="font-medium text-blue-900">Browser State Implementation</span>
+            <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">Active</span>
           </div>
+          <p className="text-sm text-blue-800">
+            Implemented sophisticated browser state management using IndexedDB for 
+            complete offline functionality and data persistence.
+          </p>
         </div>
+      </div>
       </div>
     </div>
   );
