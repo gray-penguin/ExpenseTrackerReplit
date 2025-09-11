@@ -106,10 +106,11 @@ export function ReportsPage() {
     const endDate = new Date(end);
     
     const months: string[] = [];
-    const current = new Date(startDate);
+    const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
     
     // Generate months from start to end (inclusive)
-    while (current <= endDate) {
+    while (current.getFullYear() < endDate.getFullYear() || 
+           (current.getFullYear() === endDate.getFullYear() && current.getMonth() <= endDate.getMonth())) {
       const year = current.getFullYear();
       const month = current.getMonth() + 1; // getMonth() is 0-indexed, so add 1
       months.push(`${year}-${String(month).padStart(2, '0')}`);
