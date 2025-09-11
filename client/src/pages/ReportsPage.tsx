@@ -180,19 +180,23 @@ export function ReportsPage() {
       months.push(d.toISOString().slice(0, 7));
     }
 
+    // Get subcategories that have expenses in the filtered data
+    const subcategoriesWithExpenses = new Set(filteredExpenses.map(exp => exp.subcategoryId));
+    
     // Get all subcategories for the selected category (or all if no category selected)
     const relevantCategories = selectedCategoryId === 'all' 
       ? categories 
       : categories.filter(c => c.id === selectedCategoryId);
 
     const allSubcategories = relevantCategories.flatMap(cat => 
-      cat.subcategories.map(sub => ({
-        ...sub,
-        categoryName: cat.name,
-        categoryColor: cat.color
-      }))
+      cat.subcategories
+        .filter(sub => subcategoriesWithExpenses.has(sub.id))
+        .map(sub => ({
+          ...sub,
+          categoryName: cat.name,
+          categoryColor: cat.color
+        }))
     );
-
     // Build report data
     const result: ReportCell[] = allSubcategories.map(subcategory => {
       const subcategoryExpenses = filteredExpenses.filter(expense => 
@@ -217,7 +221,9 @@ export function ReportsPage() {
 
       return {
         subcategoryId: subcategory.id,
-        subcategoryName: `${subcategory.categoryName} • ${subcategory.name}`,
+        subcategoryName: selectedCategoryId === 'all' 
+          ? `${subcategory.categoryName} • ${subcategory.name}`
+          : subcategory.name,
         monthlyTotals,
         total
       };
@@ -225,15 +231,6 @@ export function ReportsPage() {
 
     return result;
   }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate]);
-
-  // Get subcategories for the selected category
-  const subcategories = useMemo(() => {
-    if (selectedCategoryId === 'all') {
-      return categories.flatMap(cat => cat.subcategories);
-    }
-    const category = categories.find(c => c.id === selectedCategoryId);
-    return category?.subcategories || [];
-  }, [categories, selectedCategoryId]);
 
   // Generate months array for headers
   const months = useMemo(() => {
