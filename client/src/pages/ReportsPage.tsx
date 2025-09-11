@@ -280,7 +280,7 @@ export function ReportsPage() {
       
       return { month, total };
     });
-  }, [months, reportData]);
+  }, [reportData, months]);
 
   // Calculate grand total
   const grandTotal = useMemo(() => {
