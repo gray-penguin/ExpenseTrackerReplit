@@ -60,6 +60,9 @@ export function ReportsPage() {
   // State for filters
   const [selectedUserId, setSelectedUserId] = useState('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState('all');
+  const [periodPreset, setPeriodPreset] = useState<'custom' | 'thisMonth' | 'lastMonth' | 'last3Months' | 'last6Months' | 'last12Months' | 'thisYear' | 'lastYear'>('last12Months');
+  
+  // Initialize dates based on default preset
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 11);
@@ -68,7 +71,6 @@ export function ReportsPage() {
   const [endDate, setEndDate] = useState(() => {
     return new Date().toISOString().slice(0, 7);
   });
-  const [periodPreset, setPeriodPreset] = useState<'custom' | 'thisMonth' | 'lastMonth' | 'last3Months' | 'last6Months' | 'thisYear' | 'lastYear'>('last12Months');
 
   // Saved reports state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -127,6 +129,12 @@ export function ReportsPage() {
         newStartDate = sixMonthsAgo.toISOString().slice(0, 7);
         newEndDate = today.toISOString().slice(0, 7);
         break;
+      case 'last12Months':
+        const twelveMonthsAgo = new Date(today);
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+        newStartDate = twelveMonthsAgo.toISOString().slice(0, 7);
+        newEndDate = today.toISOString().slice(0, 7);
+        break;
       case 'thisYear':
         newStartDate = today.getFullYear() + '-01';
         newEndDate = today.toISOString().slice(0, 7);
@@ -145,13 +153,6 @@ export function ReportsPage() {
     setEndDate(newEndDate);
   };
 
-  // Update period preset when dates change manually
-  React.useEffect(() => {
-    // Only update if not already custom to avoid infinite loops
-    if (periodPreset !== 'custom') {
-      setPeriodPreset('custom');
-    }
-  }, [startDate, endDate]);
 
   // Generate report data
   const reportData = useMemo(() => {
@@ -581,6 +582,7 @@ export function ReportsPage() {
                 <option value="lastMonth">Last Month</option>
                 <option value="last3Months">Last 3 Months</option>
                 <option value="last6Months">Last 6 Months</option>
+                <option value="last12Months">Last 12 Months</option>
                 <option value="thisYear">This Year</option>
                 <option value="lastYear">Last Year</option>
               </select>
@@ -594,7 +596,10 @@ export function ReportsPage() {
               <input
                 type="month"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPeriodPreset('custom');
+                }}
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -607,7 +612,10 @@ export function ReportsPage() {
               <input
                 type="month"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPeriodPreset('custom');
+                }}
                 min={startDate}
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
