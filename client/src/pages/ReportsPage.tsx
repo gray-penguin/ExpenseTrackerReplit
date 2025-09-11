@@ -335,6 +335,24 @@ export const ReportsPage: React.FC = () => {
     return sum + validTotal;
   }, 0);
 
+  // Calculate user totals for the current report
+  const userTotals = useMemo(() => {
+    const totals: Record<string, { total: number; count: number }> = {};
+    
+    activeUsers.forEach(user => {
+      totals[user.id] = { total: 0, count: 0 };
+    });
+    
+    filteredExpenses.forEach(expense => {
+      if (totals[expense.userId]) {
+        const validAmount = isNaN(expense.amount) ? 0 : expense.amount;
+        totals[expense.userId].total += validAmount;
+        totals[expense.userId].count += 1;
+      }
+    });
+    
+    return totals;
+  }, [filteredExpenses, activeUsers]);
 
 
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
@@ -782,7 +800,7 @@ export const ReportsPage: React.FC = () => {
       {/* Report Summary */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Report Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <div className="text-center">
             <div className="text-lg font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
             <div className="text-xs text-gray-600">Total Expenses</div>
@@ -802,6 +820,39 @@ export const ReportsPage: React.FC = () => {
             <div className="text-xs text-gray-600">{useCaseConfig.userLabelSingular} Filter</div>
           </div>
         </div>
+        
+        {/* User Totals */}
+        {selectedUserId === 'all' && Object.values(userTotals).some(total => total.total > 0) && (
+          <div className="border-t border-gray-200 pt-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Spending by {useCaseConfig.userLabelSingular}</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {activeUsers
+                .filter(user => userTotals[user.id]?.total > 0)
+                .sort((a, b) => userTotals[b.id].total - userTotals[a.id].total)
+                .map(user => {
+                  const userTotal = userTotals[user.id];
+                  const percentage = grandTotal > 0 ? (userTotal.total / grandTotal) * 100 : 0;
+                  
+                  return (
+                    <div key={user.id} className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-6 h-6 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
+                          {user.avatar}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 truncate">{user.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-base font-bold text-gray-900">{formatCurrency(userTotal.total)}</div>
+                        <div className="text-xs text-gray-500">
+                          {userTotal.count} expense{userTotal.count !== 1 ? 's' : ''} • {percentage.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Spreadsheet Report */}
