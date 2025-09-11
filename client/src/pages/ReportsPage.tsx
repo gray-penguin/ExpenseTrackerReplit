@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Category, Expense, SavedReport } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { exportExpensesToCSV, downloadCSV } from '../utils/csvUtils';
-import { TrendingUp, Users, Calendar, Tag, Download, Save, FolderOpen, Printer, Filter, ChevronDown } from 'lucide-react';
+import { TrendingUp, Users, Calendar, Tag, Download, Save, FolderOpen, Printer, Filter, ChevronDown, X } from 'lucide-react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { useLocation, useSearch } from 'wouter';
 import { useAuth } from '../hooks/useAuth';
