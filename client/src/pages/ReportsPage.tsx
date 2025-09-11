@@ -101,22 +101,25 @@ export function ReportsPage() {
   const generateMonthRange = (start: string, end: string): string[] => {
     if (!start || !end) return [];
     
-    // Parse start and end dates
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+    // Parse start and end dates directly from YYYY-MM-DD format
+    const [startYear, startMonth] = start.split('-').map(Number);
+    const [endYear, endMonth] = end.split('-').map(Number);
     
     const months: string[] = [];
-    const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    
+    let currentYear = startYear;
+    let currentMonth = startMonth;
     
     // Generate months from start to end (inclusive)
-    while (current.getFullYear() < endDate.getFullYear() || 
-           (current.getFullYear() === endDate.getFullYear() && current.getMonth() <= endDate.getMonth())) {
-      const year = current.getFullYear();
-      const month = current.getMonth() + 1; // getMonth() is 0-indexed, so add 1
-      months.push(`${year}-${String(month).padStart(2, '0')}`);
+    while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+      months.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
       
       // Move to next month
-      current.setMonth(current.getMonth() + 1);
+      currentMonth++;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      }
     }
     
     return months;
