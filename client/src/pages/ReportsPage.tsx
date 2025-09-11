@@ -475,7 +475,7 @@ export function ReportsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 print:hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">{useCaseConfig.userLabelSingular}</label>
             <div className="relative">
@@ -507,6 +507,20 @@ export function ReportsPage() {
                 ))}
               </select>
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Period</label>
+            <div className="relative">
+              <select
+                value="custom"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white"
+                disabled
+              >
+                <option value="custom">Custom Range</option>
+              </select>
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             </div>
           </div>
 
