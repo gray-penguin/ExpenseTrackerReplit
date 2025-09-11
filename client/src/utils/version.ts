@@ -19,7 +19,7 @@ export const VERSION_HISTORY = [
       'Intelligent autocomplete for Description, Store Name, and Store Location fields',
       'Frequency-based sorting with recency weighting for suggestions',
       'Visual chevron dropdown indicators',
-      'Fixed data source to use actual expenses instead of mock data'
+      'Fixed data source to use actual expenses instead of mock data',
       'Removed all Tauri code'
     ]
   },
