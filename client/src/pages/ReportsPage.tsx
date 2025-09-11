@@ -490,9 +490,15 @@ export function ReportsPage() {
                   </th>
                   {monthRange.map((month, index) => {
                     console.log(`Rendering table header for month ${index}:`, month);
+                    // Parse year and month from YYYY-MM format
+                    const [year, monthNum] = month.split('-');
+                    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
+                      .toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                    const yearShort = year.slice(-2);
+                    
                     return (
                     <th key={month} className="text-center p-2 font-semibold text-slate-700 min-w-[80px] border-r border-slate-200">
-                      {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()}
+                      {monthName} {yearShort}
                     </th>
                   )})}
                   <th className="text-center p-2 font-semibold text-slate-700 bg-slate-100 min-w-[80px]">
