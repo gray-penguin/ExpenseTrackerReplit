@@ -66,10 +66,12 @@ export function ReportsPage() {
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 11);
+    date.setDate(1); // Ensure we're at the start of the month
     return date.toISOString().slice(0, 7);
   });
   const [endDate, setEndDate] = useState(() => {
-    return new Date().toISOString().slice(0, 7);
+    const date = new Date();
+    return date.toISOString().slice(0, 7);
   });
 
   // Saved reports state
@@ -108,41 +110,36 @@ export function ReportsPage() {
     
     switch (preset) {
       case 'thisMonth':
-        newStartDate = today.toISOString().slice(0, 7);
-        newEndDate = today.toISOString().slice(0, 7);
+        newStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
         break;
       case 'lastMonth':
-        const lastMonth = new Date(today);
-        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         newStartDate = lastMonth.toISOString().slice(0, 7);
         newEndDate = lastMonth.toISOString().slice(0, 7);
         break;
       case 'last3Months':
-        const threeMonthsAgo = new Date(today);
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 2);
+        const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
         newStartDate = threeMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = today.toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
         break;
       case 'last6Months':
-        const sixMonthsAgo = new Date(today);
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1);
         newStartDate = sixMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = today.toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
         break;
       case 'last12Months':
-        const twelveMonthsAgo = new Date(today);
-        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+        const twelveMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
         newStartDate = twelveMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = today.toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
         break;
       case 'thisYear':
-        newStartDate = today.getFullYear() + '-01';
-        newEndDate = today.toISOString().slice(0, 7);
+        newStartDate = new Date(today.getFullYear(), 0, 1).toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
         break;
       case 'lastYear':
-        const lastYear = today.getFullYear() - 1;
-        newStartDate = lastYear + '-01';
-        newEndDate = lastYear + '-12';
+        newStartDate = new Date(today.getFullYear() - 1, 0, 1).toISOString().slice(0, 7);
+        newEndDate = new Date(today.getFullYear() - 1, 11, 1).toISOString().slice(0, 7);
         break;
       case 'custom':
         // Don't change dates for custom
