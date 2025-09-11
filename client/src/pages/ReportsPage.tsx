@@ -172,12 +172,24 @@ export function ReportsPage() {
     });
 
     // Generate months array
-    const months: string[] = [];
-    const start = new Date(startDate + '-01');
-    const end = new Date(endDate + '-01');
+    const monthsArray: string[] = [];
     
-    for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
-      months.push(d.toISOString().slice(0, 7));
+    // Parse start and end dates properly
+    const [startYear, startMonth] = startDate.split('-').map(Number);
+    const [endYear, endMonth] = endDate.split('-').map(Number);
+    
+    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
+    const end = new Date(endYear, endMonth - 1, 1);
+    
+    // Generate months from start to end (inclusive)
+    let current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      monthsArray.push(`${year}-${month}`);
+      
+      // Move to next month
+      current.setMonth(current.getMonth() + 1);
     }
 
     // Get subcategories that have expenses in the filtered data
@@ -204,7 +216,7 @@ export function ReportsPage() {
       );
 
       const monthlyTotals: { [month: string]: number } = {};
-      months.forEach(month => {
+      monthsArray.forEach(month => {
         const monthExpenses = subcategoryExpenses.filter(expense => 
           expense.date.slice(0, 7) === month
         );
@@ -230,16 +242,27 @@ export function ReportsPage() {
     }).filter(row => row.total > 0).sort((a, b) => b.total - a.total);
 
     return result;
-  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate]);
 
   // Generate months array for headers
   const months = useMemo(() => {
     const monthsArray: string[] = [];
-    const start = new Date(startDate + '-01');
-    const end = new Date(endDate + '-01');
     
-    for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
-      monthsArray.push(d.toISOString().slice(0, 7));
+    // Parse start and end dates properly
+    const [startYear, startMonth] = startDate.split('-').map(Number);
+    const [endYear, endMonth] = endDate.split('-').map(Number);
+    
+    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
+    const end = new Date(endYear, endMonth - 1, 1);
+    
+    // Generate months from start to end (inclusive)
+    let current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      monthsArray.push(`${year}-${month}`);
+      
+      // Move to next month
+      current.setMonth(current.getMonth() + 1);
     }
     
     return monthsArray;
@@ -256,7 +279,6 @@ export function ReportsPage() {
       
       return { month, total };
     });
-  }, [reportData, months]);
 
   // Calculate grand total
   const grandTotal = useMemo(() => {
