@@ -2,7 +2,7 @@ export const APP_VERSION = '2.0.1';
 export const VERSION_HISTORY = [
   {
     version: '2.0.1',
-    date: '2025-07-30',
+    date: '2025-09-10',
     changes: [
       'Fixed Reports page cell click functionality to show expense details modal',
       'Restored popup window for viewing expenses when clicking on report totals',
@@ -13,13 +13,14 @@ export const VERSION_HISTORY = [
   },
   {
     version: '2.0.0',
-    date: '2025-07-30',
+    date: '2025-09-06',
     changes: [
       'Enhanced form dropdown suggestions for ExpenseForm',
       'Intelligent autocomplete for Description, Store Name, and Store Location fields',
       'Frequency-based sorting with recency weighting for suggestions',
       'Visual chevron dropdown indicators',
       'Fixed data source to use actual expenses instead of mock data'
+      'Removed all Tauri code'
     ]
   },
   {
@@ -116,7 +117,6 @@ export const VERSION_HISTORY = [
     version: '1.0.0',
     date: '2025-07-20',
     changes: [
-      'Initial migration from Bolt to Replit',
       'Multi-user expense tracking',
       'Category and subcategory management',
       'Dashboard with real-time statistics',
