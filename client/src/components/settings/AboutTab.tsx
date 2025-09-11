@@ -241,7 +241,6 @@ export const AboutTab: React.FC = () => {
           </p>
         </div>
       </div>
-      </div>
     </div>
   );
 };
