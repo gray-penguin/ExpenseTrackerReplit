@@ -18,7 +18,8 @@ import {
   Eye,
   Trash2,
   Edit3,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { getUseCaseConfig } from '../utils/useCaseConfig';
@@ -73,6 +74,12 @@ export function ReportsPage() {
   const [reportName, setReportName] = useState('');
   const [reportDescription, setReportDescription] = useState('');
   const [showSavedReports, setShowSavedReports] = useState(false);
+  const [selectedCellExpenses, setSelectedCellExpenses] = useState<{
+    expenses: Expense[];
+    subcategoryName: string;
+    month: string;
+    total: number;
+  } | null>(null);
 
   // Parse URL parameters on component mount
   useEffect(() => {
@@ -292,7 +299,16 @@ export function ReportsPage() {
   };
 
   // Handle cell click to navigate to expenses
-  const handleCellClick = (subcategoryId: string, month: string) => {
+  const handleCellClick = (subcategoryId: string, month: string, event: React.MouseEvent) => {
+    // Check if Ctrl/Cmd key is pressed for navigation, otherwise show details
+    if (event.ctrlKey || event.metaKey) {
+      navigateToExpenses(subcategoryId, month);
+    } else {
+      showExpenseDetails(subcategoryId, month);
+    }
+  };
+
+  const navigateToExpenses = (subcategoryId: string, month: string) => {
     // Store current state for return navigation
     const returnState = {
       selectedUserId,
@@ -330,6 +346,50 @@ export function ReportsPage() {
     }
     
     setLocation(`/expenses?${params.toString()}`);
+  };
+
+  const showExpenseDetails = (subcategoryId: string, month: string) => {
+    // Find expenses for this subcategory and month
+    let filteredExpenses = activeUserExpenses;
+
+    // Apply same filters as report data
+    if (selectedUserId !== 'all') {
+      filteredExpenses = filteredExpenses.filter(expense => expense.userId === selectedUserId);
+    }
+
+    if (selectedCategoryId !== 'all') {
+      filteredExpenses = filteredExpenses.filter(expense => expense.categoryId === selectedCategoryId);
+    }
+
+    // Filter by subcategory and month
+    const cellExpenses = filteredExpenses.filter(expense => {
+      const expenseMonth = expense.date.slice(0, 7);
+      return expense.subcategoryId === subcategoryId && expenseMonth === month;
+    });
+
+    if (cellExpenses.length === 0) return;
+
+    // Find subcategory name
+    const subcategory = categories
+      .flatMap(cat => cat.subcategories)
+      .find(sub => sub.id === subcategoryId);
+    
+    const category = categories.find(cat => 
+      cat.subcategories.some(sub => sub.id === subcategoryId)
+    );
+
+    const subcategoryName = subcategory && category 
+      ? `${category.name} • ${subcategory.name}`
+      : 'Unknown Subcategory';
+
+    const total = cellExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    setSelectedCellExpenses({
+      expenses: cellExpenses,
+      subcategoryName,
+      month,
+      total
+    });
   };
 
   // Save report functionality
@@ -591,8 +651,9 @@ export function ReportsPage() {
                       <td key={month} className="p-3 text-center">
                         {hasExpenses ? (
                           <button
-                            onClick={() => handleCellClick(row.subcategoryId, month)}
+                            onClick={(e) => handleCellClick(row.subcategoryId, month, e)}
                             className="text-slate-900 hover:text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded transition-colors print:hover:bg-transparent print:hover:text-slate-900"
+                            title="Click to view details • Ctrl+Click to navigate to expenses"
                           >
                             {formatCurrency(validAmount)}
                           </button>
@@ -786,6 +847,69 @@ export function ReportsPage() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expense Details Modal */}
+      {selectedCellExpenses && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">{selectedCellExpenses.subcategoryName}</h3>
+                <p className="text-slate-500">
+                  {(() => {
+                    const date = new Date(selectedCellExpenses.month + '-01');
+                    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                  })()} • {selectedCellExpenses.expenses.length} expenses • {formatCurrency(selectedCellExpenses.total)}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedCellExpenses(null)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="space-y-3">
+                {selectedCellExpenses.expenses
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map(expense => {
+                    const user = activeUsers.find(u => u.id === expense.userId);
+                    return (
+                      <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-900">{expense.description}</div>
+                          <div className="text-sm text-slate-600 flex items-center gap-2">
+                            <span>{user?.name}</span>
+                            <span>•</span>
+                            <span>{formatDate(expense.date)}</span>
+                            {expense.storeName && (
+                              <>
+                                <span>•</span>
+                                <span>{expense.storeName}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-slate-900">{formatCurrency(expense.amount)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-slate-900">Total for this period:</span>
+                  <span className="font-bold text-slate-900 text-lg">{formatCurrency(selectedCellExpenses.total)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
