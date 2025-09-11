@@ -618,27 +618,27 @@ export function ReportsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 print:grid-cols-3 print:gap-4">
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white print:bg-emerald-600">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3 print:gap-3">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white print:bg-emerald-600">
+          <div className="flex items-center justify-between mb-2">
             <DollarSign className="w-8 h-8 opacity-80" />
             <div className="text-right">
-              <p className="text-emerald-100 text-sm">Total Amount</p>
-              <p className="text-2xl font-bold">{formatCurrency(grandTotal)}</p>
+              <p className="text-emerald-100 text-xs">Total Amount</p>
+              <p className="text-xl font-bold">{formatCurrency(grandTotal)}</p>
             </div>
           </div>
-          <div className="text-emerald-100 text-sm">
+          <div className="text-emerald-100 text-xs">
             {selectedUser ? `${selectedUser.name}'s expenses` : 'All users combined'}
             {selectedCategory && ` • ${selectedCategory.name}`}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl p-4 border border-slate-200">
+          <div className="flex items-center justify-between mb-2">
             <FileText className="w-8 h-8 text-blue-500" />
             <div className="text-right">
-              <p className="text-slate-500 text-sm">Transactions</p>
-              <p className="text-2xl font-bold text-slate-900">{reportData.reduce((sum, row) => {
+              <p className="text-slate-500 text-xs">Transactions</p>
+              <p className="text-xl font-bold text-slate-900">{reportData.reduce((sum, row) => {
                 return sum + Object.values(row.monthlyTotals).filter(amount => {
                   const validAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
                   return validAmount > 0;
@@ -646,17 +646,17 @@ export function ReportsPage() {
               }, 0)}</p>
             </div>
           </div>
-          <div className="text-slate-500 text-sm">
+          <div className="text-slate-500 text-xs">
             Across {reportData.length} subcategories
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl p-4 border border-slate-200">
+          <div className="flex items-center justify-between mb-2">
             <Calendar className="w-8 h-8 text-purple-500" />
             <div className="text-right">
-              <p className="text-slate-500 text-sm">Period</p>
-              <p className="text-lg font-bold text-slate-900">
+              <p className="text-slate-500 text-xs">Period</p>
+              <p className="text-base font-bold text-slate-900">
                 {(() => {
                   const startMonth = new Date(startDate + '-01');
                   const endMonth = new Date(endDate + '-01');
@@ -667,7 +667,7 @@ export function ReportsPage() {
               </p>
             </div>
           </div>
-          <div className="text-slate-500 text-sm">
+          <div className="text-slate-500 text-xs">
             {months.length} month{months.length !== 1 ? 's' : ''} selected
           </div>
         </div>
