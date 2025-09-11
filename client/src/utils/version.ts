@@ -2,7 +2,7 @@ export const APP_VERSION = '2.0.1';
 export const VERSION_HISTORY = [
   {
     version: '2.0.1',
-    date: '2025-01-30',
+    date: '2025-07-30',
     changes: [
       'Fixed Reports page cell click functionality to show expense details modal',
       'Restored popup window for viewing expenses when clicking on report totals',
@@ -13,7 +13,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '2.0.0',
-    date: '2025-01-30',
+    date: '2025-07-30',
     changes: [
       'Enhanced form dropdown suggestions for ExpenseForm',
       'Intelligent autocomplete for Description, Store Name, and Store Location fields',
@@ -24,7 +24,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.9.0',
-    date: '2025-01-27',
+    date: '2025-07-27',
     changes: [
       'Added Tauri setup for native macOS app creation',
       'Complete Tauri project structure with Rust backend',
@@ -34,7 +34,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.8.0',
-    date: '2025-01-27',
+    date: '2025-07-27',
     changes: [
       'Cleaned up offline desktop application code',
       'Removed offline-app directory and related files',
@@ -44,7 +44,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.7.0',
-    date: '2025-01-26',
+    date: '2025-07-26',
     changes: [
       'Fixed Reports page monthly totals display',
       'Enhanced ExpenseForm amount data type handling',
@@ -54,7 +54,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.6.0',
-    date: '2025-01-25',
+    date: '2025-07-25',
     changes: [
       'UI text cleanup and bug fixes',
       'Fixed edit form data population',
@@ -64,7 +64,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.5.0',
-    date: '2025-01-23',
+    date: '2025-07-23',
     changes: [
       'Comprehensive About This App section',
       'Visual feature highlights with icons',
@@ -74,7 +74,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.4.0',
-    date: '2025-01-23',
+    date: '2025-07-23',
     changes: [
       'Fixed Dashboard subcategory navigation',
       'Improved wouter router compatibility',
@@ -84,7 +84,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.3.0',
-    date: '2025-01-21',
+    date: '2025-07-21',
     changes: [
       'Restored Dashboard subcategory navigation',
       'URL parameter support for filtering',
@@ -94,7 +94,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.2.0',
-    date: '2025-01-21',
+    date: '2025-07-21',
     changes: [
       'Fixed bulk expense form bug',
       'Created dedicated addBulkExpenses function',
@@ -104,7 +104,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.1.0',
-    date: '2025-01-20',
+    date: '2025-07-20',
     changes: [
       'Restored complete login/logout functionality',
       'Browser state management using localStorage',
@@ -114,7 +114,7 @@ export const VERSION_HISTORY = [
   },
   {
     version: '1.0.0',
-    date: '2025-01-20',
+    date: '2025-07-20',
     changes: [
       'Initial migration from Bolt to Replit',
       'Multi-user expense tracking',
