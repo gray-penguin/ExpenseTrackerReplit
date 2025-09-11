@@ -8,6 +8,12 @@ export const formatCurrency = (amount: number): string => {
 export const formatDate = (dateString: string): string => {
   // Parse date as local date to avoid timezone issues
   const date = new Date(dateString + 'T00:00:00');
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return '-';
+  }
+  
   return new Intl.DateTimeFormat(undefined, {
     year: 'numeric',
     month: 'short',
