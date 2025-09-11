@@ -136,7 +136,6 @@ export function ReportsPage() {
         break;
       case 'thisYear':
         newStartDate = `${today.getFullYear()}-01`;
-        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'lastYear':
         newStartDate = `${today.getFullYear() - 1}-01`;
