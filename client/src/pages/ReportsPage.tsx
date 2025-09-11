@@ -335,6 +335,32 @@ export const ReportsPage: React.FC = () => {
     return sum + validTotal;
   }, 0);
 
+  // Calculate user totals for the filtered expenses
+  const userTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    
+    // Initialize totals for all active users
+    activeUsers.forEach(user => {
+      totals[user.id] = 0;
+    });
+    
+    // Calculate totals from filtered expenses
+    filteredExpenses.forEach(expense => {
+      if (totals[expense.userId] !== undefined) {
+        const validAmount = isNaN(expense.amount) ? 0 : expense.amount;
+        totals[expense.userId] += validAmount;
+      }
+    });
+    
+    // Convert to array and filter out users with zero spending, then sort by amount
+    return activeUsers
+      .map(user => ({
+        user,
+        total: totals[user.id] || 0
+      }))
+      .filter(userTotal => userTotal.total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [filteredExpenses, activeUsers]);
 
 
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
@@ -782,7 +808,7 @@ export const ReportsPage: React.FC = () => {
       {/* Report Summary */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Report Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="text-center">
             <div className="text-lg font-bold text-blue-600">{formatCurrency(grandTotal)}</div>
             <div className="text-xs text-gray-600">Total Expenses</div>
@@ -795,13 +821,42 @@ export const ReportsPage: React.FC = () => {
             <div className="text-lg font-bold text-purple-600">{months.length}</div>
             <div className="text-xs text-gray-600">Months</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-orange-600">
-              {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : selectedUser?.name || 'N/A'}
-            </div>
-            <div className="text-xs text-gray-600">{useCaseConfig.userLabelSingular} Filter</div>
-          </div>
         </div>
+        
+        {/* User Spending Breakdown */}
+        {selectedUserId === 'all' && userTotals.length > 1 && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Spending by {useCaseConfig.userLabelSingular}</h4>
+            <div className="space-y-2">
+              {userTotals.map(({ user, total }) => (
+                <div key={user.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
+                      {user.avatar}
+                    </div>
+                    <span className="text-sm text-gray-900">{user.name}</span>
+                  </div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {formatCurrency(total)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Single User Display */}
+        {selectedUserId !== 'all' && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Current Filter</h4>
+            <div className="flex items-center gap-2">
+              <div className={`w-5 h-5 rounded-full ${selectedUser?.color} flex items-center justify-center text-white text-xs font-medium`}>
+                {selectedUser?.avatar}
+              </div>
+              <span className="text-sm text-gray-900">{selectedUser?.name}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Spreadsheet Report */}
