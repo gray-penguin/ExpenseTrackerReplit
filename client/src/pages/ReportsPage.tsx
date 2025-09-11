@@ -64,14 +64,15 @@ export function ReportsPage() {
   
   // Initialize dates based on default preset
   const [startDate, setStartDate] = useState(() => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - 11);
-    date.setDate(1); // Ensure we're at the start of the month
-    return date.toISOString().slice(0, 7);
+    const today = new Date();
+    const startYear = today.getFullYear();
+    const startMonth = today.getMonth() - 11; // 11 months back
+    const adjustedDate = new Date(startYear, startMonth, 1);
+    return `${adjustedDate.getFullYear()}-${String(adjustedDate.getMonth() + 1).padStart(2, '0')}`;
   });
   const [endDate, setEndDate] = useState(() => {
-    const date = new Date();
-    return date.toISOString().slice(0, 7);
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
   });
 
   // Saved reports state
@@ -110,36 +111,36 @@ export function ReportsPage() {
     
     switch (preset) {
       case 'thisMonth':
-        newStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newStartDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'lastMonth':
         const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        newStartDate = lastMonth.toISOString().slice(0, 7);
-        newEndDate = lastMonth.toISOString().slice(0, 7);
+        newStartDate = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'last3Months':
         const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
-        newStartDate = threeMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newStartDate = `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'last6Months':
         const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1);
-        newStartDate = sixMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newStartDate = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'last12Months':
         const twelveMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
-        newStartDate = twelveMonthsAgo.toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newStartDate = `${twelveMonthsAgo.getFullYear()}-${String(twelveMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'thisYear':
-        newStartDate = new Date(today.getFullYear(), 0, 1).toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 7);
+        newStartDate = `${today.getFullYear()}-01`;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'lastYear':
-        newStartDate = new Date(today.getFullYear() - 1, 0, 1).toISOString().slice(0, 7);
-        newEndDate = new Date(today.getFullYear() - 1, 11, 1).toISOString().slice(0, 7);
+        newStartDate = `${today.getFullYear() - 1}-01`;
+        newEndDate = `${today.getFullYear() - 1}-12`;
         break;
       case 'custom':
         // Don't change dates for custom
@@ -150,6 +151,31 @@ export function ReportsPage() {
     setEndDate(newEndDate);
   };
 
+  // Generate months array for headers
+  const months = useMemo(() => {
+    const monthsArray: string[] = [];
+    
+    // Parse start and end dates
+    const [startYear, startMonth] = startDate.split('-').map(Number);
+    const [endYear, endMonth] = endDate.split('-').map(Number);
+    
+    // Create start and end date objects
+    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
+    const end = new Date(endYear, endMonth - 1, 1);
+    
+    // Generate months from start to end (inclusive)
+    const current = new Date(start);
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      monthsArray.push(`${year}-${month}`);
+      
+      // Move to next month
+      current.setMonth(current.getMonth() + 1);
+    }
+    
+    return monthsArray;
+  }, [startDate, endDate]);
 
   // Generate report data
   const reportData = useMemo(() => {
@@ -171,27 +197,6 @@ export function ReportsPage() {
       return expenseMonth >= startDate && expenseMonth <= endDate;
     });
 
-    // Generate months array
-    const monthsArray: string[] = [];
-    
-    // Parse start and end dates properly
-    const [startYear, startMonth] = startDate.split('-').map(Number);
-    const [endYear, endMonth] = endDate.split('-').map(Number);
-    
-    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
-    const end = new Date(endYear, endMonth - 1, 1);
-    
-    // Generate months from start to end (inclusive)
-    let current = new Date(start);
-    while (current <= end) {
-      const year = current.getFullYear();
-      const month = String(current.getMonth() + 1).padStart(2, '0');
-      monthsArray.push(`${year}-${month}`);
-      
-      // Move to next month
-      current.setMonth(current.getMonth() + 1);
-    }
-
     // Get subcategories that have expenses in the filtered data
     const subcategoriesWithExpenses = new Set(filteredExpenses.map(exp => exp.subcategoryId));
     
@@ -209,6 +214,7 @@ export function ReportsPage() {
           categoryColor: cat.color
         }))
     );
+
     // Build report data
     const result: ReportCell[] = allSubcategories.map(subcategory => {
       const subcategoryExpenses = filteredExpenses.filter(expense => 
@@ -216,7 +222,7 @@ export function ReportsPage() {
       );
 
       const monthlyTotals: { [month: string]: number } = {};
-      monthsArray.forEach(month => {
+      months.forEach(month => {
         const monthExpenses = subcategoryExpenses.filter(expense => 
           expense.date.slice(0, 7) === month
         );
@@ -242,32 +248,7 @@ export function ReportsPage() {
     }).filter(row => row.total > 0).sort((a, b) => b.total - a.total);
 
     return result;
-  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate, categories]);
-
-  // Generate months array for headers
-  const months = useMemo(() => {
-    const monthsArray: string[] = [];
-    
-    // Parse start and end dates properly
-    const [startYear, startMonth] = startDate.split('-').map(Number);
-    const [endYear, endMonth] = endDate.split('-').map(Number);
-    
-    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
-    const end = new Date(endYear, endMonth - 1, 1);
-    
-    // Generate months from start to end (inclusive)
-    let current = new Date(start);
-    while (current <= end) {
-      const year = current.getFullYear();
-      const month = String(current.getMonth() + 1).padStart(2, '0');
-      monthsArray.push(`${year}-${month}`);
-      
-      // Move to next month
-      current.setMonth(current.getMonth() + 1);
-    }
-    
-    return monthsArray;
-  }, [startDate, endDate]);
+  }, [activeUserExpenses, selectedUserId, selectedCategoryId, startDate, endDate, categories, months]);
 
   // Calculate monthly totals
   const monthlyTotals: MonthlyTotal[] = useMemo(() => {
