@@ -105,6 +105,8 @@ export function ReportsPage() {
     const [startYear, startMonth] = start.split('-').map(Number);
     const [endYear, endMonth] = end.split('-').map(Number);
     
+    console.log('generateMonthRange called with:', { start, end, startYear, startMonth, endYear, endMonth });
+    
     const months: string[] = [];
     
     let currentYear = startYear;
@@ -112,6 +114,8 @@ export function ReportsPage() {
     
     // Generate months from start to end (inclusive)
     while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+      const monthString = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+      console.log('Adding month:', monthString);
       months.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
       
       // Move to next month
@@ -120,8 +124,15 @@ export function ReportsPage() {
         currentMonth = 1;
         currentYear++;
       }
+      
+      // Safety check to prevent infinite loops
+      if (months.length > 24) {
+        console.error('Month range generation exceeded 24 months, breaking');
+        break;
+      }
     }
     
+    console.log('Generated months:', months);
     return months;
   };
 
