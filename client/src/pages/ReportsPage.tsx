@@ -65,10 +65,9 @@ export function ReportsPage() {
   // Initialize dates based on default preset
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
-    const startYear = today.getFullYear();
-    const startMonth = today.getMonth() - 11; // 11 months back
-    const adjustedDate = new Date(startYear, startMonth, 1);
-    return `${adjustedDate.getFullYear()}-${String(adjustedDate.getMonth() + 1).padStart(2, '0')}`;
+    // For "Last 12 Months", go back 11 months from current month to include current month
+    const elevenMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+    return `${elevenMonthsAgo.getFullYear()}-${String(elevenMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
   });
   const [endDate, setEndDate] = useState(() => {
     const today = new Date();
@@ -130,13 +129,13 @@ export function ReportsPage() {
         newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'last12Months':
-        const twelveMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
-        newStartDate = `${twelveMonthsAgo.getFullYear()}-${String(twelveMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+        const elevenMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+        newStartDate = `${elevenMonthsAgo.getFullYear()}-${String(elevenMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
         newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         break;
       case 'thisYear':
         newStartDate = `${today.getFullYear()}-01`;
-        break;
+        newEndDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
       case 'lastYear':
         newStartDate = `${today.getFullYear() - 1}-01`;
         newEndDate = `${today.getFullYear() - 1}-12`;
@@ -158,8 +157,8 @@ export function ReportsPage() {
     const [startYear, startMonth] = startDate.split('-').map(Number);
     const [endYear, endMonth] = endDate.split('-').map(Number);
     
-    // Create start and end date objects
-    const start = new Date(startYear, startMonth - 1, 1); // Month is 0-indexed
+    // Create start and end date objects (month is 0-indexed in Date constructor)
+    const start = new Date(startYear, startMonth - 1, 1);
     const end = new Date(endYear, endMonth - 1, 1);
     
     // Generate months from start to end (inclusive)
