@@ -133,7 +133,9 @@ export function ReportsPage() {
 
   // Force re-calculation of month range when dates change
   const monthRange = React.useMemo(() => {
-    return generateMonthRange(startDate, endDate);
+    const range = generateMonthRange(startDate, endDate);
+    console.log('useMemo monthRange result:', range);
+    return range;
   }, [startDate, endDate]);
 
   // Get selected category data
@@ -486,11 +488,13 @@ export function ReportsPage() {
                   <th className="text-left p-2 font-semibold text-slate-700 sticky left-0 bg-slate-50 border-r border-slate-200 min-w-[120px]">
                     SUBCATEGORY
                   </th>
-                  {monthRange.map(month => (
+                  {monthRange.map((month, index) => {
+                    console.log(`Rendering table header for month ${index}:`, month);
+                    return (
                     <th key={month} className="text-center p-2 font-semibold text-slate-700 min-w-[80px] border-r border-slate-200">
                       {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()}
                     </th>
-                  ))}
+                  )})}
                   <th className="text-center p-2 font-semibold text-slate-700 bg-slate-100 min-w-[80px]">
                     TOTAL
                   </th>
