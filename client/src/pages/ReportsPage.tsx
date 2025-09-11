@@ -247,10 +247,18 @@ export function ReportsPage() {
     };
     sessionStorage.setItem('expense-tracker-return-state', JSON.stringify(reportState));
     
+    // Find the subcategory to get its category ID
+    const subcategory = subcategoryData.find(item => item.subcategory.id === subcategoryId)?.subcategory;
+    if (!subcategory) {
+      console.error('Subcategory not found for ID:', subcategoryId);
+      return;
+    }
+    
     // Navigate to expenses page with filters
     const params = new URLSearchParams();
-    params.set('categoryId', subcategoryData.find(item => item.subcategory.id === subcategoryId)?.subcategory.categoryId || '');
+    params.set('categoryId', subcategory.categoryId);
     params.set('subcategoryId', subcategoryId);
+    params.set('month', month); // Add month filter
     params.set('returnTo', 'reports');
     
     setLocation(`/expenses?${params.toString()}`);
