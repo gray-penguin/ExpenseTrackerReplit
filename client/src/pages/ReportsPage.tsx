@@ -412,7 +412,6 @@ export function ReportsPage() {
           <div className="text-center">
             {selectedUserId === 'all' && userTotals.length > 0 ? (
               <div>
-                <div className="text-lg font-bold text-orange-600 mb-2">Spending by {useCaseConfig.userLabelSingular}</div>
                 <div className="space-y-2">
                   {userTotals.slice(0, 3).map(({ user, total }) => (
                     <div key={user.id} className="flex items-center justify-between text-sm">
@@ -432,14 +431,14 @@ export function ReportsPage() {
               </div>
             ) : selectedUserId !== 'all' ? (
               <div>
-                <div className="text-lg font-bold text-orange-600 mb-1">Current Filter</div>
+                <div className="text-2xl font-bold text-slate-900 mb-1">{formatCurrency(userTotals.find(ut => ut.user.id === selectedUserId)?.total || 0)}</div>
                 <div className="text-sm text-slate-600">
                   {activeUsers.find(u => u.id === selectedUserId)?.name || 'Unknown User'}
                 </div>
               </div>
             ) : (
               <div>
-                <div className="text-3xl font-bold text-orange-600 mb-1">0</div>
+                <div className="text-2xl font-bold text-slate-900 mb-1">$0.00</div>
                 <div className="text-sm text-slate-600">No {useCaseConfig.terminology.users} with expenses</div>
               </div>
             )}
