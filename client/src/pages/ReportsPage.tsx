@@ -158,19 +158,15 @@ export function ReportsPage() {
     const [startYear, startMonth] = startDate.split('-').map(Number);
     const [endYear, endMonth] = endDate.split('-').map(Number);
     
-    // Create start and end date objects (month is 0-indexed in Date constructor)
-    const start = new Date(startYear, startMonth - 1, 1);
-    const end = new Date(endYear, endMonth - 1, 1);
+    // Create start and end date objects for comparison
+    const startValue = startYear * 12 + startMonth;
+    const endValue = endYear * 12 + endMonth;
     
     // Generate months from start to end (inclusive)
-    const current = new Date(start);
-    while (current <= end) {
-      const year = current.getFullYear();
-      const month = String(current.getMonth() + 1).padStart(2, '0');
+    for (let monthValue = startValue; monthValue <= endValue; monthValue++) {
+      const year = Math.floor((monthValue - 1) / 12);
+      const month = ((monthValue - 1) % 12) + 1;
       monthsArray.push(`${year}-${month}`);
-      
-      // Move to next month
-      current.setMonth(current.getMonth() + 1);
     }
     
     return monthsArray;
