@@ -101,16 +101,21 @@ export function ReportsPage() {
   const generateMonthRange = (start: string, end: string): string[] => {
     if (!start || !end) return [];
     
-    const startDate = new Date(start + 'T00:00:00');
-    const endDate = new Date(end + 'T00:00:00');
+    // Parse the start and end dates properly
+    const startDate = new Date(start);
+    const endDate = new Date(end);
     
-    // Convert to year-month numbers for easy iteration
+    // Ensure we're working with the first day of each month
+    startDate.setDate(1);
+    endDate.setDate(1);
+    
+    // Convert to year-month values for iteration
     const startValue = startDate.getFullYear() * 12 + startDate.getMonth();
     const endValue = endDate.getFullYear() * 12 + endDate.getMonth();
     
     const months: string[] = [];
     
-    // Generate months from start to end (inclusive)
+    // Generate all months from start to end (inclusive)
     for (let value = startValue; value <= endValue; value++) {
       const year = Math.floor(value / 12);
       const month = value % 12;
