@@ -27,6 +27,9 @@ export function ReportsPage() {
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [reportName, setReportName] = useState('');
   const [reportDescription, setReportDescription] = useState('');
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [modalExpenses, setModalExpenses] = useState<Expense[]>([]);
+  const [modalTitle, setModalTitle] = useState('');
 
   // Parse URL parameters on component mount
   useEffect(() => {
@@ -238,30 +241,28 @@ export function ReportsPage() {
 
   // Handle cell click to navigate to expenses
   const handleCellClick = (subcategoryId: string, month: string) => {
-    // Store current report state for return navigation
-    const reportState = {
-      selectedUserId,
-      selectedCategoryId,
-      startDate,
-      endDate
-    };
-    sessionStorage.setItem('expense-tracker-return-state', JSON.stringify(reportState));
-    
-    // Find the subcategory to get its category ID
-    const subcategory = subcategoryData.find(item => item.subcategory.id === subcategoryId)?.subcategory;
-    if (!subcategory) {
+    // Find the subcategory to get its details
+    const subcategoryItem = subcategoryData.find(item => item.subcategory.id === subcategoryId);
+    if (!subcategoryItem) {
       console.error('Subcategory not found for ID:', subcategoryId);
       return;
     }
     
-    // Navigate to expenses page with filters
-    const params = new URLSearchParams();
-    params.set('categoryId', subcategory.categoryId);
-    params.set('subcategoryId', subcategoryId);
-    params.set('month', month); // Add month filter
-    params.set('returnTo', 'reports');
+    // Filter expenses for this specific subcategory and month
+    const monthExpenses = filteredExpenses.filter(expense => 
+      expense.subcategoryId === subcategoryId && expense.date.startsWith(month)
+    );
     
-    setLocation(`/expenses?${params.toString()}`);
+    // Set modal data
+    setModalExpenses(monthExpenses);
+    
+    // Create modal title
+    const [year, monthNum] = month.split('-');
+    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
+      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    setModalTitle(`${subcategoryItem.subcategory.name} - ${monthName}`);
+    setShowExpenseModal(true);
   };
 
   return (
@@ -525,7 +526,7 @@ export function ReportsPage() {
                         {amount > 0 ? (
                           <button
                             onClick={() => handleCellClick(item.subcategory.id, monthRange[monthIndex])}
-                            className="text-slate-900 hover:text-emerald-600 hover:bg-emerald-50 px-1 py-0.5 rounded transition-colors print:hover:bg-transparent print:hover:text-slate-900"
+                            className="text-slate-900 hover:text-emerald-600 hover:bg-emerald-50 px-1 py-0.5 rounded transition-colors print:hover:bg-transparent print:hover:text-slate-900 cursor-pointer"
                           >
                             {formatCurrency(amount)}
                           </button>
@@ -675,6 +676,71 @@ export function ReportsPage() {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expense Details Modal */}
+      {showExpenseModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">{modalTitle}</h3>
+                  <p className="text-slate-500">
+                    {modalExpenses.length} expense{modalExpenses.length !== 1 ? 's' : ''} • 
+                    Total: {formatCurrency(modalExpenses.reduce((sum, exp) => sum + exp.amount, 0))}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowExpenseModal(false)}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              {modalExpenses.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TrendingUp className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-500">No expenses found for this period</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {modalExpenses.map(expense => {
+                    const user = activeUsers.find(u => u.id === expense.userId);
+                    const category = categories.find(c => c.id === expense.categoryId);
+                    const subcategory = category?.subcategories.find(s => s.id === expense.subcategoryId);
+                    
+                    return (
+                      <div key={expense.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full ${user?.color || 'bg-gray-500'} flex items-center justify-center text-white text-sm font-medium`}>
+                            {user?.avatar || '?'}
+                          </div>
+                          <div>
+                            <div className="font-medium text-slate-900">{expense.description}</div>
+                            <div className="text-sm text-slate-500">
+                              {user?.name || 'Unknown User'} • {formatDate(expense.date)}
+                              {expense.storeName && ` • ${expense.storeName}`}
+                              {expense.storeLocation && ` (${expense.storeLocation})`}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-lg font-bold text-slate-900">
+                          {formatCurrency(expense.amount)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
