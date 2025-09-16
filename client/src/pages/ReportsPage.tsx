@@ -363,23 +363,6 @@ export function ReportsPage() {
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 print:hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          {/* Column Type Filter */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Columns:
-            </label>
-            <select
-              value={columnType}
-              onChange={(e) => setColumnType(e.target.value as 'day' | 'month' | 'year')}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-            >
-              <option value="day">Daily</option>
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
-            </select>
-          </div>
-
           {/* User Filter */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
@@ -433,6 +416,23 @@ export function ReportsPage() {
               <option value="lastYear">Last Year</option>
               <option value="last12Months">Last 12 Months</option>
               <option value="custom">Custom Range</option>
+            </select>
+          </div>
+
+          {/* Column Type Filter */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Columns:
+            </label>
+            <select
+              value={columnType}
+              onChange={(e) => setColumnType(e.target.value as 'day' | 'month' | 'year')}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+            >
+              <option value="day">Daily</option>
+              <option value="month">Monthly</option>
+              <option value="year">Yearly</option>
             </select>
           </div>
 
