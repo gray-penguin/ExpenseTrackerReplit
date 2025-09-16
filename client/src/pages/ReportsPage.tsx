@@ -18,6 +18,7 @@ export function ReportsPage() {
   // Filter states
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
+  const [columnType, setColumnType] = useState<'day' | 'month' | 'year'>('month');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [periodPreset, setPeriodPreset] = useState<string>('thisYear');
@@ -85,6 +86,20 @@ export function ReportsPage() {
     }
   }, [periodPreset]);
 
+  // Adjust date range when column type changes
+  useEffect(() => {
+    if (columnType === 'day') {
+      // Limit to 30 days max for day view
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 29); // 30 days including today
+      
+      setStartDate(thirtyDaysAgo.toISOString().split('T')[0]);
+      setEndDate(today.toISOString().split('T')[0]);
+      setPeriodPreset('custom');
+    }
+  }, [columnType]);
+
   // Filter to only show active users and their expenses
   const activeUsers = users.filter(user => user.isActive);
   const activeUserExpenses = expenses.filter(expense => 
@@ -101,45 +116,55 @@ export function ReportsPage() {
   });
 
   // Generate month range for the report
-  const generateMonthRange = (start: string, end: string): string[] => {
+  const generateColumnRange = (start: string, end: string, type: 'day' | 'month' | 'year'): string[] => {
     if (!start || !end) return [];
     
-    // Parse start and end dates directly from YYYY-MM-DD format
-    const [startYear, startMonth] = start.split('-').map(Number);
-    const [endYear, endMonth] = end.split('-').map(Number);
+    const startDate = new Date(start + 'T00:00:00');
+    const endDate = new Date(end + 'T00:00:00');
+    const columns: string[] = [];
     
-    const months: string[] = [];
-    
-    let currentYear = startYear;
-    let currentMonth = startMonth;
-    
-    // Generate months from start to end (inclusive)
-    while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
-      const monthString = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-      months.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
-      
-      // Move to next month
-      currentMonth++;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
+    if (type === 'day') {
+      const current = new Date(startDate);
+      while (current <= endDate && columns.length < 30) {
+        columns.push(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
       }
+    } else if (type === 'month') {
+      const [startYear, startMonth] = start.split('-').map(Number);
+      const [endYear, endMonth] = end.split('-').map(Number);
       
-      // Safety check to prevent infinite loops
-      if (months.length > 24) {
-        break;
+      let currentYear = startYear;
+      let currentMonth = startMonth;
+      
+      while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+        columns.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
+        
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+        
+        if (columns.length > 24) break;
+      }
+    } else if (type === 'year') {
+      const startYear = parseInt(start.split('-')[0]);
+      const endYear = parseInt(end.split('-')[0]);
+      
+      for (let year = startYear; year <= endYear && columns.length < 10; year++) {
+        columns.push(year.toString());
       }
     }
     
-    return months;
+    return columns;
   };
 
   // Force re-calculation of month range when dates change
-  const monthRange = React.useMemo(() => {
-    const range = generateMonthRange(startDate, endDate);
-    console.log('useMemo monthRange result:', range);
+  const columnRange = React.useMemo(() => {
+    const range = generateColumnRange(startDate, endDate, columnType);
+    console.log('useMemo columnRange result:', range);
     return range;
-  }, [startDate, endDate]);
+  }, [startDate, endDate, columnType]);
 
   // Get selected category data
   const selectedCategory = selectedCategoryId === 'all' ? null : categories.find(c => c.id === selectedCategoryId);
@@ -150,15 +175,22 @@ export function ReportsPage() {
   const calculateSubcategoryData = () => {
     return subcategoriesToShow.map(subcategory => {
       const subcategoryExpenses = filteredExpenses.filter(expense => expense.subcategoryId === subcategory.id);
-      const monthlyTotals = monthRange.map(month => {
-        const monthExpenses = subcategoryExpenses.filter(expense => expense.date.startsWith(month));
-        return monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+      const columnTotals = columnRange.map(column => {
+        let columnExpenses;
+        if (columnType === 'day') {
+          columnExpenses = subcategoryExpenses.filter(expense => expense.date === column);
+        } else if (columnType === 'month') {
+          columnExpenses = subcategoryExpenses.filter(expense => expense.date.startsWith(column));
+        } else { // year
+          columnExpenses = subcategoryExpenses.filter(expense => expense.date.startsWith(column));
+        }
+        return columnExpenses.reduce((sum, expense) => sum + expense.amount, 0);
       });
       const total = subcategoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
       
       return {
         subcategory,
-        monthlyTotals,
+        columnTotals,
         total
       };
     }).filter(item => item.total > 0).sort((a, b) => b.total - a.total);
@@ -166,10 +198,17 @@ export function ReportsPage() {
 
   const subcategoryData = calculateSubcategoryData();
 
-  // Calculate monthly totals
-  const monthlyTotals = monthRange.map(month => {
-    const monthExpenses = filteredExpenses.filter(expense => expense.date.startsWith(month));
-    return monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  // Calculate column totals
+  const columnTotals = columnRange.map(column => {
+    let columnExpenses;
+    if (columnType === 'day') {
+      columnExpenses = filteredExpenses.filter(expense => expense.date === column);
+    } else if (columnType === 'month') {
+      columnExpenses = filteredExpenses.filter(expense => expense.date.startsWith(column));
+    } else { // year
+      columnExpenses = filteredExpenses.filter(expense => expense.date.startsWith(column));
+    }
+    return columnExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   });
 
   // Calculate user totals for the current report
@@ -240,7 +279,7 @@ export function ReportsPage() {
   };
 
   // Handle cell click to navigate to expenses
-  const handleCellClick = (subcategoryId: string, month: string) => {
+  const handleCellClick = (subcategoryId: string, column: string) => {
     // Find the subcategory to get its details
     const subcategoryItem = subcategoryData.find(item => item.subcategory.id === subcategoryId);
     if (!subcategoryItem) {
@@ -248,20 +287,40 @@ export function ReportsPage() {
       return;
     }
     
-    // Filter expenses for this specific subcategory and month
-    const monthExpenses = filteredExpenses.filter(expense => 
-      expense.subcategoryId === subcategoryId && expense.date.startsWith(month)
-    );
+    // Filter expenses for this specific subcategory and column
+    let columnExpenses;
+    if (columnType === 'day') {
+      columnExpenses = filteredExpenses.filter(expense => 
+        expense.subcategoryId === subcategoryId && expense.date === column
+      );
+    } else if (columnType === 'month') {
+      columnExpenses = filteredExpenses.filter(expense => 
+        expense.subcategoryId === subcategoryId && expense.date.startsWith(column)
+      );
+    } else { // year
+      columnExpenses = filteredExpenses.filter(expense => 
+        expense.subcategoryId === subcategoryId && expense.date.startsWith(column)
+      );
+    }
     
     // Set modal data
-    setModalExpenses(monthExpenses);
+    setModalExpenses(columnExpenses);
     
     // Create modal title
-    const [year, monthNum] = month.split('-');
-    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
-      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    let columnLabel;
+    if (columnType === 'day') {
+      columnLabel = new Date(column + 'T00:00:00').toLocaleDateString('en-US', { 
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
+      });
+    } else if (columnType === 'month') {
+      const [year, monthNum] = column.split('-');
+      columnLabel = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
+        .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else { // year
+      columnLabel = column;
+    }
     
-    setModalTitle(`${subcategoryItem.subcategory.name} - ${monthName}`);
+    setModalTitle(`${subcategoryItem.subcategory.name} - ${columnLabel}`);
     setShowExpenseModal(true);
   };
 
@@ -303,7 +362,24 @@ export function ReportsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 print:hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          {/* Column Type Filter */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Columns:
+            </label>
+            <select
+              value={columnType}
+              onChange={(e) => setColumnType(e.target.value as 'day' | 'month' | 'year')}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+            >
+              <option value="day">Daily</option>
+              <option value="month">Monthly</option>
+              <option value="year">Yearly</option>
+            </select>
+          </div>
+
           {/* User Filter */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
@@ -425,12 +501,14 @@ export function ReportsPage() {
             <div className="text-sm text-slate-600">Subcategories</div>
           </div>
 
-          {/* Months Count */}
+          {/* Columns Count */}
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-600 mb-1">
-              {monthRange.length}
+              {columnRange.length}
             </div>
-            <div className="text-sm text-slate-600">Months</div>
+            <div className="text-sm text-slate-600">
+              {columnType === 'day' ? 'Days' : columnType === 'month' ? 'Months' : 'Years'}
+            </div>
           </div>
 
           {/* User Spending Breakdown */}
@@ -475,7 +553,7 @@ export function ReportsPage() {
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
         <div className="p-4 border-b border-slate-200 print:border-slate-400">
           <h3 className="font-bold text-slate-900 text-sm">
-            Expense Breakdown - {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : activeUsers.find(u => u.id === selectedUserId)?.name} - {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name} ({startDate.slice(0, 7)} to {endDate.slice(0, 7)})
+            Expense Breakdown - {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : activeUsers.find(u => u.id === selectedUserId)?.name} - {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name} ({columnType === 'day' ? startDate : startDate.slice(0, 7)} to {columnType === 'day' ? endDate : endDate.slice(0, 7)})
           </h3>
         </div>
         
@@ -497,17 +575,29 @@ export function ReportsPage() {
                   <th className="text-left p-2 font-semibold text-slate-700 sticky left-0 bg-slate-50 border-r border-slate-200 min-w-[120px]">
                     SUBCATEGORY
                   </th>
-                  {monthRange.map((month, index) => {
-                    console.log(`Rendering table header for month ${index}:`, month);
-                    // Parse year and month from YYYY-MM format
-                    const [year, monthNum] = month.split('-');
-                    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
-                      .toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-                    const yearShort = year.slice(-2);
+                  {columnRange.map((column, index) => {
+                    console.log(`Rendering table header for column ${index}:`, column);
+                    
+                    let headerLabel;
+                    if (columnType === 'day') {
+                      const date = new Date(column + 'T00:00:00');
+                      headerLabel = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      }).toUpperCase();
+                    } else if (columnType === 'month') {
+                      const [year, monthNum] = column.split('-');
+                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1)
+                        .toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                      const yearShort = year.slice(-2);
+                      headerLabel = `${monthName} ${yearShort}`;
+                    } else { // year
+                      headerLabel = column;
+                    }
                     
                     return (
-                    <th key={month} className="text-center p-2 font-semibold text-slate-700 min-w-[80px] border-r border-slate-200">
-                      {monthName} {yearShort}
+                    <th key={column} className="text-center p-2 font-semibold text-slate-700 min-w-[80px] border-r border-slate-200">
+                      {headerLabel}
                     </th>
                   )})}
                   <th className="text-center p-2 font-semibold text-slate-700 bg-slate-100 min-w-[80px]">
@@ -521,11 +611,11 @@ export function ReportsPage() {
                     <td className="p-2 font-medium text-slate-900 sticky left-0 bg-inherit border-r border-slate-200">
                       {item.subcategory.name}
                     </td>
-                    {item.monthlyTotals.map((amount, monthIndex) => (
-                      <td key={monthIndex} className="text-center p-2 border-r border-slate-200">
+                    {item.columnTotals.map((amount, columnIndex) => (
+                      <td key={columnIndex} className="text-center p-2 border-r border-slate-200">
                         {amount > 0 ? (
                           <button
-                            onClick={() => handleCellClick(item.subcategory.id, monthRange[monthIndex])}
+                            onClick={() => handleCellClick(item.subcategory.id, columnRange[columnIndex])}
                             className="text-slate-900 hover:text-emerald-600 hover:bg-emerald-50 px-1 py-0.5 rounded transition-colors print:hover:bg-transparent print:hover:text-slate-900 cursor-pointer"
                           >
                             {formatCurrency(amount)}
@@ -540,12 +630,12 @@ export function ReportsPage() {
                     </td>
                   </tr>
                 ))}
-                {/* Monthly Totals Row */}
+                {/* Column Totals Row */}
                 <tr className="bg-slate-100 border-t-2 border-slate-300 font-semibold">
                   <td className="p-2 text-slate-900 sticky left-0 bg-slate-100 border-r border-slate-200">
-                    MONTHLY TOTALS
+                    {columnType === 'day' ? 'DAILY' : columnType === 'month' ? 'MONTHLY' : 'YEARLY'} TOTALS
                   </td>
-                  {monthlyTotals.map((total, index) => (
+                  {columnTotals.map((total, index) => (
                     <td key={index} className="text-center p-2 text-slate-900 border-r border-slate-200">
                       {total > 0 ? formatCurrency(total) : '-'}
                     </td>
