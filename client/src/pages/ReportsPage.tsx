@@ -572,7 +572,7 @@ export function ReportsPage() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="text-left p-2 font-semibold text-slate-700 sticky left-0 bg-white border-r border-slate-200 min-w-[120px]">
+                  <th className="text-left p-2 font-semibold text-slate-700 sticky left-0 bg-slate-50 border-r border-slate-200 min-w-[120px]">
                     SUBCATEGORY
                   </th>
                   {columnRange.map((column, index) => {
