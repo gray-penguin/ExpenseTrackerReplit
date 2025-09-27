@@ -608,7 +608,7 @@ export function ReportsPage() {
               <tbody>
                 {subcategoryData.map((item, index) => (
                   <tr key={item.subcategory.id} className={`border-b border-slate-100 hover:bg-slate-50 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-25'}`}>
-                    <td className="p-2 font-medium text-slate-900 sticky left-0 bg-inherit border-r border-slate-200">
+                    <td className="p-2 font-medium text-slate-900 sticky left-0 bg-slate-50 border-r border-slate-200">
                       {item.subcategory.name}
                     </td>
                     {item.columnTotals.map((amount, columnIndex) => (
@@ -632,7 +632,7 @@ export function ReportsPage() {
                 ))}
                 {/* Column Totals Row */}
                 <tr className="bg-slate-100 border-t-2 border-slate-300 font-semibold">
-                  <td className="p-2 text-slate-900 sticky left-0 bg-slate-100 border-r border-slate-200">
+                  <td className="p-2 text-slate-900 sticky left-0 bg-slate-50 border-r border-slate-200">
                     {columnType === 'day' ? 'DAILY' : columnType === 'month' ? 'MONTHLY' : 'YEARLY'} TOTALS
                   </td>
                   {columnTotals.map((total, index) => (
