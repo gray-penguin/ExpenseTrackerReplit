@@ -808,14 +808,32 @@ export function ReportsPage() {
                     const category = categories.find(c => c.id === expense.categoryId);
                     const subcategory = category?.subcategories.find(s => s.id === expense.subcategoryId);
                     
+                   const handleEditExpense = () => {
+                     // Store current reports state for return navigation
+                     const reportsState = {
+                       selectedUserId,
+                       selectedCategoryId,
+                       startDate,
+                       endDate
+                     };
+                     sessionStorage.setItem('expense-tracker-return-state', JSON.stringify(reportsState));
+                     
+                     // Navigate to expenses page with edit parameter and return flag
+                     setLocation(`/expenses?edit=${expense.id}&returnTo=reports`);
+                   };
+                   
                     return (
-                      <div key={expense.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                     <button 
+                       key={expense.id} 
+                       onClick={handleEditExpense}
+                       className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer group"
+                     >
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full ${user?.color || 'bg-gray-500'} flex items-center justify-center text-white text-sm font-medium`}>
                             {user?.avatar || '?'}
                           </div>
                           <div>
-                            <div className="font-medium text-slate-900">{expense.description}</div>
+                           <div className="font-medium text-slate-900 group-hover:text-emerald-600 transition-colors text-left">{expense.description}</div>
                             <div className="text-sm text-slate-500">
                               {user?.name || 'Unknown User'} • {formatDate(expense.date)}
                               {expense.storeName && ` • ${expense.storeName}`}
@@ -823,10 +841,10 @@ export function ReportsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="text-lg font-bold text-slate-900">
+                       <div className="text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
                           {formatCurrency(expense.amount)}
                         </div>
-                      </div>
+                     </button>
                     );
                   })}
                 </div>
