@@ -637,11 +637,64 @@ export function ReportsPage() {
                   </td>
                   {columnTotals.map((total, index) => (
                     <td key={index} className="text-center p-2 text-slate-900 border-r border-slate-200">
-                      {total > 0 ? formatCurrency(total) : '-'}
+                      {total > 0 ? (
+                        <div className="space-y-1">
+                          <div className="font-bold">{formatCurrency(total)}</div>
+                          <div className="text-xs text-slate-600 space-y-0.5">
+                            {activeUsers.map(user => {
+                              let userColumnExpenses;
+                              if (columnType === 'day') {
+                                userColumnExpenses = filteredExpenses.filter(expense => 
+                                  expense.userId === user.id && expense.date === columnRange[index]
+                                );
+                              } else if (columnType === 'month') {
+                                userColumnExpenses = filteredExpenses.filter(expense => 
+                                  expense.userId === user.id && expense.date.startsWith(columnRange[index])
+                                );
+                              } else { // year
+                                userColumnExpenses = filteredExpenses.filter(expense => 
+                                  expense.userId === user.id && expense.date.startsWith(columnRange[index])
+                                );
+                              }
+                              const userTotal = userColumnExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                              
+                              if (userTotal > 0) {
+                                return (
+                                  <div key={user.id} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1">
+                                      <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
+                                        {user.avatar}
+                                      </div>
+                                      <span className="truncate">{user.name}</span>
+                                    </div>
+                                    <span className="font-medium">{formatCurrency(userTotal)}</span>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }).filter(Boolean)}
+                          </div>
+                        </div>
+                      ) : '-'}
                     </td>
                   ))}
                   <td className="text-center p-2 text-slate-900 bg-slate-200">
-                    {formatCurrency(grandTotal)}
+                    <div className="space-y-1">
+                      <div className="font-bold">{formatCurrency(grandTotal)}</div>
+                      <div className="text-xs text-slate-600 space-y-0.5">
+                        {userTotals.map(({ user, total }) => (
+                          <div key={user.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
+                                {user.avatar}
+                              </div>
+                              <span className="truncate">{user.name}</span>
+                            </div>
+                            <span className="font-medium">{formatCurrency(total)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
