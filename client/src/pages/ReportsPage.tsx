@@ -661,11 +661,8 @@ export function ReportsPage() {
                               if (userTotal > 0) {
                                 return (
                                   <div key={user.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1">
-                                      <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
-                                        {user.avatar}
-                                      </div>
-                                      <span className="truncate">{user.name}</span>
+                                    <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`} title={user.name}>
+                                      {user.avatar}
                                     </div>
                                     <span className="font-medium">{formatCurrency(userTotal)}</span>
                                   </div>
@@ -684,11 +681,8 @@ export function ReportsPage() {
                       <div className="text-xs text-slate-600 space-y-0.5">
                         {userTotals.map(({ user, total }) => (
                           <div key={user.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                              <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`}>
-                                {user.avatar}
-                              </div>
-                              <span className="truncate">{user.name}</span>
+                            <div className={`w-3 h-3 rounded-full ${user.color} flex items-center justify-center text-white text-xs font-medium`} title={user.name}>
+                              {user.avatar}
                             </div>
                             <span className="font-medium">{formatCurrency(total)}</span>
                           </div>
