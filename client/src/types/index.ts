@@ -68,7 +68,8 @@ export interface SavedReport {
   description?: string;
   filters: {
     selectedUserId: string;
-    selectedCategoryId: string;
+    selectedCategoryIds: string[];
+    selectedSubcategoryIds: string[];
     startDate: string;
     endDate: string;
   };

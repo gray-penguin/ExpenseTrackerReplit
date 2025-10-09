@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Category, Expense, SavedReport } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { exportExpensesToCSV, downloadCSV } from '../utils/csvUtils';
-import { TrendingUp, Users, Calendar, Tag, Download, Save, FolderOpen, Printer, Filter, ChevronDown, X } from 'lucide-react';
+import { TrendingUp, Users, Calendar, Tag, Download, Save, FolderOpen, Printer, Filter, ChevronDown, X, Check } from 'lucide-react';
 import { useExpenseData } from '../hooks/useExpenseData';
 import { useLocation, useSearch } from 'wouter';
 import { useAuth } from '../hooks/useAuth';
@@ -17,8 +17,11 @@ export function ReportsPage() {
 
   // Filter states
   const [selectedUserId, setSelectedUserId] = useState<string>('all');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([]);
   const [columnType, setColumnType] = useState<'day' | 'month' | 'year'>('month');
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+  const [showSubcategoryFilter, setShowSubcategoryFilter] = useState(false);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [periodPreset, setPeriodPreset] = useState<string>('thisYear');
@@ -32,6 +35,20 @@ export function ReportsPage() {
   const [modalExpenses, setModalExpenses] = useState<Expense[]>([]);
   const [modalTitle, setModalTitle] = useState('');
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.category-filter-container') && !target.closest('.subcategory-filter-container')) {
+        setShowCategoryFilter(false);
+        setShowSubcategoryFilter(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Parse URL parameters on component mount
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -41,7 +58,13 @@ export function ReportsPage() {
     const urlEndDate = params.get('endDate');
 
     if (userId) setSelectedUserId(userId);
-    if (categoryId) setSelectedCategoryId(categoryId);
+    if (categoryId) {
+      setSelectedCategoryIds([categoryId]);
+      const category = categories.find(c => c.id === categoryId);
+      if (category) {
+        setSelectedSubcategoryIds(category.subcategories.map(s => s.id));
+      }
+    }
     if (urlStartDate) {
       setStartDate(urlStartDate);
       setPeriodPreset('custom');
@@ -50,7 +73,7 @@ export function ReportsPage() {
       setEndDate(urlEndDate);
       setPeriodPreset('custom');
     }
-  }, [search]);
+  }, [search, categories]);
 
   // Set default date range based on preset
   useEffect(() => {
@@ -109,10 +132,11 @@ export function ReportsPage() {
   // Apply filters to expenses
   const filteredExpenses = activeUserExpenses.filter(expense => {
     const matchesUser = selectedUserId === 'all' || expense.userId === selectedUserId;
-    const matchesCategory = selectedCategoryId === 'all' || expense.categoryId === selectedCategoryId;
+    const matchesCategory = selectedCategoryIds.length === 0 || selectedCategoryIds.includes(expense.categoryId);
+    const matchesSubcategory = selectedSubcategoryIds.length === 0 || selectedSubcategoryIds.includes(expense.subcategoryId);
     const matchesDateRange = (!startDate || expense.date >= startDate) && (!endDate || expense.date <= endDate);
-    
-    return matchesUser && matchesCategory && matchesDateRange;
+
+    return matchesUser && matchesCategory && matchesSubcategory && matchesDateRange;
   });
 
   // Generate month range for the report
@@ -166,10 +190,12 @@ export function ReportsPage() {
     return range;
   }, [startDate, endDate, columnType]);
 
-  // Get selected category data
-  const selectedCategory = selectedCategoryId === 'all' ? null : categories.find(c => c.id === selectedCategoryId);
-  const subcategoriesToShow = selectedCategory ? selectedCategory.subcategories : 
-    categories.flatMap(cat => cat.subcategories);
+  // Get subcategories to show based on filters
+  const subcategoriesToShow = selectedSubcategoryIds.length === 0
+    ? (selectedCategoryIds.length === 0
+        ? categories.flatMap(cat => cat.subcategories)
+        : categories.filter(cat => selectedCategoryIds.includes(cat.id)).flatMap(cat => cat.subcategories))
+    : categories.flatMap(cat => cat.subcategories).filter(sub => selectedSubcategoryIds.includes(sub.id));
 
   // Calculate totals for each subcategory and month
   const calculateSubcategoryData = () => {
@@ -253,7 +279,8 @@ export function ReportsPage() {
       description: reportDescription.trim() || undefined,
       filters: {
         selectedUserId,
-        selectedCategoryId,
+        selectedCategoryIds,
+        selectedSubcategoryIds,
         startDate,
         endDate
       }
@@ -268,12 +295,13 @@ export function ReportsPage() {
   // Handle load report
   const handleLoadReport = (report: SavedReport) => {
     setSelectedUserId(report.filters.selectedUserId);
-    setSelectedCategoryId(report.filters.selectedCategoryId);
+    setSelectedCategoryIds(report.filters.selectedCategoryIds || []);
+    setSelectedSubcategoryIds(report.filters.selectedSubcategoryIds || []);
     setStartDate(report.filters.startDate);
     setEndDate(report.filters.endDate);
     setPeriodPreset('custom');
     setShowLoadDialog(false);
-    
+
     // Update the saved report's last used timestamp
     updateSavedReport(report.id, { lastUsed: new Date().toISOString() });
   };
@@ -362,7 +390,7 @@ export function ReportsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 print:hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* User Filter */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
@@ -377,24 +405,6 @@ export function ReportsPage() {
               <option value="all">{useCaseConfig.terminology.allUsers}</option>
               {activeUsers.map(user => (
                 <option key={user.id} value={user.id}>{user.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Category Filter */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              Category:
-            </label>
-            <select
-              value={selectedCategoryId}
-              onChange={(e) => setSelectedCategoryId(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-            >
-              <option value="all">All Categories</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
           </div>
@@ -479,6 +489,153 @@ export function ReportsPage() {
             />
           </div>
         </div>
+
+        {/* Category and Subcategory Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {/* Categories Multi-Select */}
+          <div className="relative category-filter-container">
+            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              Categories:
+            </label>
+            <button
+              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm flex items-center justify-between bg-white hover:bg-slate-50 transition-colors"
+            >
+              <span className="text-slate-700">
+                {selectedCategoryIds.length === 0
+                  ? 'All Categories'
+                  : `${selectedCategoryIds.length} selected`}
+              </span>
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            </button>
+            {showCategoryFilter && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="p-2">
+                  <button
+                    onClick={() => {
+                      if (selectedCategoryIds.length === categories.length) {
+                        setSelectedCategoryIds([]);
+                        setSelectedSubcategoryIds([]);
+                      } else {
+                        setSelectedCategoryIds(categories.map(c => c.id));
+                        setSelectedSubcategoryIds([]);
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 rounded flex items-center gap-2 font-medium text-slate-700"
+                  >
+                    <div className="w-4 h-4 border-2 border-slate-400 rounded flex items-center justify-center">
+                      {selectedCategoryIds.length === categories.length && (
+                        <Check className="w-3 h-3 text-emerald-600" />
+                      )}
+                    </div>
+                    Select All
+                  </button>
+                  {categories.map(category => (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        const isSelected = selectedCategoryIds.includes(category.id);
+                        if (isSelected) {
+                          setSelectedCategoryIds(selectedCategoryIds.filter(id => id !== category.id));
+                          const categorySubIds = category.subcategories.map(s => s.id);
+                          setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => !categorySubIds.includes(id)));
+                        } else {
+                          setSelectedCategoryIds([...selectedCategoryIds, category.id]);
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 rounded flex items-center gap-2"
+                    >
+                      <div className="w-4 h-4 border-2 border-slate-400 rounded flex items-center justify-center">
+                        {selectedCategoryIds.includes(category.id) && (
+                          <Check className="w-3 h-3 text-emerald-600" />
+                        )}
+                      </div>
+                      <span className={`text-lg ${category.icon}`}></span>
+                      <span className="text-slate-700">{category.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Subcategories Multi-Select */}
+          <div className="relative subcategory-filter-container">
+            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              Subcategories:
+            </label>
+            <button
+              onClick={() => setShowSubcategoryFilter(!showSubcategoryFilter)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm flex items-center justify-between bg-white hover:bg-slate-50 transition-colors"
+            >
+              <span className="text-slate-700">
+                {selectedSubcategoryIds.length === 0
+                  ? 'All Subcategories'
+                  : `${selectedSubcategoryIds.length} selected`}
+              </span>
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            </button>
+            {showSubcategoryFilter && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="p-2">
+                  <button
+                    onClick={() => {
+                      const allSubcategories = categories
+                        .filter(cat => selectedCategoryIds.length === 0 || selectedCategoryIds.includes(cat.id))
+                        .flatMap(cat => cat.subcategories)
+                        .map(s => s.id);
+                      if (selectedSubcategoryIds.length === allSubcategories.length) {
+                        setSelectedSubcategoryIds([]);
+                      } else {
+                        setSelectedSubcategoryIds(allSubcategories);
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 rounded flex items-center gap-2 font-medium text-slate-700"
+                  >
+                    <div className="w-4 h-4 border-2 border-slate-400 rounded flex items-center justify-center">
+                      {selectedSubcategoryIds.length > 0 && (
+                        <Check className="w-3 h-3 text-emerald-600" />
+                      )}
+                    </div>
+                    Select All
+                  </button>
+                  {categories
+                    .filter(cat => selectedCategoryIds.length === 0 || selectedCategoryIds.includes(cat.id))
+                    .map(category => (
+                      <div key={category.id} className="mt-2">
+                        <div className="px-3 py-1 text-xs font-semibold text-slate-500 uppercase">
+                          {category.name}
+                        </div>
+                        {category.subcategories.map(subcategory => (
+                          <button
+                            key={subcategory.id}
+                            onClick={() => {
+                              const isSelected = selectedSubcategoryIds.includes(subcategory.id);
+                              if (isSelected) {
+                                setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => id !== subcategory.id));
+                              } else {
+                                setSelectedSubcategoryIds([...selectedSubcategoryIds, subcategory.id]);
+                              }
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 rounded flex items-center gap-2 ml-2"
+                          >
+                            <div className="w-4 h-4 border-2 border-slate-400 rounded flex items-center justify-center">
+                              {selectedSubcategoryIds.includes(subcategory.id) && (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              )}
+                            </div>
+                            <span className="text-slate-700">{subcategory.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Report Summary */}
@@ -553,7 +710,13 @@ export function ReportsPage() {
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
         <div className="p-4 border-b border-slate-200 print:border-slate-400">
           <h3 className="font-bold text-slate-900 text-sm">
-            Expense Breakdown - {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : activeUsers.find(u => u.id === selectedUserId)?.name} - {selectedCategoryId === 'all' ? 'All Categories' : selectedCategory?.name} ({columnType === 'day' ? startDate : startDate.slice(0, 7)} to {columnType === 'day' ? endDate : endDate.slice(0, 7)})
+            Expense Breakdown - {selectedUserId === 'all' ? useCaseConfig.terminology.allUsers : activeUsers.find(u => u.id === selectedUserId)?.name} - {
+              selectedCategoryIds.length === 0
+                ? 'All Categories'
+                : selectedCategoryIds.length === 1
+                  ? categories.find(c => c.id === selectedCategoryIds[0])?.name
+                  : `${selectedCategoryIds.length} Categories`
+            }{selectedSubcategoryIds.length > 0 && selectedSubcategoryIds.length < subcategoriesToShow.length ? ` (${selectedSubcategoryIds.length} subcategories)` : ''} ({columnType === 'day' ? startDate : startDate.slice(0, 7)} to {columnType === 'day' ? endDate : endDate.slice(0, 7)})
           </h3>
         </div>
         
