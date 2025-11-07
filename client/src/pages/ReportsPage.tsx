@@ -1022,12 +1022,13 @@ export function ReportsPage() {
                      // Store current reports state for return navigation
                      const reportsState = {
                        selectedUserId,
-                       selectedCategoryId,
+                       selectedCategoryIds,
+                       selectedSubcategoryIds,
                        startDate,
                        endDate
                      };
                      sessionStorage.setItem('expense-tracker-return-state', JSON.stringify(reportsState));
-                     
+
                      // Navigate to expenses page with edit parameter and return flag
                      setLocation(`/expenses?edit=${expense.id}&returnTo=reports`);
                    };
