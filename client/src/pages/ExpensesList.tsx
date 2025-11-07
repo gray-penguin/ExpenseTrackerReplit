@@ -84,33 +84,19 @@ export function ExpensesList() {
   const handleReturnNavigation = () => {
     const params = new URLSearchParams(search);
     const returnTo = params.get('returnTo');
-    
+
     if (returnTo === 'reports') {
       // Get stored reports state
       const storedState = sessionStorage.getItem('expense-tracker-return-state');
       if (storedState) {
         try {
           const reportsState = JSON.parse(storedState);
-          // Clean up stored state
-          sessionStorage.removeItem('expense-tracker-return-state');
-          
-          // Navigate back to reports with filters
-          const reportsParams = new URLSearchParams();
-          if (reportsState.selectedUserId !== 'all') {
-            reportsParams.set('userId', reportsState.selectedUserId);
-          }
-          if (reportsState.selectedCategoryId !== 'all') {
-            reportsParams.set('categoryId', reportsState.selectedCategoryId);
-          }
-          if (reportsState.startDate) {
-            reportsParams.set('startDate', reportsState.startDate);
-          }
-          if (reportsState.endDate) {
-            reportsParams.set('endDate', reportsState.endDate);
-          }
-          
-          const reportsUrl = reportsParams.toString() ? `/reports?${reportsParams.toString()}` : '/reports';
-          setLocation(reportsUrl);
+
+          // Store the state temporarily in a different key to preserve it during navigation
+          sessionStorage.setItem('expense-tracker-restored-state', storedState);
+
+          // Navigate back to reports - the reports page will restore the state
+          setLocation('/reports');
         } catch (error) {
           console.error('Error parsing stored reports state:', error);
           setLocation('/reports');

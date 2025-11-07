@@ -49,8 +49,31 @@ export function ReportsPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Parse URL parameters on component mount
+  // Parse URL parameters and restore state on component mount
   useEffect(() => {
+    // First check if we're returning from editing an expense
+    const restoredState = sessionStorage.getItem('expense-tracker-restored-state');
+    if (restoredState) {
+      try {
+        const state = JSON.parse(restoredState);
+        setSelectedUserId(state.selectedUserId || 'all');
+        setSelectedCategoryIds(state.selectedCategoryIds || []);
+        setSelectedSubcategoryIds(state.selectedSubcategoryIds || []);
+        setStartDate(state.startDate || '');
+        setEndDate(state.endDate || '');
+        if (state.startDate || state.endDate) {
+          setPeriodPreset('custom');
+        }
+        // Clean up
+        sessionStorage.removeItem('expense-tracker-restored-state');
+        sessionStorage.removeItem('expense-tracker-return-state');
+        return;
+      } catch (error) {
+        console.error('Error restoring reports state:', error);
+      }
+    }
+
+    // Otherwise, parse URL parameters
     const params = new URLSearchParams(search);
     const userId = params.get('userId');
     const categoryId = params.get('categoryId');
